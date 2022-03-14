@@ -1,15 +1,57 @@
-import utils from './utils.js'
+import Chord from './Chord.js'
+import NotePitch from './NotePitch.js'
+import TensionNotePitch from './TensionNotePitch.js'
 
 class ChordTextParser {
+  static parseBassNote(chordText) {
+    const validBassNotes = {
+      'A':  NotePitch.a,
+      'Ab': NotePitch.aFlat,
+      'A#': NotePitch.aSharp,
+      'B':  NotePitch.b,
+      'Bb': NotePitch.bFlat,
+      'B#': NotePitch.bSharp,
+      'C':  NotePitch.c,
+      'Cb': NotePitch.cFlat,
+      'C#': NotePitch.cSharp,
+      'D':  NotePitch.d,
+      'Db': NotePitch.dFlat,
+      'D#': NotePitch.dSharp,
+      'E':  NotePitch.e,
+      'Eb': NotePitch.eFlat,
+      'E#': NotePitch.eSharp,
+      'F':  NotePitch.f,
+      'Fb': NotePitch.fFlat,
+      'F#': NotePitch.fSharp,
+      'G':  NotePitch.g,
+      'Gb': NotePitch.gFlat,
+      'G#': NotePitch.gSharp,
+    };
+    const validBassNoteNotations = Object.keys(validBassNotes);
+    let chordWithBassNoteNotationRegexp = new RegExp('(?<remaining>.+)( on |/)(?<bassNoteNotation>.+)');
+    let chordWithBassNoteNotation = chordWithBassNoteNotationRegexp.exec(chordText);
+    if (chordWithBassNoteNotation === null) {
+      return [ chordText, null ];
+    } else {
+      let remainingChordText = chordWithBassNoteNotation.groups.remaining;
+      let bassNoteNotationCandidate = chordWithBassNoteNotation.groups.bassNoteNotation;
+      if (!validBassNoteNotations.includes(bassNoteNotationCandidate)) {
+        throw new ChordTextParser.ParseError(bassNoteNotationCandidate);
+      }
+      let bassNote = validBassNotes[bassNoteNotationCandidate];
+      return [ remainingChordText, bassNote ];
+    }
+  }
+
   static parseTensionNotes(chordText) {
     const validTensionNotes = {
-      '9': ChordTextParser.ParseResult.TensionNote.ninth,
-      'b9': ChordTextParser.ParseResult.TensionNote.flatNinth,
-      '#9': ChordTextParser.ParseResult.TensionNote.sharpNinth,
-      '11': ChordTextParser.ParseResult.TensionNote.eleventh,
-      '#11': ChordTextParser.ParseResult.TensionNote.sharpEleventh,
-      '13': ChordTextParser.ParseResult.TensionNote.thirteenth,
-      'b13': ChordTextParser.ParseResult.TensionNote.flatThirteenth,
+      '9': TensionNotePitch.ninth,
+      'b9': TensionNotePitch.flatNinth,
+      '#9': TensionNotePitch.sharpNinth,
+      '11': TensionNotePitch.eleventh,
+      '#11': TensionNotePitch.sharpEleventh,
+      '13': TensionNotePitch.thirteenth,
+      'b13': TensionNotePitch.flatThirteenth,
     };
     const validTensionNotations = Object.keys(validTensionNotes);
     let chordWithTensionNotationRegexp = new RegExp('(?<remaining>.+)\\((?<tensionNotations>.+)\\)');
@@ -22,11 +64,11 @@ class ChordTextParser {
       let tensionNotationCandidates = tensionNotations.split(' ').filter(x => x.length);
       let tensionNotationCandidateSet = new Set(tensionNotationCandidates);
       if (tensionNotationCandidateSet.size !== tensionNotationCandidates.length) {
-        throw RuntimeError();
+        throw new ChordTextParser.ParseError(tensionNotationCandidateSet);
       }
       for (let tensionNotationCandidate of tensionNotationCandidates) {
         if (!validTensionNotations.includes(tensionNotationCandidate)) {
-          throw RuntimeError();
+          throw new ChordTextParser.ParseError(tensionNotationCandidate);
         }
       }
       let tensionNotes = tensionNotationCandidates.map(tensionNotation => validTensionNotes[tensionNotation])
@@ -36,7 +78,7 @@ class ChordTextParser {
 
   static parseOtherTension(chordText) {
     const validOtherTensionNotes = {
-      'add9': ChordTextParser.ParseResult.TensionNote.ninth,
+      'add9': TensionNotePitch.ninth,
     };
     let indexOfOtherTensionNotesNotation = chordText.length;
     if (chordText.endsWith('add9')) {
@@ -52,29 +94,29 @@ class ChordTextParser {
   static parseTriadSeventhAndNinth(chordText) {
     const validTriadSeventhAndNinths = {
       '9': [
-        ChordTextParser.ParseResult.Triad.major,
-        ChordTextParser.ParseResult.SixthOrSeventh.dominantSeventh,
-        ChordTextParser.ParseResult.TensionNote.ninth,
+        Chord.Triad.major,
+        Chord.SixthOrSeventh.dominantSeventh,
+        TensionNotePitch.ninth,
       ],
       'm9': [
-        ChordTextParser.ParseResult.Triad.minor,
-        ChordTextParser.ParseResult.SixthOrSeventh.dominantSeventh,
-        ChordTextParser.ParseResult.TensionNote.ninth,
+        Chord.Triad.minor,
+        Chord.SixthOrSeventh.dominantSeventh,
+        TensionNotePitch.ninth,
       ],
       'M9': [
-        ChordTextParser.ParseResult.Triad.major,
-        ChordTextParser.ParseResult.SixthOrSeventh.majorSeventh,
-        ChordTextParser.ParseResult.TensionNote.ninth,
+        Chord.Triad.major,
+        Chord.SixthOrSeventh.majorSeventh,
+        TensionNotePitch.ninth,
       ],
       'mM9': [
-        ChordTextParser.ParseResult.Triad.major,
-        ChordTextParser.ParseResult.SixthOrSeventh.majorSeventh,
-        ChordTextParser.ParseResult.TensionNote.ninth,
+        Chord.Triad.major,
+        Chord.SixthOrSeventh.majorSeventh,
+        TensionNotePitch.ninth,
       ],
       'dim9': [
-        ChordTextParser.ParseResult.Triad.diminished,
-        ChordTextParser.ParseResult.SixthOrSeventh.diminishedSeventh,
-        ChordTextParser.ParseResult.TensionNote.ninth,
+        Chord.Triad.diminished,
+        Chord.SixthOrSeventh.diminishedSeventh,
+        TensionNotePitch.ninth,
       ],
     };
     let indexOfTriadSeventhAndNinthNotation = chordText.length;
@@ -99,8 +141,8 @@ class ChordTextParser {
   static parseTriadAndSeventh(chordText) {
     const validTriadAndSevenths = {
       'dim7': [
-        ChordTextParser.ParseResult.Triad.diminished,
-        ChordTextParser.ParseResult.SixthOrSeventh.diminishedSeventh,
+        Chord.Triad.diminished,
+        Chord.SixthOrSeventh.diminishedSeventh,
       ],
     };
     let indexOfTriadAndSeventhNotation = chordText.length;
@@ -116,9 +158,9 @@ class ChordTextParser {
 
   static parseSixthOrSeventh(chordText) {
     const validSixthAndSevenths = {
-      '6': ChordTextParser.ParseResult.SixthOrSeventh.sixth,
-      '7': ChordTextParser.ParseResult.SixthOrSeventh.dominantSeventh,
-      'M7': ChordTextParser.ParseResult.SixthOrSeventh.majorSeventh,
+      '6': Chord.SixthOrSeventh.sixth,
+      '7': Chord.SixthOrSeventh.dominantSeventh,
+      'M7': Chord.SixthOrSeventh.majorSeventh,
     };
     let indexOfSixthOrSeventhNotation = chordText.length;
     if (chordText.endsWith('M7')) {
@@ -137,8 +179,8 @@ class ChordTextParser {
 
   static parsePostTriad(chordText) {
     const validPostTriads = {
-      'sus4': ChordTextParser.ParseResult.Triad.suspendedFourth,
-      'sus2': ChordTextParser.ParseResult.Triad.suspendedSecond,
+      'sus4': Chord.Triad.suspendedFourth,
+      'sus2': Chord.Triad.suspendedSecond,
     };
     let indexOfPostTriadNotation = chordText.length;
     if (chordText.endsWith('sus4')) {
@@ -155,12 +197,12 @@ class ChordTextParser {
 
   static parseTriad(chordText) {
     const validTriads = {
-      'M': ChordTextParser.ParseResult.Triad.major,
-      'm': ChordTextParser.ParseResult.Triad.minor,
-      '-': ChordTextParser.ParseResult.Triad.minor,
-      'aug': ChordTextParser.ParseResult.Triad.augumented,
-      '+': ChordTextParser.ParseResult.Triad.augumented,
-      'dim': ChordTextParser.ParseResult.Triad.diminished,
+      'M': Chord.Triad.major,
+      'm': Chord.Triad.minor,
+      '-': Chord.Triad.minor,
+      'aug': Chord.Triad.augumented,
+      '+': Chord.Triad.augumented,
+      'dim': Chord.Triad.diminished,
     };
     let indexOfTriadNotation = chordText.length;
     if (chordText.endsWith('dim')) {
@@ -185,51 +227,50 @@ class ChordTextParser {
 
   static parseRoot(chordText) {
     const validRoots = {
-      'A': ChordTextParser.ParseResult.Root.a,
-      'Ab': ChordTextParser.ParseResult.Root.aFlat,
-      'A#': ChordTextParser.ParseResult.Root.aSharp,
-      'B': ChordTextParser.ParseResult.Root.b,
-      'Bb': ChordTextParser.ParseResult.Root.bFlat,
-      'B#': ChordTextParser.ParseResult.Root.bSharp,
-      'C': ChordTextParser.ParseResult.Root.c,
-      'Cb': ChordTextParser.ParseResult.Root.cFlat,
-      'C#': ChordTextParser.ParseResult.Root.cSharp,
-      'D': ChordTextParser.ParseResult.Root.d,
-      'Db': ChordTextParser.ParseResult.Root.dFlat,
-      'D#': ChordTextParser.ParseResult.Root.dSharp,
-      'E': ChordTextParser.ParseResult.Root.e,
-      'Eb': ChordTextParser.ParseResult.Root.eFlat,
-      'E#': ChordTextParser.ParseResult.Root.eSharp,
-      'F': ChordTextParser.ParseResult.Root.f,
-      'Fb': ChordTextParser.ParseResult.Root.fFlat,
-      'F#': ChordTextParser.ParseResult.Root.fSharp,
-      'G': ChordTextParser.ParseResult.Root.g,
-      'Gb': ChordTextParser.ParseResult.Root.gFlat,
-      'G#': ChordTextParser.ParseResult.Root.gSharp,
+      'A': Chord.Root.a,
+      'Ab': Chord.Root.aFlat,
+      'A#': Chord.Root.aSharp,
+      'B': Chord.Root.b,
+      'Bb': Chord.Root.bFlat,
+      'B#': Chord.Root.bSharp,
+      'C': Chord.Root.c,
+      'Cb': Chord.Root.cFlat,
+      'C#': Chord.Root.cSharp,
+      'D': Chord.Root.d,
+      'Db': Chord.Root.dFlat,
+      'D#': Chord.Root.dSharp,
+      'E': Chord.Root.e,
+      'Eb': Chord.Root.eFlat,
+      'E#': Chord.Root.eSharp,
+      'F': Chord.Root.f,
+      'Fb': Chord.Root.fFlat,
+      'F#': Chord.Root.fSharp,
+      'G': Chord.Root.g,
+      'Gb': Chord.Root.gFlat,
+      'G#': Chord.Root.gSharp,
     };
+    let rootNotationCandidate = chordText;
     const validRootNotations = Object.keys(validRoots);
-    const escapedValidRootNotations = validRootNotations.map(x => utils.escapeRegex(x));
-    let chordWithRootRegexp = new RegExp('(?<remaining>.*)(?<rootNotation>' + escapedValidRootNotations.join('|') + ')');
-    let chordWithRoot = chordWithRootRegexp.exec(chordText);
-    if (chordWithRoot === null) {
-      return [ chordText, null ];
-    } else {
-      let remainingChordText = chordWithRoot.groups.remaining;
-      let rootNotationCandidate = chordWithRoot.groups.rootNotation;
-      if (!validRootNotations.includes(rootNotationCandidate)) {
-        throw RuntimeError();
-      }
-      let root = validRoots[rootNotationCandidate];
-      return [ remainingChordText, root ];
+    if (!validRootNotations.includes(rootNotationCandidate)) {
+      throw new ChordTextParser.ParseError(rootNotationCandidate);
     }
+    let root = validRoots[rootNotationCandidate];
+    return root;
   }
 
   static parse(chordText) {
-    let root = undefined;
     let triad = undefined;
     let sixthOrSeventh = undefined;
     let tensions = new Set();
-    // let bass = undefined;
+    let bass = undefined;
+
+    chordText = chordText.trim();
+
+    {
+      let result = ChordTextParser.parseBassNote(chordText);
+      chordText = result[0];
+      bass = result[1];
+    }
 
     {
       let result = ChordTextParser.parseTensionNotes(chordText);
@@ -289,6 +330,8 @@ class ChordTextParser {
       }
     }
 
+    if (sixthOrSeventh === undefined) sixthOrSeventh = null;
+
     {
       let result = ChordTextParser.parseTriad(chordText);
       chordText = result[0];
@@ -298,112 +341,25 @@ class ChordTextParser {
       }
     }
 
-    {
-      let result = ChordTextParser.parseRoot(chordText);
-      chordText = result[0];
-      root = result[1];
-    }
+    let root = ChordTextParser.parseRoot(chordText);
 
-    if (triad === undefined) triad = ChordTextParser.ParseResult.Triad.major;
+    if (triad === undefined) triad = Chord.Triad.major;
 
-    return new this.ParseResult(root, triad, sixthOrSeventh, tensions, null);
+    return new Chord(root, triad, sixthOrSeventh, tensions, bass);
   }
 }
 
 Object.defineProperty(
   ChordTextParser,
-  'ParseResult',
+  'ParseError',
   {
-    value: class {
-      constructor(root, triad, sixthOrSeventh, tension, bass) {
-        this.root = root;
-        this.triad = triad;
-        this.sixthOrSeventh = sixthOrSeventh;
-        this.tension = tension;
-        this.bass = bass;
+    value: class extends Error {
+      constructor(...args) {
+        super(...args);
       }
     },
     writable: false,
   },
 );
-
-Object.defineProperty(
-  ChordTextParser.ParseResult,
-  'Triad',
-  {
-    value: {
-      major: 'major',
-      minor: 'minor',
-      suspendedFourth: 'suspendedFourth',
-      suspendedSecond: 'suspendedSecond',
-      diminished: 'diminished',
-      augumented: 'augumented',
-    },
-    writable: false,
-  },
-);
-
-Object.defineProperty(
-  ChordTextParser.ParseResult,
-  'SixthOrSeventh',
-  {
-    value: {
-      dominantSeventh: 'dominantSeventh',
-      majorSeventh: 'majorSeventh',
-      diminishedSeventh: 'diminishedSeventh',
-      sixth: 'sixth',
-    },
-    writable: false,
-  },
-);
-
-Object.defineProperty(
-  ChordTextParser.ParseResult,
-  'TensionNote',
-  {
-    value: {
-      ninth: 'ninth',
-      flatNinth: 'flatNinth',
-      sharpNinth: 'sharpNinth',
-      eleventh: 'eleventh',
-      sharpEleventh: 'flatEleventh',
-      thirteenth: 'thirteenth',
-      flatThirteenth: 'flatThirteenth',
-    },
-    writable: false,
-  },
-);
-
-Object.defineProperty(
-  ChordTextParser.ParseResult,
-  'Root',
-  {
-    value: {
-      a: 'a',
-      aFlat: 'aFlat',
-      aSharp: 'aSharp',
-      b: 'b',
-      bFlat: 'bFlat',
-      bSharp: 'bSharp',
-      c: 'c',
-      cFlat: 'cFlat',
-      cSharp: 'cSharp',
-      d: 'd',
-      dFlat: 'dFlat',
-      dSharp: 'dSharp',
-      e: 'e',
-      eFlat: 'eFlat',
-      eSharp: 'eSharp',
-      f: 'f',
-      fFlat: 'fFlat',
-      fSharp: 'fSharp',
-      g: 'g',
-      gFlat: 'gFlat',
-      gSharp: 'gSharp',
-    },
-    writable: false,
-  },
-);
-
 
 export default ChordTextParser;
