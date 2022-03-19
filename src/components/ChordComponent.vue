@@ -1,5 +1,8 @@
 <template>
-  <div id="chord-container">
+  <div
+    id="chord-container"
+    v-on:click="$emit('click')"
+  >
     <div id="chord">
       <note-pitch-component
         v-bind:note="$_rootNote"
@@ -107,6 +110,13 @@ import TensionNotePitch from '../modules/TensionNotePitch.js';
 import NotePitchComponent from './NotePitchComponent.vue'
 import TensionNotePitchComponent from './TensionNotePitchComponent.vue'
 
+function isHalfDiminished7th(chord) {
+  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.dominantSeventh);
+}
+function isDiminished7th(chord) {
+  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.diminishedSeventh);
+}
+
 export default {
   components: {
     NotePitchComponent,
@@ -164,6 +174,12 @@ export default {
 
     $_basicChordText() {
       if (this.chord !== null) {
+        if (isHalfDiminished7th(this.chord)) {
+          return 'm7';
+        }
+        if (isDiminished7th(this.chord)) {
+          return 'dim7';
+        }
         let basicChordText = '';
         switch (this.chord.triad) {
           case Chord.Triad.minor:
@@ -196,6 +212,9 @@ export default {
 
     $_additionalChordText() {
       if (this.chord !== null) {
+        if (isHalfDiminished7th(this.chord)) {
+          return '-5';
+        }
         switch (this.chord.triad) {
           case Chord.Triad.suspendedFourth:
             return 'sus4';

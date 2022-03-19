@@ -15,6 +15,18 @@ class Bar {
     this.lineEnd = barLineEnd;
   }
 
+  static generateNew(value, clef, scale, partInBarType) {
+    return new Bar(
+      value,
+      [ new PartInBar([], partInBarType, null) ],
+      clef,
+      scale,
+      false,
+      BarLine.Start.empty,
+      BarLine.End.single,
+    );
+  }
+
   getRawObj() {
     let rawObj = new Object();
     rawObj.value = this.value.getRawObj();

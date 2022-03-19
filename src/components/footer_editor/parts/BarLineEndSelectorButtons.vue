@@ -23,7 +23,7 @@
 </style>
 
 <script>
-import BarLine from '../modules/BarLine.js'
+import BarLine from '@/modules/BarLine.js'
 
 class ButtonTextAndBarLineEnd {
   constructor(buttonText, barLineEnd) {

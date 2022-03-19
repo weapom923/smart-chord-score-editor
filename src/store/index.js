@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import NoteValue from '../modules/NoteValue.js'
+import Scale from '../modules/Scale.js'
 import Chord from '../modules/Chord.js'
+import Clef from '../modules/Clef.js'
+import PartInBar from '../modules/PartInBar.js'
 import Color from '../modules/Color.js'
 
 Vue.use(Vuex);
@@ -18,6 +21,10 @@ const store = new Vuex.Store({
       gridNoteValue: NoteValue.divisible.half,
       chordFontSizePx: 18,
       defaultChord: new Chord(Chord.Root.a, Chord.Triad.major),
+      defaultBarValue: new NoteValue(4, 4),
+      defaultClef: Clef.Type.treble,
+      defaultScale: Scale.cMajor,
+      defaultPartInBarTypes: [ PartInBar.Type.chord ],
       selectedNoteColor: new Color(42, 118, 210, 1),
     },
   },
@@ -32,7 +39,7 @@ const store = new Vuex.Store({
       state.selectedBarIdx = null;
     },
 
-    setSelectedSectionIdxAndBarIdx(state, [ sectionIdx, barIdx ]) {
+    setSelectedSectionIdxAndBarIdx(state, { sectionIdx, barIdx }) {
       state.selectedSectionIdx = sectionIdx;
       state.selectedBarIdx = barIdx;
     },
@@ -70,6 +77,14 @@ const store = new Vuex.Store({
         state.selectedBarIdx = decrementedSelectedBarIdx;
       }
     },
+
+    setConfig(state, config) {
+      state.config.staffLineStepPx = config.staffLineStepPx;
+      state.config.systemMarginTopPx = config.systemMarginTopPx;
+      state.config.systemMarginBottomPx = config.systemMarginBottomPx;
+      state.config.gridNoteValue = config.gridNoteValue;
+      state.config.chordFontSizePx = config.chordFontSizePx;
+    },
   },
 
   actions: {
@@ -77,10 +92,8 @@ const store = new Vuex.Store({
       context.commit('setScore', score);
     },
 
-    selectBar(context, args) {
-      let sectionIdx = args[0];
-      let barIdx = args[1];
-      context.commit('setSelectedSectionIdxAndBarIdx', [ sectionIdx, barIdx ]);
+    selectBar(context, { sectionIdx, barIdx }) {
+      context.commit('setSelectedSectionIdxAndBarIdx', { sectionIdx, barIdx });
     },
 
     unselectBar(context) {
@@ -94,9 +107,17 @@ const store = new Vuex.Store({
     selectPreviousBar(context) {
       context.commit('decrementSelectedBarIdx');
     },
+
+    setConfig(context, config) {
+      context.commit('setConfig', config);
+    },
   },
 
-  modules: {},
+  getters: {
+    score(state) {
+      return state.score;
+    },
+  },
 });
 
 export default store;

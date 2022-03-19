@@ -45,22 +45,25 @@
     </v-card-actions>
     <v-card-text class="pa-0">
       <bar-component
+        v-bind:score="score"
         v-bind:section-idx="$_selectedSectionIdx"
         v-bind:bar-idx="$_selectedBarIdx"
         v-bind:show-key-signature="true"
         v-bind:show-beat="true"
         v-bind:selected-part-idx="selectedPartIdx"
         v-bind:selected-note-idx="selectedNoteIdx"
+        v-on:select-note="$_onSelectNote"
       />
     </v-card-text>
   </v-card>
 </template>
 
 <script>
-import BarComponent from './BarComponent.vue';
-import PartInBar from '../modules/PartInBar.js';
-import Note from '../modules/Note.js';
-import NoteValue from '../modules/NoteValue.js';
+import BarComponent from '@/components/BarComponent.vue';
+import Score from '@/modules/Score.js';
+import PartInBar from '@/modules/PartInBar.js';
+import Note from '@/modules/Note.js';
+import NoteValue from '@/modules/NoteValue.js';
 
 export default {
   components: {
@@ -68,6 +71,7 @@ export default {
   },
 
   props: {
+    score: { type: Score },
     selectedPartIdx: { type: Number },
     selectedNoteIdx: { type: Number },
   },
@@ -82,8 +86,8 @@ export default {
     },
 
     $_selectedSection() {
-      if (this.$score === null) return null;
-      return this.$_score.sections[this.$_selectedSectionIdx];
+      if (this.score === null) return null;
+      return this.score.sections[this.$_selectedSectionIdx];
     },
 
     $_selectedBarIdx() {
@@ -91,8 +95,8 @@ export default {
     },
 
     $_selectedBar() {
-      if (this.$score === null) return null;
-      return this.$_score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
+      if (this.score === null) return null;
+      return this.score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
     },
 
     $_selectedPart() {
@@ -101,7 +105,7 @@ export default {
     },
 
     $_isSelectNextBarButtonDisabled() {
-      let numSections = this.$_score.sections.length;
+      let numSections = this.score.sections.length;
       let isSelectedSectionLastSection = (this.$_selectedSectionIdx === (numSections - 1));
       let numBars = this.$_selectedSection.bars.length;
       let isSelectedBarLastBar = (this.$_selectedBarIdx === (numBars - 1));
@@ -142,11 +146,23 @@ export default {
     },
 
     async $_selectNextBar() {
-      await this.$store.dispatch('selectNextBar');
+      await this.$store.dispatch(
+        'selectBar',
+        this.score.getNextSectionAndBarIdx({
+          sectionIdx: this.$_selectedSectionIdx,
+          barIdx: this.$_selectedBarIdx
+        }),
+      );
     },
 
     async $_selectPreviousBar() {
-      await this.$store.dispatch('selectPreviousBar');
+      await this.$store.dispatch(
+        'selectBar',
+        this.score.getPreviousSectionAndBarIdx({
+          sectionIdx: this.$_selectedSectionIdx,
+          barIdx: this.$_selectedBarIdx
+        }),
+      );
     },
 
     $_fillBarWithNote(event) {
@@ -170,6 +186,10 @@ export default {
         numExistingNotes,
         note,
       );
+    },
+
+    $_onSelectNote({ partIdx, noteIdx }) {
+      this.$emit('select-note', { partIdx, noteIdx });
     },
   },
 };

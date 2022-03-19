@@ -2,7 +2,7 @@
   <div
     id="note-base-component"
     v-bind="$attrs"
-    v-bind:style="$_noteComponentStyle"
+    v-bind:style="$_noteBaseComponentStyle"
   >
     <div
       id="chord-component-container"
@@ -12,6 +12,7 @@
         v-bind:chord="note.pitchOrChord"
         v-bind:style="$_chordStyle"
         v-on:note-element-update="$_onChordComponentElementUpdate"
+        v-on:click="$_onClickNote"
       />
     </div>
     <div id="split-divisible-notes-container">
@@ -20,6 +21,7 @@
         v-for="(splitDivisibleNote, splitDivisibleNoteIdx) in $_splitDivisibleNotes"
         v-bind:key="splitDivisibleNoteIdx"
         v-bind:style="$_splitDivisibleNoteContainerStyles[splitDivisibleNoteIdx]"
+        v-on:click="$_onClickNote"
       >
         <template v-if="$_isNormalNote(splitDivisibleNote.type)">
           <template v-if="$_isPartTypeChord">
@@ -83,6 +85,10 @@ import RestNoteCanvas from './canvases/RestNoteCanvas.vue'
 import Color from '../modules/Color.js'
 import utils from '../modules/utils.js'
 
+function getSplitNoteElementKey(splitDivisibleNoteIdx) {
+  return 'chordNoteCanvas' + String(splitDivisibleNoteIdx);
+}
+
 export default {
   components: {
     ChordComponent,
@@ -107,7 +113,7 @@ export default {
   },
 
   computed: {
-    $_noteComponentStyle() {
+    $_noteBaseComponentStyle() {
       return {
         flexGrow: this.note.value.divide(NoteValue.divisible.sixtyFourth).toNumber(),
         width: String(this.$_maximumSubComponentWidthPx) + 'px',
@@ -157,10 +163,12 @@ export default {
       let splitDivisibleNoteContainerStyles = new Array();
       for (let splitDivisibleNoteIdx = 0; splitDivisibleNoteIdx < this.$_numSplitDivisibleNotes; ++splitDivisibleNoteIdx) {
         let splitDivisibleNoteValue = this.$_splitDivisibleNoteValues[splitDivisibleNoteIdx];
-        let splitDivisibleNoteElementWidthPx = this.$data.$_splitNoteElementWidthPxs[splitDivisibleNoteIdx];
+        let splitDivisibleNoteElementKey = getSplitNoteElementKey(splitDivisibleNoteIdx);
+        let splitDivisibleNoteElementWidthPx = this.$data.$_splitNoteElementWidthPxs[splitDivisibleNoteElementKey];
         splitDivisibleNoteContainerStyles.push({
           flexGrow: splitDivisibleNoteValue.divide(NoteValue.divisible.sixtyFourth).toNumber(),
-          flexBasis: String(utils.max(splitDivisibleNoteElementWidthPx, this.$data.$_chordElementWidthPx)) + 'px',
+          flexBasis: String(splitDivisibleNoteElementWidthPx) + 'px',
+          width: String(splitDivisibleNoteElementWidthPx) + 'px',
         });
       }
       return splitDivisibleNoteContainerStyles;
@@ -187,19 +195,23 @@ export default {
       this.$emit('note-elements-update', this.$data.$_noteSubElements);
     },
 
-    $_onNoteElementUpdate(divisibleSplitNoteIdx, { element, widthPx }) {
-      let noteElementKey = 'chordNoteCanvas' + String(divisibleSplitNoteIdx);
+    $_onNoteElementUpdate(splitDivisibleNoteIdx, { element, widthPx }) {
+      let splitDivisibleNoteElementKey = getSplitNoteElementKey(splitDivisibleNoteIdx);
       if (element === null) {
-        this.$delete(this.$data.$_noteSubElements, noteElementKey);
+        this.$delete(this.$data.$_noteSubElements, splitDivisibleNoteElementKey);
       } else {
-        this.$set(this.$data.$_noteSubElements, noteElementKey, element);
+        this.$set(this.$data.$_noteSubElements, splitDivisibleNoteElementKey, element);
       }
       if (widthPx === null) {
-        this.$delete(this.$data.$_splitNoteElementWidthPxs, noteElementKey);
+        this.$delete(this.$data.$_splitNoteElementWidthPxs, splitDivisibleNoteElementKey);
       } else {
-        this.$set(this.$data.$_splitNoteElementWidthPxs, noteElementKey, widthPx);
+        this.$set(this.$data.$_splitNoteElementWidthPxs, splitDivisibleNoteElementKey, widthPx);
       }
       this.$emit('note-elements-update', this.$data.$_noteSubElements);
+    },
+
+    $_onClickNote() {
+      this.$emit('select-note');
     },
   }
 }

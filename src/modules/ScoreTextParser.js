@@ -203,7 +203,7 @@ class ScoreTextParser {
     return bars;
   }
 
-  static parse(scoreText, beatValue, scale) {
+  static parse(scoreText, beatValue, scale, scoreMetadata = new Score.Metadata('NewSong')) {
     scoreText = ScoreTextParser.normalizeScoreText(scoreText);
     let sectionTexts = ScoreTextParser.splitIntoSectionTexts(scoreText);
     let sections = new Array();
@@ -214,8 +214,7 @@ class ScoreTextParser {
       let bars = ScoreTextParser.packBarTextTokensIntoBars(barTextTokensBySystem, beatValue, scale);
       sections.push(new Section(sectionName, bars));
     }
-    let scoreMetaData = new Score.MetaData('NewSong');
-    return new Score(scoreMetaData, sections);
+    return new Score(scoreMetadata, sections);
   }
 }
 

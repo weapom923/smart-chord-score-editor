@@ -31,12 +31,13 @@
 </template>
 
 <script>
-import Note from '../modules/Note.js'
-import PartInBar from '../modules/PartInBar.js'
-import NoteValue from '../modules/NoteValue.js'
-import NoteValueSelectorButtons from '../parts/NoteValueSelectorButtons.vue'
-import NoteTypeSelectorButtons from '../parts/NoteTypeSelectorButtons.vue'
-import ChordEditorComponent from './ChordEditorComponent.vue'
+import Score from '@/modules/Score.js'
+import PartInBar from '@/modules/PartInBar.js'
+import Note from '@/modules/Note.js'
+import NoteValue from '@/modules/NoteValue.js'
+import NoteValueSelectorButtons from '@/components/footer_editor/parts/NoteValueSelectorButtons.vue'
+import NoteTypeSelectorButtons from '@/components/footer_editor/parts/NoteTypeSelectorButtons.vue'
+import ChordEditorComponent from '@/components/footer_editor/ChordEditorComponent.vue'
 
 export default {
   components: {
@@ -60,6 +61,7 @@ export default {
   },
 
   props: {
+    score: { type: Score },
     selectedPartIdx: { type: Number },
     selectedNoteIdx: { type: Number },
   },
@@ -73,10 +75,6 @@ export default {
   },
 
   computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
-
     $_selectedSectionIdx() {
       return this.$store.state.selectedSectionIdx;
     },
@@ -86,8 +84,8 @@ export default {
     },
 
     $_selectedBar() {
-      if (this.$_score === null) return null;
-      return this.$_score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
+      if (this.score === null) return null;
+      return this.score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
     },
 
     $_selectedPart() {

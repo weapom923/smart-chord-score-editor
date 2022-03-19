@@ -3,6 +3,7 @@
     <bar-component
       v-for="barIdx of $_barIdcs"
       v-bind:key="barIdx"
+      v-bind:score="score"
       v-bind:section-idx="sectionIdx"
       v-bind:bar-idx="barIdx"
       v-bind:staff-background-color="$_getStaffBackgroundColor(barIdx)"
@@ -30,6 +31,7 @@
 
 <script>
 import BarComponent from '../components/BarComponent.vue'
+import Score from '../modules/Score.js';
 import Color from '../modules/Color.js';
 import utils from '../modules/utils.js';
 
@@ -41,6 +43,7 @@ export default {
   },
 
   props: {
+    score: { type: Score },
     sectionIdx: { type: Number, default: null },
     systemFirstBarIdx: { type: Number, default: null },
     systemLastBarIdx: { type: Number, default: null },
@@ -49,26 +52,22 @@ export default {
 
   data() {
     return {
-      $_marginTopPxMax: 0,
-      $_marginBottomPxMax: 0,
+      $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
+      $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
       $_marginTopPx: new Object(),
       $_marginBottomPx: new Object(),
     };
   },
 
   computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
-
     $_section() {
-      if (this.$_score === null) return null;
-      return this.$_score.sections[this.sectionIdx];
+      if (this.score === null) return null;
+      return this.score.sections[this.sectionIdx];
     },
 
     $_barIdcs() {
       let barIdcs = new Array();
-      if (this.$_score === null) return barIdcs;
+      if (this.score === null) return barIdcs;
       if (this.systemFirstBarIdx === null) return barIdcs;
       if (this.systemLastBarIdx === null) return barIdcs;
       for (let barIdx = this.systemFirstBarIdx; barIdx <= this.systemLastBarIdx; ++barIdx) {
@@ -104,7 +103,10 @@ export default {
         this.$set(this.$data.$_marginTopPx, barIdx, marginTopPx);
       }
       this.$nextTick(() => {
-        this.$data.$_marginTopPxMax = utils.max(...Object.values(this.$data.$_marginTopPx));
+        this.$data.$_marginTopPxMax = utils.max(
+          this.$store.state.config.systemMarginTopPx,
+          ...Object.values(this.$data.$_marginTopPx),
+        );
       });
     },
 
@@ -115,7 +117,10 @@ export default {
         this.$set(this.$data.$_marginBottomPx, barIdx, marginBottomPx);
       }
       this.$nextTick(() => {
-        this.$data.$_marginBottomPxMax = utils.max(...Object.values(this.$data.$_marginBottomPx));
+        this.$data.$_marginBottomPxMax = utils.max(
+          this.$store.state.config.systemMarginBottomPx,
+          ...Object.values(this.$data.$_marginBottomPx),
+        );
       });
     },
   },

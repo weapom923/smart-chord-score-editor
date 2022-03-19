@@ -7,6 +7,7 @@
       <system-component
         v-for="(systemInfo, systemIdx) of $_systemInfoArray"
         v-bind:key="systemIdx"
+        v-bind:score="score"
         v-bind:section-idx="sectionIdx"
         v-bind:system-first-bar-idx="systemInfo.systemFirstBarIdx"
         v-bind:system-last-bar-idx="systemInfo.systemLastBarIdx"
@@ -36,6 +37,7 @@
 
 <script>
 import SystemComponent from './SystemComponent.vue'
+import Score from '../modules/Score.js'
 
 class SystemInfo {
   constructor(systemFirstBarIdx, systemLastBarIdx, isFirstSystem) {
@@ -51,19 +53,16 @@ export default {
   },
 
   props: {
+    score: { type: Score },
     sectionIdx: { type: Number, default: null },
     showBeatOnFirstBar: { type: Boolean, default: null },
   },
 
   computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
-
     $_section() {
-      if (this.$_score === null) return null;
+      if (this.score === null) return null;
       if (this.sectionIdx === null) return null;
-      return this.$_score.sections[this.sectionIdx];
+      return this.score.sections[this.sectionIdx];
     },
 
     $_systemInfoArray() {

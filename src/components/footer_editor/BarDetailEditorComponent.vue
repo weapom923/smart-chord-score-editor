@@ -24,9 +24,10 @@
 </template>
 
 <script>
-import BarLineStartSelectorButtons from '../parts/BarLineStartSelectorButtons.vue'
-import BarLineEndSelectorButtons from '../parts/BarLineEndSelectorButtons.vue'
-import Bar from '../modules/Bar.js'
+import BarLineStartSelectorButtons from '@/components/footer_editor/parts/BarLineStartSelectorButtons.vue'
+import BarLineEndSelectorButtons from '@/components/footer_editor//parts/BarLineEndSelectorButtons.vue'
+import Score from '@/modules/Score.js'
+import Bar from '@/modules/Bar.js'
 
 export default {
   components: {
@@ -34,11 +35,11 @@ export default {
     BarLineEndSelectorButtons,
   },
 
-  computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
+  props: {
+    score: { type: Score },
+  },
 
+  computed: {
     $_selectedSectionIdx() {
       return this.$store.state.selectedSectionIdx;
     },
@@ -48,8 +49,8 @@ export default {
     },
 
     $_selectedBar() {
-      if (this.$score === null) return null;
-      return this.$_score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
+      if (this.score === null) return null;
+      return this.score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
     },
   },
 

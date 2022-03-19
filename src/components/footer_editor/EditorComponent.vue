@@ -1,6 +1,12 @@
 <template>
-  <v-sheet width="100%">
-    <v-toolbar dark dense height="20">
+  <v-card
+    outlined
+    id="editor-component"
+  >
+    <v-toolbar
+      dark dense
+      height="20"
+    >
       <v-spacer />
       <v-btn
         small icon
@@ -34,6 +40,7 @@
           <v-card>
             <v-card-text class="pa-0">
               <bar-detail-editor-component
+                v-bind:score="score"
                 v-on:replace-bar="$_onReplaceBar"
               />
             </v-card-text>
@@ -47,21 +54,17 @@
         >
           <bar-editor-component
             flat tile class="pa-0"
+            v-bind:score="score"
             v-bind:selected-part-idx="$data.$_selectedPartIdx"
             v-bind:selected-note-idx="$data.$_selectedNoteIdx"
             v-on:insert-bar="$_onInsertBar"
             v-on:remove-bar="$_onRemoveBar"
             v-on:insert-note="$_onInsertNote"
-          />
-          <note-selector-component
-            flat tile class="pa-0"
-            v-if="$_selectedPartHasNote"
-            v-model="$data.$_selectedNoteIdx"
-            v-bind:partType="$_selectedPart.type"
-            v-bind:notes="$_selectedPart.notes"
+            v-on:select-note="$_onSelectNote"
           />
           <note-editor-component
             flat tile class="pa-0"
+            v-bind:score="score"
             v-bind:selected-part-idx="$data.$_selectedPartIdx"
             v-bind:selected-note-idx="$data.$_selectedNoteIdx"
             v-on:update-part="$_onUpdatePart"
@@ -69,26 +72,31 @@
         </v-col>
       </v-row>
     </v-container>
-  </v-sheet>
+  </v-card>
 </template>
 
 <style>
+#editor-component {
+  width: 100%;
+}
+
 #bar-component-container {
+  height: 70vh;
+  overflow-y: scroll;
   position: relative;
 }
 </style>
 
 <script>
-import BarEditorComponent from './BarEditorComponent.vue';
-import NoteEditorComponent from './NoteEditorComponent.vue';
-import NoteSelectorComponent from './NoteSelectorComponent.vue';
-import BarDetailEditorComponent from './BarDetailEditorComponent.vue';
+import BarEditorComponent from '@/components/footer_editor/BarEditorComponent.vue';
+import NoteEditorComponent from '@/components/footer_editor/NoteEditorComponent.vue';
+import BarDetailEditorComponent from '@/components/footer_editor/BarDetailEditorComponent.vue';
+import Score from '@/modules/Score.js';
 
 export default {
   components: {
     BarEditorComponent,
     NoteEditorComponent,
-    NoteSelectorComponent,
     BarDetailEditorComponent,
   },
 
@@ -101,6 +109,10 @@ export default {
     },
   },
 
+  props: {
+    score: { type: Score },
+  },
+
   data() {
     return {
       $_selectedPartIdx: 0,
@@ -109,10 +121,6 @@ export default {
   },
 
   computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
-
     $_selectedSectionIdx() {
       return this.$store.state.selectedSectionIdx;
     },
@@ -124,7 +132,7 @@ export default {
     $_selectedBar() {
       if (this.$_selectedSectionIdx === null) return null;
       if (this.$_selectedBarIdx === null) return null;
-      return this.$_score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
+      return this.score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
     },
 
     $_selectedPart() {
@@ -135,10 +143,6 @@ export default {
     $_numNotesInSelectedPart() {
       if (this.$_selectedPart === null) return null;
       return this.$_selectedPart.notes.length;
-    },
-
-    $_selectedPartHasNote() {
-      return (this.$_numNotesInSelectedPart > 0);
     },
   },
 
@@ -167,6 +171,11 @@ export default {
     $_onInsertNote(sectionIdx, barIdx, partIdx, noteIdx, note) {
       this.$data.$_selectedNoteIdx = noteIdx;
       this.$emit('insert-note', sectionIdx, barIdx, partIdx, noteIdx, note);
+    },
+
+    $_onSelectNote({ partIdx, noteIdx }) {
+      this.$data.$_selectedPartIdx = partIdx;
+      this.$data.$_selectedNoteIdx = noteIdx;
     },
 
     $_onUpdatePart(sectionIdx, barIdx, partIdx, part, newSelectedNoteIdx) {

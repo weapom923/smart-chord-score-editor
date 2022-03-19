@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import PartInBar from '../modules/PartInBar.js'
-import ChordComponent from '../components/ChordComponent.vue';
+import PartInBar from '@/modules/PartInBar.js'
+import ChordComponent from '@/components/ChordComponent.vue';
 
 export default {
   components: {

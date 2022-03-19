@@ -6,6 +6,15 @@ class Section {
     this.bars = bars;
   }
 
+  static generateNew(name, value, clef, scale, partInBarTypes) {
+    return new Section(
+      name,
+      partInBarTypes.map(
+        partInBarType => Bar.generateNew(value, clef, scale, partInBarType),
+      ),
+    );
+  }
+
   getRawObj() {
     let rawObj = new Object();
     rawObj.name = this.name;

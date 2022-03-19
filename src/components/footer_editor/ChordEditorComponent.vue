@@ -145,10 +145,10 @@
 </style>
 
 <script>
-import Chord from '../modules/Chord.js'
-import TensionNotePitch from '../modules/TensionNotePitch.js'
-import NotePitch from '../modules/NotePitch.js'
-import NotePitchSymbol from '../modules/NotePitchSymbol.js'
+import Chord from '@/modules/Chord.js'
+import TensionNotePitch from '@/modules/TensionNotePitch.js'
+import NotePitch from '@/modules/NotePitch.js'
+import NotePitchSymbol from '@/modules/NotePitchSymbol.js'
 
 function first(x) {
   return x[0];

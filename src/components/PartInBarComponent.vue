@@ -9,6 +9,7 @@
       v-bind:rest-note-pitch="part.restNotePitch"
       v-bind:is-selected="$_isNoteSelected(noteIdx)"
       v-on:note-elements-update="$_onNoteElementsUpdate(noteIdx, $event)"
+      v-on:select-note="$_onSelectNote(noteIdx)"
     />
   </div>
 </template>
@@ -67,6 +68,10 @@ export default {
         this.$set(this.$data.$_noteElements, noteIdx, noteElements);
       }
       this.$emit('note-elements-update', this.$data.$_noteElements);
+    },
+
+    $_onSelectNote(noteIdx) {
+      this.$emit('select-note', noteIdx);
     },
   },
 }

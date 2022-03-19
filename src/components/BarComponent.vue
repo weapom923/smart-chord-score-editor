@@ -6,6 +6,7 @@
   >
     <div id="beat-and-part-container">
       <key-signature-component
+        id="key-signature"
         v-if="$_showKeySignature"
         v-bind:clef="$_bar.clef"
         v-bind:scale="$_bar.scale"
@@ -25,6 +26,7 @@
           v-bind:part="part"
           v-bind:selected-note-idx="$_getSelectedNoteIdxInPart(partIdx)"
           v-on:note-elements-update="$_onNoteElementsUpdate(partIdx, $event)"
+          v-on:select-note="$_onSelectNote(partIdx, $event)"
         />
       </div>
       <bar-line-canvas
@@ -52,7 +54,13 @@
 }
 
 #beat-and-part-container * {
+  position: relative;
   flex-shrink: 0;
+  z-index: 1;
+}
+
+#key-signature {
+  margin-left: 10px;
 }
 
 #part-container {
@@ -67,6 +75,7 @@ import StaffCanvas from "./canvases/StaffCanvas.vue";
 import BarLineCanvas from "./canvases/BarLineCanvas.vue";
 import BeatComponent from "./BeatComponent.vue";
 import KeySignatureComponent from "./KeySignatureComponent.vue";
+import Score from '../modules/Score.js';
 import Color from '../modules/Color.js';
 
 export default {
@@ -79,6 +88,7 @@ export default {
   },
 
   props: {
+    score: { type: Score },
     sectionIdx: { type: Number },
     barIdx: { type: Number },
     selectedPartIdx: { type: Number, default: null },
@@ -93,20 +103,16 @@ export default {
   data() {
     return {
       $_subComponentElements: new Object(),
-      $_marginTopPx: 0,
-      $_marginBottomPx: 0,
+      $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
+      $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
     };
   },
 
   computed: {
-    $_score() {
-      return this.$store.state.score;
-    },
-
     $_section() {
-      if (this.$_score === null) return null;
+      if (this.score === null) return null;
       if (this.sectionIdx === null) return null;
-      return this.$_score.sections[this.sectionIdx];
+      return this.score.sections[this.sectionIdx];
     },
 
     $_bar() {
@@ -115,8 +121,8 @@ export default {
     },
 
     $_barStyle() {
-      let marginTopPx = (this.marginTopPx === null)? this.$data.$_marginTopPx : this.marginTopPx;
-      let marginBottomPx = (this.marginBottomPx === null)? this.$data.$_marginBottomPx : this.marginBottomPx;
+      let marginTopPx = (this.marginTopPx === null)? this.$data.$_marginTopPxMax : this.marginTopPx;
+      let marginBottomPx = (this.marginBottomPx === null)? this.$data.$_marginBottomPxMax : this.marginBottomPx;
       return {
         marginTop: String(marginTopPx) + 'px',
         marginBottom: String(marginBottomPx) + 'px',
@@ -167,7 +173,7 @@ export default {
     },
 
     async $_selectBar() {
-      await this.$store.dispatch('selectBar', [ this.sectionIdx, this.barIdx ]);
+      await this.$store.dispatch('selectBar', { sectionIdx: this.sectionIdx, barIdx: this.barIdx });
     },
 
     $_onNoteElementsUpdate(partIdx, noteElementsInPart) {
@@ -201,12 +207,17 @@ export default {
             }
           }
         }
-        this.$data.$_marginTopPx = maxTopOffsetPx;
-        this.$data.$_marginBottomPx = maxBottomOffsetPx;
+        this.$data.$_marginTopPxMax = maxTopOffsetPx;
+        this.$data.$_marginBottomPxMax = maxBottomOffsetPx;
         this.$emit('margin-top-px-update', this.$data.$_marginTopPx);
         this.$emit('margin-bottom-px-update', this.$data.$_marginBottomPx);
       });
     },
+
+    $_onSelectNote(partIdx, noteIdx) {
+      console.log(partIdx, noteIdx);
+      this.$emit('select-note', { partIdx, noteIdx });
+    }
   },
 }
 </script>

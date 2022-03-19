@@ -93,7 +93,7 @@ test('parse score text', () => {
     ScoreTextParser.parse('||: Cm7 | Eb ||\nBb7 :||\n', new NoteValue(4, 4), null)
   ).toStrictEqual(
     new Score(
-      new Score.MetaData(),
+      new Score.Metadata(),
       [
         new Section(
           null,
