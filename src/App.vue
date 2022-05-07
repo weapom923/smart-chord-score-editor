@@ -69,8 +69,6 @@ import ScorePage from './pages/ScorePage.vue';
 import { ScorePageDefinition } from './pages/ScorePage.vue';
 import EditorComponent from './components/footer_editor/EditorComponent.vue';
 import Score from './modules/Score.js';
-import NoteValue from './modules/NoteValue.js';
-import Scale from './modules/Scale.js';
 import Bar from './modules/Bar.js';
 import BarRepeatEnding from './modules/BarRepeatEnding.js';
 import BarBreak from './modules/BarBreak.js';
@@ -78,21 +76,6 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
-
-const scoreTextForDev = `
-[サビ]
-||: Gsus2 | E7sus4 | F#m7 | Bm7 CM7 D7 |
-Gsus2 | D | A | Bm7 ||
-[間奏]
-Gsus2 | D | A | Bm7 |
-Gsus2 | D | A | Bm7 ||
-[Aメロ]
-Bm | Bm | G | G |
-Bm | Bm | G | G ||
-[Bメロ]
-G7 | Bb7 | Bm7 | Bm7 |
-G7 | Bb7 | C#7 | F#7 :||
-`;
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -160,6 +143,19 @@ export default {
   },
 
   watch: {
+    score: {
+      async handler(newScore) {
+        if (newScore === null) {
+          await this.$_generateNewScore();
+        } else {
+          this.$_setScore(newScore);
+          ScoreSnapshotManager.initialize(newScore);
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
+
     '$data.$_score': {
       handler() {
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
@@ -174,13 +170,6 @@ export default {
   },
 
   mounted() {
-    let score = ScoreTextParser.parse(
-      scoreTextForDev,
-      new NoteValue(4, 4), Scale.dMajor,
-      new Score.Metadata('Test Song', '', ''),
-    );
-    this.$_setScore(score);
-    ScoreSnapshotManager.initialize(score);
     this.$data.$_windowResizeObserver = new ResizeObserver(this.$_rerenderScore);
     this.$data.$_windowResizeObserver.observe(document.documentElement);
     this.$data.$_footerResizeObserver = new ResizeObserver(resizeObserverEntries => {
@@ -201,6 +190,10 @@ export default {
   errorCaptured(error) {
     console.log(this, this.$store.state);
     console.log(error, Object.keys(error));
+  },
+
+  props: {
+    score: { type: Score, default: null },
   },
 
   data() {
@@ -303,12 +296,7 @@ export default {
 
       redo: this.$_redo,
 
-      generateNewScore: async () => {
-        let score = Score.generateNew();
-        this.$_setScore(score);
-        await this.$_unselectBar();
-        ScoreSnapshotManager.initialize(score);
-      },
+      generateNewScore: this.$_generateNewScore,
 
       loadScoreFile: async () => {
         let fileInterface = await getFileInterface('application/json');
@@ -458,6 +446,13 @@ export default {
       this.$nextTick(() => {
         this.$data.$_renderComponent = true;
       })
+    },
+
+    async $_generateNewScore() {
+      let score = Score.generateNew('Untitled', '', '');
+      this.$_setScore(score);
+      await this.$_unselectBar();
+      ScoreSnapshotManager.initialize(score);
     },
 
     $_setScore(score) {
