@@ -1,17 +1,39 @@
 <template>
   <div id="section-container">
     <div id="section-name-container">
-      <span v-if="$_section">{{ $_section.name }}</span>
+      <v-menu
+        open-on-hover
+        close-on-click
+        close-on-content-click
+        bottom
+        offset-y
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <span
+            v-if="$_isSectionContainingFirstBar"
+            v-bind="attrs"
+            v-on="on"
+          >
+            {{ $_section.name }}
+          </span>
+        </template>
+
+        <section-name-hover-menu
+          v-bind:section-idx="sectionDefinition.sectionIdx"
+        />
+      </v-menu>
     </div>
+
     <div id="system-container">
       <system-component
-        v-for="(systemInfo, systemIdx) of $_systemInfoArray"
+        v-for="(systemDefinition, systemIdx) of $_systemDefinitions"
         v-bind:key="systemIdx"
         v-bind:score="score"
-        v-bind:section-idx="sectionIdx"
-        v-bind:system-first-bar-idx="systemInfo.systemFirstBarIdx"
-        v-bind:system-last-bar-idx="systemInfo.systemLastBarIdx"
-        v-bind:show-beat-on-first-bar="systemInfo.isFirstSystem && showBeatOnFirstBar"
+        v-bind:system-definition="systemDefinition"
+        v-bind:is-bar-hover-menu-enabled="$_isBarHoverMenuEnabled"
+        v-bind:is-print-layout-enabled="isPrintLayoutEnabled"
+        v-on:mousedown-staff="$_selectBar"
+        v-on:mouseup-staff="$_expandSelectedBars"
       />
     </div>
   </div>
@@ -36,54 +58,95 @@
 </style>
 
 <script>
-import SystemComponent from './SystemComponent.vue'
-import Score from '../modules/Score.js'
+import SystemComponent from './SystemComponent.vue';
+import { SystemDefinition } from './SystemComponent.vue';
+import SectionNameHoverMenu from './parts/SectionNameHoverMenu.vue';
+import Score from '../modules/Score.js';
+import BarBreak from '../modules/BarBreak.js';
 
-class SystemInfo {
-  constructor(systemFirstBarIdx, systemLastBarIdx, isFirstSystem) {
-    this.systemFirstBarIdx = systemFirstBarIdx;
-    this.systemLastBarIdx = systemLastBarIdx;
-    this.isFirstSystem = isFirstSystem;
+class SectionDefinition {
+  constructor(sectionIdx, firstBarIdx, lastBarIdx, showBeatOnFirstBar) {
+    this.sectionIdx = sectionIdx;
+    this.firstBarIdx = firstBarIdx;
+    this.lastBarIdx = lastBarIdx;
+    this.showBeatOnFirstBar = showBeatOnFirstBar;
   }
+}
+
+export {
+  SectionDefinition,
 }
 
 export default {
   components: {
     SystemComponent,
+    SectionNameHoverMenu,
   },
 
   props: {
     score: { type: Score },
-    sectionIdx: { type: Number, default: null },
-    showBeatOnFirstBar: { type: Boolean, default: null },
+    sectionDefinition: { type: SectionDefinition },
+    isPrintLayoutEnabled: { type: Boolean },
   },
 
   computed: {
     $_section() {
-      if (this.score === null) return null;
-      if (this.sectionIdx === null) return null;
-      return this.score.sections[this.sectionIdx];
+      return this.score.sections[this.sectionDefinition.sectionIdx];
     },
 
-    $_systemInfoArray() {
-      let systemInfoArray = new Array();
-      if (this.$_section === null) return systemInfoArray;
-      let numBarsInSection = this.$_section.bars.length;
-      let currentSystemFirstIdx = null;
-      for (let barIdx = 0; barIdx < numBarsInSection; ++barIdx) {
-        if (currentSystemFirstIdx === null) {
-          currentSystemFirstIdx = barIdx;
+    $_isBarHoverMenuEnabled() {
+      return !this.isPrintLayoutEnabled;
+    },
+
+    $_isSectionContainingFirstBar() {
+      return (this.sectionDefinition.firstBarIdx === 0);
+    },
+
+    $_systemDefinitions() {
+      let systemDefinitions = new Array();
+      if (this.$_section === null) return systemDefinitions;
+      let firstBarIdxOfCurrentSystem = null;
+      for (let barIdx = this.sectionDefinition.firstBarIdx; barIdx <= this.sectionDefinition.lastBarIdx; ++barIdx) {
+        if (firstBarIdxOfCurrentSystem === null) {
+          firstBarIdxOfCurrentSystem = barIdx;
         }
         let bar = this.$_section.bars[barIdx];
-        let isSectionLastBar = (barIdx === (numBarsInSection - 1));
-        if (bar.terminatesSystem || isSectionLastBar) {
-          let isFirstSystem = (systemInfoArray.length === 0);
-          systemInfoArray.push(new SystemInfo(currentSystemFirstIdx, barIdx, isFirstSystem));
-          currentSystemFirstIdx = null;
+        let isSectionLastBar = (barIdx === this.sectionDefinition.lastBarIdx);
+        let isSectionBroken = (bar.break !== BarBreak.empty);
+        if (isSectionBroken || isSectionLastBar) {
+          let isFirstSystem = (this.sectionDefinition.sectionIdx === 0);
+          let showBeatOnFirstBar = isFirstSystem && this.sectionDefinition.showBeatOnFirstBar;
+          let lastBarIdxOfCurrentSystem = barIdx;
+          systemDefinitions.push(new SystemDefinition(
+            this.sectionDefinition.sectionIdx,
+            firstBarIdxOfCurrentSystem,
+            lastBarIdxOfCurrentSystem,
+            showBeatOnFirstBar,
+          ));
+          firstBarIdxOfCurrentSystem = null;
         }
       }
-      return systemInfoArray;
+      return systemDefinitions;
     },
   },
+
+  inject: [
+    'expandSelectedBars',
+    'selectBar',
+  ],
+
+  methods: {
+    async $_expandSelectedBars({ barIdx }) {
+      await this.expandSelectedBars(this.sectionDefinition.sectionIdx, barIdx);
+    },
+
+    async $_selectBar({ barIdx, event }) {
+      if (event.shiftKey) {
+        await this.$_expandSelectedBars({ barIdx });
+      } else {
+        await this.selectBar(this.sectionDefinition.sectionIdx, barIdx);
+      }
+    },
+  }
 }
 </script>

@@ -4,6 +4,7 @@
     id="note-canvas-container"
     v-bind:style="$_style"
     v-bind="$attrs"
+    v-on="$listeners"
   />
 </template>
 
@@ -28,18 +29,24 @@ export default {
 
   watch: {
     noteValue: {
-      handler() { this.draw() },
+      handler() {
+        this.$_setDirty(true);
+        this.draw();
+      },
       deep: true,
     },
 
     restNotePitch: {
-      handler() { this.draw() },
+      handler() {
+        this.$_setDirty(true);
+        this.draw();
+      },
       deep: true,
     },
 
     $_noteWidthPx(newCanvasWidthPx) {
       this.$_setCanvasWidthPx(newCanvasWidthPx);
-      this.$emit('note-element-update', { element: this.$el, widthPx: newCanvasWidthPx });
+      this.$emit('width-update', newCanvasWidthPx);
     },
 
     $_noteHeightPx(newCanvasHeightPx) {
@@ -50,11 +57,8 @@ export default {
   mounted() {
     this.$_setCanvasWidthPx(this.$_noteWidthPx);
     this.$_setCanvasHeightPx(this.$_noteHeightPx);
-    this.$emit('note-element-update', { element: this.$el, widthPx: this.$_noteWidthPx });
-  },
-
-  destroyed() {
-    this.$emit('note-element-update', { element: null, widthPx: null });
+    this.$emit('element-update', this.$el);
+    this.$emit('width-update', this.$_noteWidthPx);
   },
 
   props: {

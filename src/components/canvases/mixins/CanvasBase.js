@@ -12,7 +12,7 @@ export default {
     },
   },
 
-  mounted() {
+  async mounted() {
     this.$data.$_canvasElement = this.$refs.canvas;
   },
 

@@ -3,7 +3,6 @@ class TensionNotePitch {
     this.symbol = symbol;
     this.isFlat = flat;
     this.isSharp = sharp;
-    this.isNatural = !flat && !sharp;
   }
 
   getRawObj() {
@@ -14,12 +13,33 @@ class TensionNotePitch {
     return rawObj;
   }
 
+  isEqualTo(that) {
+    if (this.symbol !== that.symbol) return false;
+    if (this.isFlat !== that.isFlat) return false;
+    if (this.isSharp !== that.isSharp) return false;
+    return true;
+  }
+
+  clone() {
+    return new TensionNotePitch(
+      this.symbol,
+      this.isFlat,
+      this.isSharp,
+    );
+  }
+
   static loadFromRawObj(rawObj) {
     return new TensionNotePitch(
       rawObj.symbol,
       rawObj.is_flat,
       rawObj.is_sharp,
     );
+  }
+
+  get isNatural() {
+    if (Object.keys(this).includes('_isNatural')) return this._isNatural;
+    this._isNatural = !this.isFlat && !this.isSharp;
+    return this._isNatural;
   }
 }
 

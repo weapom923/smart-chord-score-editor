@@ -24,6 +24,13 @@ class RationalNumber {
     return rawObj;
   }
 
+  clone() {
+    return new RationalNumber(
+      this.numerator,
+      this.denominator,
+    );
+  }
+
   loadFromRawObj(rawObj) {
     return new RationalNumber(
       rawObj.numerator,

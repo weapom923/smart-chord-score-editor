@@ -9,6 +9,29 @@ class BarLine {
     return rawObj;
   }
 
+  isEqualTo(that) {
+    return this.type === that.type;
+  }
+
+  clone() {
+    switch (this) {
+      case BarLine.Start.empty:
+        return BarLine.Start.empty;
+      case BarLine.Start.repeatStart:
+        return BarLine.Start.repeatStart;
+      case BarLine.End.single:
+        return BarLine.End.single;
+      case BarLine.End.double:
+        return BarLine.End.double;
+      case BarLine.End.repeatEnd:
+        return BarLine.End.repeatEnd;
+      case BarLine.End.greatDouble:
+        return BarLine.End.greatDouble;
+      default:
+        return new BarLine(String(this.type));
+    }
+  }
+
   static loadFromRawObj(rawObj) {
     switch (rawObj.type) {
       case BarLine.Start.empty.getRawObj().type:
@@ -21,6 +44,8 @@ class BarLine {
         return BarLine.End.double;
       case BarLine.End.repeatEnd.getRawObj().type:
         return BarLine.End.repeatEnd;
+      case BarLine.End.greatDouble.getRawObj().type:
+        return BarLine.End.greatDouble;
       default:
         return null;
     }
@@ -47,6 +72,7 @@ Object.defineProperty(
       single: new BarLine('single'),
       double: new BarLine('double'),
       repeatEnd: new BarLine('repeatEnd'),
+      greatDouble: new BarLine('greatDouble'),
     },
     writable: false,
   }

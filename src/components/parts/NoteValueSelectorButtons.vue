@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import NoteValue from '@/modules/NoteValue.js'
+import NoteValue from '../../modules/NoteValue.js'
 
 class ButtonTextAndNoteValue {
   constructor(buttonText, unitValue, safeUnitValue) {

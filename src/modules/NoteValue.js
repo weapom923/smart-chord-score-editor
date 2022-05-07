@@ -13,6 +13,13 @@ class NoteValue extends RationalNumber {
     return rawObj;
   }
 
+  clone() {
+    return new NoteValue(
+      this.numerator,
+      this.denominator,
+    );
+  }
+
   static loadFromRawObj(rawObj) {
     return new NoteValue(
       rawObj.numerator,

@@ -32,6 +32,25 @@ class NotePitch {
     return rawObj;
   }
 
+  isEqualTo(that) {
+    if (this.baseNoteNumber !== that.baseNoteNumber) return false;
+    if (!this.symbol.isEqualTo(that.symbol)) return false;
+    if (this.shift !== that.shift) return false;
+    return true;
+  }
+
+  clone() {
+    let predefinedNotePitch = NotePitch.findPredefinedNotePitch(this.symbol, this.shift);
+    if (predefinedNotePitch !== null) {
+      return predefinedNotePitch;
+    } else {
+      return new NotePitch(
+        this.noteNumber,
+        this.symbol.clone(),
+      );
+    }
+  }
+
   static loadFromRawObj(rawObj) {
     let notePitch = new NotePitch(
       rawObj.note_number,

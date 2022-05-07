@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import Note from '@/modules/Note.js'
+import Note from '../../modules/Note.js';
 
 class ButtonTextAndNoteType {
   constructor(buttonText, noteType) {

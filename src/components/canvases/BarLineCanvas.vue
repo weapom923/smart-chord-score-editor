@@ -60,6 +60,8 @@ export default {
           return boldBarLineWidthPx + barLineIntervalPx + normalBarLineWidthPx + barLineDotMarginPx + 2 * this.$_barLineDotRadiusPx;
         case BarLine.End.repeatEnd:
           return boldBarLineWidthPx + barLineIntervalPx + normalBarLineWidthPx + barLineDotMarginPx + 2 * this.$_barLineDotRadiusPx;
+        case BarLine.End.greatDouble:
+          return boldBarLineWidthPx + barLineIntervalPx + normalBarLineWidthPx + 1;
       } 
       return null;
     },
@@ -91,6 +93,9 @@ export default {
             break;
           case BarLine.End.repeatEnd:
             this.$_drawRepeatEndBarLine(canvas);
+            break;
+          case BarLine.End.greatDouble:
+            this.$_drawGreatDoubleBarLine(canvas);
             break;
         } 
       });
@@ -148,6 +153,13 @@ export default {
         barLineDotCenterHorizontalOffsetPx,
         lowerBarLineDotCenterVerticalOffsetPx,
       );
+    },
+
+    $_drawGreatDoubleBarLine(canvas) {
+      let rightBarLineCenterHorizontalOffsetPx = this.$_barLineTotalWidthPx - (boldBarLineWidthPx / 2);
+      this.$_drawBoldBarLine(canvas, rightBarLineCenterHorizontalOffsetPx);
+      let leftBarLineCenterHorizontalOffsetPx = this.$_canvasRightEndOffsetPx - (boldBarLineWidthPx + barLineIntervalPx + normalBarLineWidthPx / 2);
+      this.$_drawNormalBarLine(canvas, leftBarLineCenterHorizontalOffsetPx);
     },
 
     $_drawNormalBarLine(canvas, horizontalOffsetPx) {

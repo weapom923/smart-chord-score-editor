@@ -36,7 +36,7 @@ export default {
     },
 
     $_note() {
-      return new Note(null, NoteValue.divisible.quarter, Note.Type.rest);
+      return new Note(null, NoteValue.divisible.quarter, Note.Type.rest, false);
     },
   },
 }

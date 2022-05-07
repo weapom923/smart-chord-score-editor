@@ -4,13 +4,6 @@ class Scale {
   constructor(tonicNotePitch, type) {
     tonicNotePitch = Scale.normalizeTonicNotePitch(tonicNotePitch, type);
     this.notePitches = Scale.getScaleNotePitches(tonicNotePitch, type);
-    switch (type) {
-      case Scale.Type.major:
-      case Scale.Type.minor:
-        this.numSharps = this.notePitches.filter(notePitch => notePitch.isSharp).length;
-        this.numFlats = this.notePitches.filter(notePitch => notePitch.isFlat).length;
-        break;
-    }
     this.type = type;
   }
 
@@ -25,6 +18,32 @@ class Scale {
     return rawObj;
   }
 
+  isEqualTo(that) {
+    let foundPredefinedScaleByThis = Scale.findPredefinedScale(this);
+    let foundPredefinedScaleByThat = Scale.findPredefinedScale(that);
+    if (foundPredefinedScaleByThis === foundPredefinedScaleByThat) {
+      if (foundPredefinedScaleByThis !== null) return true;
+    }
+    if (this.notePitches.length !== that.notePitches.length) return false;
+    for (let notePitchIdx = 0; notePitchIdx < this.notePitches.length; ++notePitchIdx) {
+      if (!this.notePitches[notePitchIdx].isEqualTo(that.notePitches[notePitchIdx])) return false;
+    }
+    if (this.type !== that.type) return false;
+    return true;
+  }
+
+  clone() {
+    let foundPredefinedScaleByThis = Scale.findPredefinedScale(this);
+    if (foundPredefinedScaleByThis !== null) {
+      return foundPredefinedScaleByThis;
+    } else {
+      return new Scale(
+        this.tonicNotePitch.clone(),
+        this.type,
+      );
+    }
+  }
+
   static loadFromRawObj(rawObj) {
     let scale = new Scale(
       NotePitch.loadFromRawObj(rawObj.tonic_note_pitch),
@@ -32,6 +51,18 @@ class Scale {
     );
     let predefinedScale = Scale.findPredefinedScale(scale);
     return (predefinedScale === null)? scale : predefinedScale;
+  }
+
+  get numSharps() {
+    if (Object.keys(this).includes('_numSharps')) return this._numSharps;
+    this._numSharps = this.notePitches.filter(notePitch => notePitch.isSharp).length;
+    return this._numSharps;
+  }
+
+  get numFlats() {
+    if (Object.keys(this).includes('_numFlats')) return this._numFlats;
+    this._numFlats = this.notePitches.filter(notePitch => notePitch.isFlat).length;
+    return this._numFlats;
   }
 
   static findPredefinedScale(scale) {

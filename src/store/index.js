@@ -11,9 +11,15 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    score: null,
-    selectedSectionIdx: null,
-    selectedBarIdx: null,
+    selectedBarsFirst: {
+      sectionIdx: null,
+      barIdx: null,
+    },
+    selectedBarsLast: {
+      sectionIdx: null,
+      barIdx: null,
+    },
+    copiedBars: new Array(),
     config: {
       staffLineStepPx: 10,
       systemMarginTopPx: 30,
@@ -22,7 +28,7 @@ const store = new Vuex.Store({
       chordFontSizePx: 18,
       defaultChord: new Chord(Chord.Root.a, Chord.Triad.major),
       defaultBarValue: new NoteValue(4, 4),
-      defaultClef: Clef.Type.treble,
+      defaultClef: Clef.treble,
       defaultScale: Scale.cMajor,
       defaultPartInBarTypes: [ PartInBar.Type.chord ],
       selectedNoteColor: new Color(42, 118, 210, 1),
@@ -30,52 +36,129 @@ const store = new Vuex.Store({
   },
 
   mutations: {
-    setScore(state, score) {
-      state.score = score;
+    unselectBar(state) {
+      state.selectedBarsFirst.sectionIdx = null;
+      state.selectedBarsFirst.barIdx = null;
+      state.selectedBarsLast.sectionIdx = null;
+      state.selectedBarsLast.barIdx = null;
     },
 
-    resetSelectedSectionIdxAndBarIdx(state) {
-      state.selectedSectionIdx = null;
-      state.selectedBarIdx = null;
+    selectBar(state, { sectionIdx, barIdx }) {
+      state.selectedBarsFirst.sectionIdx = sectionIdx;
+      state.selectedBarsFirst.barIdx = barIdx;
+      state.selectedBarsLast.sectionIdx = sectionIdx;
+      state.selectedBarsLast.barIdx = barIdx;
     },
 
-    setSelectedSectionIdxAndBarIdx(state, { sectionIdx, barIdx }) {
-      state.selectedSectionIdx = sectionIdx;
-      state.selectedBarIdx = barIdx;
-    },
-
-    incrementSelectedBarIdx(state) {
-      let score = state.score;
-      let selectedSectionIdx = state.selectedSectionIdx;
-      let selectedBarIdx = state.selectedBarIdx;
-      if (score === null) return;
-      let numSections = score.sections.length;
-      let numSelectedSectionBars = score.sections[selectedSectionIdx].bars.length;
-      let incrementedSelectedBarIdx = selectedBarIdx + 1;
-      if (incrementedSelectedBarIdx === numSelectedSectionBars) {
-        let incrementedSelectedSectionIdx = selectedSectionIdx + 1;
-        if (incrementedSelectedSectionIdx === numSections) return;
-        state.selectedBarIdx = 0;
-        state.selectedSectionIdx = incrementedSelectedSectionIdx;
-      } else {
-        state.selectedBarIdx = incrementedSelectedBarIdx;
+    expandSelectedBars(state, { sectionIdx, barIdx }) {
+      let isAnyBarSelected =
+        (state.selectedBarsFirst.sectionIdx !== null) &&
+        (state.selectedBarsFirst.barIdx !== null) &&
+        (state.selectedBarsLast.sectionIdx !== null) &&
+        (state.selectedBarsLast.barIdx !== null);
+      if (isAnyBarSelected) {
+        if (sectionIdx < state.selectedBarsFirst.sectionIdx) {
+          state.selectedBarsFirst.sectionIdx = sectionIdx;
+          state.selectedBarsFirst.barIdx = barIdx;
+        } else if (sectionIdx > state.selectedBarsLast.sectionIdx) {
+          state.selectedBarsLast.sectionIdx = sectionIdx;
+          state.selectedBarsLast.barIdx = barIdx;
+        } else {
+          if (barIdx < state.selectedBarsFirst.barIdx) {
+            state.selectedBarsFirst.sectionIdx = sectionIdx;
+            state.selectedBarsFirst.barIdx = barIdx;
+          } else if (barIdx > state.selectedBarsLast.barIdx) {
+            state.selectedBarsLast.sectionIdx = sectionIdx;
+            state.selectedBarsLast.barIdx = barIdx;
+          }
+        }
       }
     },
 
-    decrementSelectedBarIdx(state) {
-      let score = state.score;
-      let selectedSectionIdx = state.selectedSectionIdx;
-      let selectedBarIdx = state.selectedBarIdx;
-      if (score === null) return;
-      let decrementedSelectedBarIdx = selectedBarIdx - 1;
-      if (decrementedSelectedBarIdx === -1) {
-        let decrementedSelectedSectionIdx = selectedSectionIdx - 1;
-        if (decrementedSelectedSectionIdx === -1) return;
-        state.selectedBarIdx = score.sections[decrementedSelectedSectionIdx].bars.length - 1;
-        state.selectedSectionIdx = decrementedSelectedSectionIdx;
+    selectNextBar(state, score) {
+      let sectionIdx = state.selectedBarsLast.sectionIdx;
+      let barIdx = state.selectedBarsLast.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) {
+        sectionIdx = 0;
+        barIdx = 0;
       } else {
-        state.selectedBarIdx = decrementedSelectedBarIdx;
+        ({ sectionIdx, barIdx } = score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
+        if ((sectionIdx === null) || (barIdx === null)) {
+          state.selectedBarsFirst.sectionIdx = state.selectedBarsLast.sectionIdx;
+          state.selectedBarsFirst.barIdx = state.selectedBarsLast.barIdx;
+          return;
+        }
       }
+      state.selectedBarsFirst.sectionIdx = sectionIdx;
+      state.selectedBarsFirst.barIdx = barIdx;
+      state.selectedBarsLast.sectionIdx = sectionIdx;
+      state.selectedBarsLast.barIdx = barIdx;
+    },
+
+    selectPreviousBar(state, score) {
+      let sectionIdx = state.selectedBarsFirst.sectionIdx;
+      let barIdx = state.selectedBarsFirst.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) {
+        sectionIdx = score.sections.length - 1;
+        barIdx = score.sections[sectionIdx].bars.length - 1;
+      } else {
+        ({ sectionIdx, barIdx } = score.getPreviousSectionAndBarIdx({ sectionIdx, barIdx }));
+        if ((sectionIdx === null) || (barIdx === null)) {
+          state.selectedBarsLast.sectionIdx = state.selectedBarsFirst.sectionIdx;
+          state.selectedBarsLast.barIdx = state.selectedBarsFirst.barIdx;
+          return;
+        }
+      }
+      state.selectedBarsFirst.sectionIdx = sectionIdx;
+      state.selectedBarsFirst.barIdx = barIdx;
+      state.selectedBarsLast.sectionIdx = sectionIdx;
+      state.selectedBarsLast.barIdx = barIdx;
+    },
+
+    incrementSelectedBarsFirstIdx(state, score) {
+      let sectionIdx = state.selectedBarsFirst.sectionIdx;
+      let barIdx = state.selectedBarsFirst.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      if ((sectionIdx === state.selectedBarsLast.sectionIdx) && (barIdx === state.selectedBarsLast.barIdx)) return;
+      ({ sectionIdx, barIdx } = score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      state.selectedBarsFirst.sectionIdx = sectionIdx;
+      state.selectedBarsFirst.barIdx = barIdx;
+    },
+
+    incrementSelectedBarsLastIdx(state, score) {
+      let sectionIdx = state.selectedBarsLast.sectionIdx;
+      let barIdx = state.selectedBarsLast.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      ({ sectionIdx, barIdx } = score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      state.selectedBarsLast.sectionIdx = sectionIdx;
+      state.selectedBarsLast.barIdx = barIdx;
+    },
+
+    decrementSelectedBarsFirstIdx(state, score) {
+      let sectionIdx = state.selectedBarsFirst.sectionIdx;
+      let barIdx = state.selectedBarsFirst.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      ({ sectionIdx, barIdx } = score.getPreviousSectionAndBarIdx({ sectionIdx, barIdx }));
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      state.selectedBarsFirst.sectionIdx = sectionIdx;
+      state.selectedBarsFirst.barIdx = barIdx;
+    },
+
+    decrementSelectedBarsLastIdx(state, score) {
+      let sectionIdx = state.selectedBarsLast.sectionIdx;
+      let barIdx = state.selectedBarsLast.barIdx;
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      if ((sectionIdx === state.selectedBarsFirst.sectionIdx) && (barIdx === state.selectedBarsFirst.barIdx)) return;
+      ({ sectionIdx, barIdx } = score.getPreviousSectionAndBarIdx({ sectionIdx, barIdx }));
+      if ((sectionIdx === null) || (barIdx === null)) return;
+      state.selectedBarsLast.sectionIdx = sectionIdx;
+      state.selectedBarsLast.barIdx = barIdx;
+    },
+
+    setCopiedBars(state, bars) {
+      state.copiedBars = bars;
     },
 
     setConfig(state, config) {
@@ -88,34 +171,48 @@ const store = new Vuex.Store({
   },
 
   actions: {
-    setScore(context, score) {
-      context.commit('setScore', score);
-    },
-
     selectBar(context, { sectionIdx, barIdx }) {
-      context.commit('setSelectedSectionIdxAndBarIdx', { sectionIdx, barIdx });
+      context.commit('selectBar', { sectionIdx, barIdx });
     },
 
     unselectBar(context) {
-      context.commit('resetSelectedSectionIdxAndBarIdx');
+      context.commit('unselectBar');
     },
 
-    selectNextBar(context) {
-      context.commit('incrementSelectedBarIdx');
+    expandSelectedBars(context, { sectionIdx, barIdx }) {
+      context.commit('expandSelectedBars', { sectionIdx, barIdx });
     },
 
-    selectPreviousBar(context) {
-      context.commit('decrementSelectedBarIdx');
+    selectNextBar(context, score) {
+      context.commit('selectNextBar', score);
+    },
+
+    selectPreviousBar(context, score) {
+      context.commit('selectPreviousBar', score);
+    },
+
+    incrementSelectedBarsFirstIdx(context, score) {
+      context.commit('incrementSelectedBarsFirstIdx', score);
+    },
+
+    incrementSelectedBarsLastIdx(context, score) {
+      context.commit('incrementSelectedBarsLastIdx', score);
+    },
+
+    decrementSelectedBarsFirstIdx(context, score) {
+      context.commit('decrementSelectedBarsFirstIdx', score);
+    },
+
+    decrementSelectedBarsLastIdx(context, score) {
+      context.commit('decrementSelectedBarsLastIdx', score);
+    },
+
+    setCopiedBars(context, bars) {
+      context.commit('setCopiedBars', bars);
     },
 
     setConfig(context, config) {
       context.commit('setConfig', config);
-    },
-  },
-
-  getters: {
-    score(state) {
-      return state.score;
     },
   },
 });

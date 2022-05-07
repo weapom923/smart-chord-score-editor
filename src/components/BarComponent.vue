@@ -2,9 +2,12 @@
   <div
     id="bar"
     v-bind="$attrs"
-    v-bind:style="$_barStyle"
   >
     <div id="beat-and-part-container">
+      <clef-canvas
+        v-if="showClef"
+        v-bind:clef="$_bar.clef"
+      />
       <key-signature-component
         id="key-signature"
         v-if="$_showKeySignature"
@@ -19,14 +22,33 @@
         v-if="$_bar.lineStart"
         v-bind:bar-line="$_bar.lineStart"
       />
-      <div id="part-container">
+      <div
+        id="repeat-ending-container"
+        ref="repeatEndingContainer"
+        v-if="!$_isBarRepeatEndingEmpty"
+        v-bind:style="$_repeatEndingStyle"
+      >
+        <bar-repeat-ending-component
+          v-bind:bar-repeat-ending="$_bar.repeatEnding"
+          v-on:update-bar-repeat-ending="$_onBarRepeatEndingUpdate"
+        />
+      </div>
+      <div
+        id="part-container"
+        ref="partContainer"
+      >
         <part-in-bar-component
           v-for="(part, partIdx) in $_bar.parts"
           v-bind:key="partIdx"
-          v-bind:part="part"
+          v-bind:score="score"
+          v-bind:section-idx="sectionIdx"
+          v-bind:bar-idx="barIdx"
+          v-bind:part-idx="partIdx"
           v-bind:selected-note-idx="$_getSelectedNoteIdxInPart(partIdx)"
           v-on:note-elements-update="$_onNoteElementsUpdate(partIdx, $event)"
-          v-on:select-note="$_onSelectNote(partIdx, $event)"
+          v-on:note-chord-elements-update="$_onNoteChordElementsUpdate(partIdx, $event)"
+          v-on:tie-point-update="$_onPartTiePointUpdate(partIdx, $event)"
+          v-on:click-note="$_onClickNote(partIdx, $event)"
         />
       </div>
       <bar-line-canvas
@@ -34,12 +56,31 @@
       />
     </div>
 
-    <staff-canvas
-      ref="staffCanvas"
-      v-bind:background-color="staffBackgroundColor"
-      v-bind:style="$_staffCanvasStyle"
-      v-on:click="$_selectBar"
-    />
+    <v-menu
+      open-on-hover
+      close-on-click
+      close-on-content-click
+      bottom
+      offset-y
+      v-bind:disabled="!isHoverMenuEnabled"
+    >
+      <template v-slot:activator="{ on, attrs }">
+        <staff-canvas
+          ref="staffCanvas"
+          v-bind="attrs"
+          v-bind:background-color="$_staffBackgroundColor"
+          v-bind:style="$_staffCanvasStyle"
+          v-on="on"
+          v-on:mousedown.stop="$_onMousedownStaff"
+          v-on:mouseup.stop="$_onMouseupStaff"
+        />
+      </template>
+      
+      <bar-hover-menu
+        v-bind:section-idx="sectionIdx"
+        v-bind:bar-idx="barIdx"
+      />
+    </v-menu>
   </div>              
 </template>           
 
@@ -59,8 +100,12 @@
   z-index: 1;
 }
 
-#key-signature {
-  margin-left: 10px;
+#repeat-ending-container {
+  display: flex;
+  position: relative;
+  border-left: 1px solid #000000;
+  border-top: 1px solid #000000;
+  margin-left: -1px;
 }
 
 #part-container {
@@ -71,38 +116,90 @@
 
 <script>
 import PartInBarComponent from '../components/PartInBarComponent.vue';
-import StaffCanvas from "./canvases/StaffCanvas.vue";
-import BarLineCanvas from "./canvases/BarLineCanvas.vue";
-import BeatComponent from "./BeatComponent.vue";
-import KeySignatureComponent from "./KeySignatureComponent.vue";
+import StaffCanvas from './canvases/StaffCanvas.vue';
+import ClefCanvas from './canvases/ClefCanvas.vue';
+import BarLineCanvas from './canvases/BarLineCanvas.vue';
+import BeatComponent from './BeatComponent.vue';
+import BarRepeatEndingComponent from './BarRepeatEndingComponent.vue';
+import KeySignatureComponent from './KeySignatureComponent.vue';
+import BarHoverMenu from './parts/BarHoverMenu.vue'
 import Score from '../modules/Score.js';
+import BarRepeatEnding from '../modules/BarRepeatEnding.js';
+import BarBreak from '../modules/BarBreak.js';
 import Color from '../modules/Color.js';
+
+const selectedBarStaffBackgroundColor = new Color(0, 0, 0, 0.2);
 
 export default {
   components: {
     BeatComponent,
     PartInBarComponent,
     StaffCanvas,
+    ClefCanvas,
     BarLineCanvas,
+    BarRepeatEndingComponent,
     KeySignatureComponent,
+    BarHoverMenu,
+  },
+
+  watch: {
+    $_numParts: {
+      handler(newNumParts, oldNumParts) {
+        if (oldNumParts === undefined) oldNumParts = 0;
+        if (newNumParts > oldNumParts) {
+          for (let partIdx = oldNumParts; partIdx < newNumParts; ++partIdx) {
+            this.$data.$_partNoteElements.push(new Array());
+            this.$data.$_partNoteChordElements.push(null);
+            this.$data.$_partTieStartPointOffsets.push(null);
+            this.$data.$_partTieEndPointOffsets.push(null);
+          }
+        } else if(newNumParts < oldNumParts) {
+          this.$data.$_partNoteElements.splice(newNumParts);
+          this.$data.$_partNoteChordElements.splice(newNumParts);
+          this.$data.$_partTieStartPointOffsets.splice(newNumParts);
+          this.$data.$_partTieEndPointOffsets.splice(newNumParts);
+        }
+      },
+      immediate: true,
+    },
+  },
+
+  mounted() {
+    this.$emit('bar-element-update', this.$el);
+    this.$data.$_partContainerElementResizeObserver = new ResizeObserver(this.$_updateBarElementBoundingClientRect);
+    this.$data.$_partContainerElementResizeObserver.observe(this.$refs.partContainer);
+    this.$_updateBarElementBoundingClientRect();
+    this.$_updateMarginTopAndBottom();
+  },
+
+  destroyed() {
+    this.$data.$_partContainerElementResizeObserver.disconnect();
   },
 
   props: {
-    score: { type: Score },
-    sectionIdx: { type: Number },
-    barIdx: { type: Number },
+    score: { type: Score, default: null },
+    sectionIdx: { type: Number, default: null },
+    barIdx: { type: Number, default: null },
     selectedPartIdx: { type: Number, default: null },
     selectedNoteIdx: { type: Number, default: null },
     showBeat: { type: Boolean, default: false },
+    showClef: { type: Boolean, default: false },
     showKeySignature: { type: Boolean, default: null },
-    staffBackgroundColor: { type: Color, default: null },
-    marginTopPx: { type: Number, default: null },
-    marginBottomPx: { type: Number, default: null },
+    staffBackgroundColor: { type: Color, default: () => Color.transparent },
+    selectedStaffBackgroundColor: { type: Color, default: () => selectedBarStaffBackgroundColor },
+    isHoverMenuEnabled: { type: Boolean, default: false },
+    isPrintLayoutEnabled: { type: Boolean, default: false },
   },
 
   data() {
     return {
-      $_subComponentElements: new Object(),
+      $_partNoteElements: new Array(),
+      $_partNoteChordElements: new Array(),
+      $_partTieStartPointOffsets: new Array(),
+      $_partTieEndPointOffsets: new Array(),
+      $_barRepeatEndingElement: null,
+      $_partContainerElementResizeObserver: null,
+      $_partContainerElementBoundingClientRect: null,
       $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
       $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
     };
@@ -111,29 +208,67 @@ export default {
   computed: {
     $_section() {
       if (this.score === null) return null;
-      if (this.sectionIdx === null) return null;
-      return this.score.sections[this.sectionIdx];
+      return this.score.getSection(this.sectionIdx);
     },
 
     $_bar() {
-      if (this.$_section === null) return null;
-      return this.$_section.bars[this.barIdx];
+      if (this.score === null) return null;
+      return this.score.getBar(this.sectionIdx, this.barIdx);
     },
 
-    $_barStyle() {
-      let marginTopPx = (this.marginTopPx === null)? this.$data.$_marginTopPxMax : this.marginTopPx;
-      let marginBottomPx = (this.marginBottomPx === null)? this.$data.$_marginBottomPxMax : this.marginBottomPx;
-      return {
-        marginTop: String(marginTopPx) + 'px',
-        marginBottom: String(marginBottomPx) + 'px',
-        height: String(this.$store.state.config.staffLineStepPx * 4 + 1) + 'px',
-        paddingTop: String(this.$store.state.config.staffLineStepPx * 2) + 'px',
-      };
+    $_numParts() {
+      if (this.score === null) return null;
+      return this.score.getNumParts(this.sectionIdx, this.barIdx);
+    },
+
+    $_internalMarginTopPx() {
+      return this.$store.state.config.staffLineStepPx * 2;
+    },
+
+    $_internalMarginBottomPx() {
+      return this.$store.state.config.staffLineStepPx * 2 + 1;
+    },
+
+    $_isBarSelected() {
+      if (this.$store.state.selectedBarsFirst.sectionIdx === null) return false;
+      if (this.$store.state.selectedBarsFirst.barIdx === null) return false;
+      if (this.$store.state.selectedBarsLast.sectionIdx === null) return false;
+      if (this.$store.state.selectedBarsLast.barIdx === null) return false;
+      if (this.$store.state.selectedBarsFirst.sectionIdx > this.sectionIdx) return false;
+      if (this.$store.state.selectedBarsLast.sectionIdx < this.sectionIdx) return false;
+      if (this.$store.state.selectedBarsFirst.sectionIdx === this.sectionIdx) {
+        if (this.$store.state.selectedBarsFirst.barIdx > this.barIdx) return false;
+      }
+      if (this.$store.state.selectedBarsLast.sectionIdx === this.sectionIdx) {
+        if (this.$store.state.selectedBarsLast.barIdx < this.barIdx) return false;
+      }
+      return true;
+    },
+
+    $_isBarRepeatEndingEmpty() {
+      return this.$_bar.repeatEnding.isEqualTo(BarRepeatEnding.empty);
+    },
+
+    $_staffBackgroundColor() {
+      if (this.isPrintLayoutEnabled) return this.staffBackgroundColor;
+      if (this.$_isBarSelected) return this.selectedStaffBackgroundColor;
+      return this.staffBackgroundColor;
     },
 
     $_staffCanvasStyle() {
       return {
-        marginTop: String(-this.$store.state.config.staffLineStepPx * 2) + 'px',
+        marginTop: String(-this.$_internalMarginTopPx) + 'px',
+      };
+    },
+
+    $_repeatEndingStyle() {
+      if (this.$data.$_barRepeatEndingElement === null) return 0;
+      let barRepeatEndingElementBoundingClientRect = this.$data.$_barRepeatEndingElement.getBoundingClientRect();
+      return {
+        marginTop: String(-this.$data.$_marginTopPxMax) + 'px',
+        marginRight: String(-this.$data.$_partContainerElementBoundingClientRect.width) + 'px',
+        height: String(this.$data.$_marginTopPxMax - this.$_internalMarginTopPx) + 'px',
+        width: String(this.$data.$_partContainerElementBoundingClientRect.width + barRepeatEndingElementBoundingClientRect.width) + 'px',
       };
     },
 
@@ -145,7 +280,7 @@ export default {
       } else {
         let currentBar = this.$_section.bars[this.barIdx];
         let previousBar = this.$_section.bars[this.barIdx - 1];
-        if (previousBar.terminatesSystem) return true;
+        if (previousBar.break !== BarBreak.empty) return true;
         if (currentBar.scale.type !== previousBar.scale.type) return true;
         if (currentBar.scale.tonicNotePitch !== previousBar.scale.tonicNotePitch) return true;
         return false;
@@ -164,60 +299,110 @@ export default {
         return false;
       }
     },
+
+    $_visiblePartNoteElements() {
+      return [ ...this.$data.$_partNoteElements, ...this.$data.$_partNoteChordElements ];
+    },
   },
 
   methods: {
+    $_updateBarElementBoundingClientRect() {
+      this.$data.$_partContainerElementBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
+    },
+
     $_getSelectedNoteIdxInPart(partIdx) {
       if (this.selectedPartIdx === null) return null;
       if (partIdx === this.selectedPartIdx) return this.selectedNoteIdx;
     },
 
-    async $_selectBar() {
-      await this.$store.dispatch('selectBar', { sectionIdx: this.sectionIdx, barIdx: this.barIdx });
+    $_onMouseupStaff() {
+      this.$emit('mouseup-staff', event);
     },
 
-    $_onNoteElementsUpdate(partIdx, noteElementsInPart) {
-      if (noteElementsInPart === null) {
-        this.$delete(this.$data.$_subComponentElements, partIdx);
-        if (Object.keys(this.$data.$_subComponentElements).length === 0) {
-          this.$emit('margin-top-px-update', null);
-          this.$emit('margin-bottom-px-update', null);
-        }
-      } else {
-        this.$set(this.$data.$_subComponentElements, partIdx, noteElementsInPart);
-      }
+    $_onMousedownStaff(event) {
+      this.$emit('mousedown-staff', event);
+    },
 
-      this.$nextTick(() => {
-        let maxTopOffsetPx = this.$store.state.config.systemMarginTopPx;
-        let maxBottomOffsetPx = this.$store.state.config.systemMarginBottomPx;
-        let barBoundingClientRect = this.$el.getBoundingClientRect();
-        let topBiasPx = barBoundingClientRect.top;
-        let bottomBiasPx = barBoundingClientRect.bottom;
-        for (let noteElementsInPart of Object.values(this.$data.$_subComponentElements)) {
-          for (let noteElements of Object.values(noteElementsInPart)) {
-            for (let noteElement of Object.values(noteElements)) {
-              let topOffsetPx = topBiasPx - noteElement.getBoundingClientRect().top;
-              if (maxTopOffsetPx < topOffsetPx) {
-                maxTopOffsetPx = topOffsetPx;
-              }
-              let bottomOffsetPx = noteElement.getBoundingClientRect().bottom - bottomBiasPx;
-              if (maxBottomOffsetPx < bottomOffsetPx) {
-                maxBottomOffsetPx = bottomOffsetPx;
-              }
+    $_onNoteElementsUpdate(partIdx, noteElements) {
+      this.$set(this.$data.$_partNoteElements, partIdx, noteElements);
+      this.$nextTick(this.$_updateMarginTopAndBottom);
+    },
+
+    $_onNoteChordElementsUpdate(partIdx, chordElements) {
+      this.$set(this.$data.$_partNoteChordElements, partIdx, chordElements);
+      this.$nextTick(this.$_updateMarginTopAndBottom);
+    },
+
+    $_onPartTiePointUpdate(partIdx, { tieStartPointOffset, tieEndPointOffset }) {
+      this.$set(this.$data.$_partTieStartPointOffsets, partIdx, tieStartPointOffset);
+      this.$set(this.$data.$_partTieEndPointOffsets, partIdx, tieEndPointOffset);
+      this.$_emitTiePointUpdate();
+    },
+
+    $_onBarRepeatEndingUpdate(barRepeatEndingElement) {
+      this.$data.$_barRepeatEndingElement = barRepeatEndingElement;
+    },
+
+    $_emitTiePointUpdate() {
+      let barElementBoundingClientRect = this.$el.getBoundingClientRect();
+      this.$emit(
+        'tie-point-update',
+        {
+          tieStartPointOffsets: this.$data.$_partTieStartPointOffsets.map(
+            partTieStartPointOffset => {
+              if (partTieStartPointOffset === null) return null;
+              return new DOMPoint(
+                this.$data.$_partContainerElementBoundingClientRect.x + partTieStartPointOffset.x - barElementBoundingClientRect.x,
+                partTieStartPointOffset.y,
+              )
+            },
+          ),
+          tieEndPointOffsets: this.$data.$_partTieEndPointOffsets.map(
+            partTieEndPointOffset => {
+              if (partTieEndPointOffset === null) return null;
+              return new DOMPoint(
+                this.$data.$_partContainerElementBoundingClientRect.x + partTieEndPointOffset.x - barElementBoundingClientRect.x,
+                partTieEndPointOffset.y,
+              );
+            },
+          ),
+        },
+      );
+    },
+
+    $_updateMarginTopAndBottom() {
+      let maxTopOffsetPx = this.$_internalMarginTopPx + this.$store.state.config.systemMarginTopPx;
+      let maxBottomOffsetPx = this.$_internalMarginBottomPx + this.$store.state.config.systemMarginBottomPx;
+      let topBiasPx = this.$el.getBoundingClientRect().y;
+      let bottomBiasPx = this.$el.getBoundingClientRect().y;
+      for (let partIdx = 0; partIdx < this.$_numParts; ++partIdx) {
+        let partNoteElements = [ ...this.$data.$_partNoteElements[partIdx], this.$data.$_partNoteChordElements[partIdx] ];
+        if (!partNoteElements) continue;
+        for (let noteElements of partNoteElements) {
+          if (!noteElements) continue;
+          for (let noteElement of noteElements) {
+            if (!noteElement) continue;
+            if (noteElement.clientHeight === 0) continue;
+            let topOffsetPx = topBiasPx - noteElement.getBoundingClientRect().top;
+            if (maxTopOffsetPx < topOffsetPx) {
+              maxTopOffsetPx = topOffsetPx;
+            }
+            let bottomOffsetPx = noteElement.getBoundingClientRect().bottom - bottomBiasPx;
+            if (maxBottomOffsetPx < bottomOffsetPx) {
+              maxBottomOffsetPx = bottomOffsetPx;
             }
           }
         }
-        this.$data.$_marginTopPxMax = maxTopOffsetPx;
-        this.$data.$_marginBottomPxMax = maxBottomOffsetPx;
-        this.$emit('margin-top-px-update', this.$data.$_marginTopPx);
-        this.$emit('margin-bottom-px-update', this.$data.$_marginBottomPx);
-      });
+      }
+      this.$data.$_marginTopPxMax = maxTopOffsetPx;
+      this.$data.$_marginBottomPxMax = maxBottomOffsetPx;
+      this.$emit('margin-top-px-update', this.$data.$_marginTopPxMax);
+      this.$emit('margin-bottom-px-update', this.$data.$_marginBottomPxMax);
     },
 
-    $_onSelectNote(partIdx, noteIdx) {
-      console.log(partIdx, noteIdx);
-      this.$emit('select-note', { partIdx, noteIdx });
-    }
+    $_onClickNote(partIdx, noteIdx) {
+      this.$emit('click-note', { partIdx, noteIdx });
+    },
   },
 }
 </script>

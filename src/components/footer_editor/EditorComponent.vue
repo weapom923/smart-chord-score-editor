@@ -3,31 +3,21 @@
     outlined
     id="editor-component"
   >
-    <v-toolbar
-      dark dense
-      height="20"
-    >
-      <v-spacer />
-      <v-btn
-        small icon
-        v-on:click="$_unsetCurrentBar"
-      >
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-toolbar>
-
-    <v-container>
+    <v-container id="editor-container">
       <v-row>
         <v-col cols="3">
           <v-card>
-            <v-card-text class="pa-0">
+            <v-card-text
+              class="pa-0"
+              v-if="$_isSingleBarSelected"
+            >
               <v-list dense>
                 <v-list-item-group
                   mandatory
                   v-model="$data.$_selectedPartIdx"
                 >
                   <v-list-item
-                    v-for="(part, partIdx) in $_selectedBar.parts"
+                    v-for="(part, partIdx) in $_singlySelectedBar.parts"
                     v-bind:key="partIdx"
                   >
                     {{ part.type }}
@@ -39,10 +29,7 @@
 
           <v-card>
             <v-card-text class="pa-0">
-              <bar-detail-editor-component
-                v-bind:score="score"
-                v-on:replace-bar="$_onReplaceBar"
-              />
+              <bar-detail-editor-component v-bind:score="score" />
             </v-card-text>
           </v-card>
         </v-col>
@@ -52,23 +39,30 @@
           id="bar-component-container"
           ref="barComponentContainer"
         >
-          <bar-editor-component
-            flat tile class="pa-0"
-            v-bind:score="score"
-            v-bind:selected-part-idx="$data.$_selectedPartIdx"
-            v-bind:selected-note-idx="$data.$_selectedNoteIdx"
-            v-on:insert-bar="$_onInsertBar"
-            v-on:remove-bar="$_onRemoveBar"
-            v-on:insert-note="$_onInsertNote"
-            v-on:select-note="$_onSelectNote"
-          />
-          <note-editor-component
-            flat tile class="pa-0"
-            v-bind:score="score"
-            v-bind:selected-part-idx="$data.$_selectedPartIdx"
-            v-bind:selected-note-idx="$data.$_selectedNoteIdx"
-            v-on:update-part="$_onUpdatePart"
-          />
+          <template v-if="$_isSingleBarSelected">
+            <bar-editor-component
+              flat tile class="pa-0"
+              v-bind:score="score"
+              v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
+              v-bind:selected-section-idx="$_singlySelectedSectionIdx"
+              v-bind:selected-bar-idx="$_singlySelectedBarIdx"
+              v-bind:selected-part-idx="$data.$_selectedPartIdx"
+              v-bind:selected-note-idx="$data.$_selectedNoteIdx"
+              v-on:insert-note="$_onInsertNote"
+              v-on:select-note="$_onSelectNote"
+            />
+            <note-editor-component
+              flat tile class="pa-0"
+              v-bind:score="score"
+              v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
+              v-bind:selected-section-idx="$_singlySelectedSectionIdx"
+              v-bind:selected-bar-idx="$_singlySelectedBarIdx"
+              v-bind:selected-part-idx="$data.$_selectedPartIdx"
+              v-bind:selected-note-idx="$data.$_selectedNoteIdx"
+              v-on:update-part="$_onUpdatePart"
+              v-on:set-temporal-part="$_onSetTemporalPart"
+            />
+          </template>
         </v-col>
       </v-row>
     </v-container>
@@ -77,21 +71,27 @@
 
 <style>
 #editor-component {
+  max-height: 70vh;
   width: 100%;
 }
 
-#bar-component-container {
-  height: 70vh;
+#editor-container {
+  max-height: 70vh;
   overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#bar-component-container {
   position: relative;
 }
 </style>
 
 <script>
-import BarEditorComponent from '@/components/footer_editor/BarEditorComponent.vue';
-import NoteEditorComponent from '@/components/footer_editor/NoteEditorComponent.vue';
-import BarDetailEditorComponent from '@/components/footer_editor/BarDetailEditorComponent.vue';
-import Score from '@/modules/Score.js';
+import BarEditorComponent from '../footer_editor/BarEditorComponent.vue';
+import NoteEditorComponent from '../footer_editor/NoteEditorComponent.vue';
+import BarDetailEditorComponent from '../footer_editor/BarDetailEditorComponent.vue';
+import Score from '../../modules/Score.js';
+import { keyEventTypeEnum } from '../../modules/KeyEventType.js';
 
 export default {
   components: {
@@ -101,11 +101,18 @@ export default {
   },
 
   watch: {
-    $_selectedSectionIdx() {
-      this.$_resetSelection();
+    $_selectedBarsFirst: {
+      handler() {
+        this.$_resetSelection();
+      },
+      deep: true,
     },
-    $_selectedBarIdx() {
-      this.$_resetSelection();
+
+    $_selectedBarsLast: {
+      handler() {
+        this.$_resetSelection();
+      },
+      deep: true,
     },
   },
 
@@ -117,27 +124,51 @@ export default {
     return {
       $_selectedPartIdx: 0,
       $_selectedNoteIdx: 0,
+      $_temporalSelectedPart: null,
     };
   },
 
   computed: {
-    $_selectedSectionIdx() {
-      return this.$store.state.selectedSectionIdx;
+    $_selectedBarsFirst() {
+      return this.$store.state.selectedBarsFirst;
     },
 
-    $_selectedBarIdx() {
-      return this.$store.state.selectedBarIdx;
+    $_selectedBarsLast() {
+      return this.$store.state.selectedBarsLast;
     },
 
-    $_selectedBar() {
-      if (this.$_selectedSectionIdx === null) return null;
-      if (this.$_selectedBarIdx === null) return null;
-      return this.score.sections[this.$_selectedSectionIdx].bars[this.$_selectedBarIdx];
+    $_isSingleBarSelected() {
+      if (this.$_selectedBarsFirst.sectionIdx === null) return false;
+      if (this.$_selectedBarsFirst.barIdx === null) return false;
+      if (this.$_selectedBarsFirst.sectionIdx !== this.$_selectedBarsLast.sectionIdx) return false;
+      if (this.$_selectedBarsFirst.barIdx < this.$_selectedBarsLast.barIdx) return false;
+      return true;
+    },
+
+    $_singlySelectedSectionIdx() {
+      if (!this.$_isSingleBarSelected) return null;
+      return this.$_selectedBarsFirst.sectionIdx;
+    },
+
+    $_singlySelectedSection() {
+      if (this.$_singlySelectedSectionIdx === null) return null;
+      return this.score.sections[this.$_singlySelectedSectionIdx];
+    },
+
+    $_singlySelectedBarIdx() {
+      if (!this.$_isSingleBarSelected) return null;
+      return this.$_selectedBarsFirst.barIdx;
+    },
+
+    $_singlySelectedBar() {
+      if (this.$_singlySelectedSection === null) return null;
+      if (this.$_singlySelectedBarIdx === null) return null;
+      return this.$_singlySelectedSection.bars[this.$_singlySelectedBarIdx];
     },
 
     $_selectedPart() {
-      if (this.$_selectedBar === null) return null;
-      return this.$_selectedBar.parts[this.$data.$_selectedPartIdx];
+      if (this.$_singlySelectedBar === null) return null;
+      return this.$_singlySelectedBar.parts[this.$data.$_selectedPartIdx];
     },
 
     $_numNotesInSelectedPart() {
@@ -146,31 +177,58 @@ export default {
     },
   },
 
+  mounted() {
+    this.$emit('register-component', this);
+  },
+
+  destroyed() {
+    this.$emit('register-component', null);
+  },
+
+  inject: [
+    'insertNote',
+    'updatePart',
+    'selectNextBar',
+    'selectPreviousBar',
+  ],
+
   methods: {
+    onKeydown(keyEventType, event) {
+      switch (keyEventType) {
+        case keyEventTypeEnum.keyWithCtrlAndShift:
+          switch (event.code) {
+            case 'ArrowRight':
+              return incrementNoteIdx(this);
+            case 'ArrowLeft':
+              return decrementNoteIdx(this);
+          }
+          break;
+      }
+      return false;
+
+      function incrementNoteIdx(self) {
+        if (self.$_numNotesInSelectedPart === 0) return false;
+        if (self.$data.$_selectedNoteIdx === (self.$_numNotesInSelectedPart - 1)) return true;
+        ++self.$data.$_selectedNoteIdx;
+        return true;
+      }
+
+      function decrementNoteIdx(self) {
+        if (self.$_numNotesInSelectedPart === 0) return false;
+        if (self.$data.$_selectedNoteIdx === 0) return true;
+        --self.$data.$_selectedNoteIdx;
+        return true;
+      }
+    },
+
     $_resetSelection() {
       this.$data.$_selectedPartIdx = 0;
       this.$data.$_selectedNoteIdx = 0;
     },
 
-    async $_unsetCurrentBar() {
-      await this.$store.dispatch('unselectBar');
-    },
-
-    $_onInsertBar(sectionIdx, baseBarIdx, barIdx) {
-      this.$emit('insert-bar', sectionIdx, baseBarIdx, barIdx);
-    },
-
-    $_onRemoveBar(sectionIdx, barIdx) {
-      this.$emit('remove-bar', sectionIdx, barIdx);
-    },
-
-    $_onReplaceBar(sectionIdx, barIdx, bar) {
-      this.$emit('replace-bar', sectionIdx, barIdx, bar);
-    },
-
     $_onInsertNote(sectionIdx, barIdx, partIdx, noteIdx, note) {
       this.$data.$_selectedNoteIdx = noteIdx;
-      this.$emit('insert-note', sectionIdx, barIdx, partIdx, noteIdx, note);
+      this.insertNote(sectionIdx, barIdx, partIdx, noteIdx, note);
     },
 
     $_onSelectNote({ partIdx, noteIdx }) {
@@ -178,9 +236,20 @@ export default {
       this.$data.$_selectedNoteIdx = noteIdx;
     },
 
-    $_onUpdatePart(sectionIdx, barIdx, partIdx, part, newSelectedNoteIdx) {
+    $_onUpdatePart(newPart, newSelectedNoteIdx) {
       this.$data.$_selectedNoteIdx = newSelectedNoteIdx;
-      this.$emit('update-part', sectionIdx, barIdx, partIdx, part);
+      this.updatePart(
+        this.$_singlySelectedSectionIdx,
+        this.$_singlySelectedBarIdx,
+        this.$data.$_selectedPartIdx,
+        newPart,
+      );
+      this.$data.$_temporalSelectedPart = null;
+    },
+
+    $_onSetTemporalPart(newPart, newSelectedNoteIdx) {
+      this.$data.$_selectedNoteIdx = newSelectedNoteIdx;
+      this.$data.$_temporalSelectedPart = newPart;
     },
 
     $_insertEmptyBarBeforeSelectedBar() {

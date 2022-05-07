@@ -50,7 +50,7 @@ const fontSizeRate = 1.8;
 
 export default {
   props: {
-    clef: { type: Clef, defualt: Clef.Type.treble },
+    clef: { type: Clef, defualt: Clef.treble },
     scale: { type: Scale, default: null },
   },
 
@@ -76,7 +76,7 @@ export default {
       if (this.$_keySignatureNotePitches.length > 0) {
         keySignatureComponentStyle.marginRight = String(10) + 'px';
       }
-      if (this.clef.type == Clef.Type.bass) {
+      if (this.clef.type == Clef.bass) {
         keySignatureComponentStyle.marginTop = String(this.$_staffLineStepPx) + 'px';
       }
       keySignatureComponentStyle.width = String(keySignatureWidthPx * this.$_numKeySignatures) + 'px';

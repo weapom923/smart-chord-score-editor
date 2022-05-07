@@ -1,13 +1,14 @@
 <template>
-  <v-dialog v-bind:value="show">
-    <v-card>
+  <dialog-base
+    v-model="$_shows"
+    v-bind:ok-callback="$_ok"
+    v-bind:ok-disabled="!$data.$_valid"
+  >
+    <template v-slot:body>
       <v-card-title>Global Config</v-card-title>
   
       <v-card-text>
-        <v-form
-          ref="form"
-          v-model="$data.$_valid"
-        >
+        <v-form v-model="$data.$_valid">
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
@@ -45,11 +46,9 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-select
-                  v-model="$data.$_gridNoteValueName"
-                  v-bind:items="$_gridNoteValueNames"
+                <grid-note-selector
+                  v-model="$data.$_gridNoteValue"
                   v-bind:rules="$_rules.gridNoteValue"
-                  label="Grid Note Value"
                 />
               </v-col>
 
@@ -67,30 +66,14 @@
           </v-container>
         </v-form>
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
-          text secondary
-          v-on:click="$_cancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          text primary
-          v-on:click="$_submit"
-          v-bind:disabled="!$data.$_valid"
-        >
-          OK
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    </template>
+  </dialog-base>
 </template>
 
 <script>
-import NoteValue from '@/modules/NoteValue.js';
-import input_utils from '@/modules/input_utils.js';
+import DialogBase from './DialogBase.vue';
+import GridNoteSelector from '../parts/GridNoteSelector.vue';
+import input_utils from '../../modules/input_utils.js';
 
 const staffLineStaffPxMin = 5;
 const staffLineStaffPxMax = 15;
@@ -98,34 +81,28 @@ const systemMarginTopPxMin = 0;
 const systemMerginBottomPxMin = 0;
 const chordFontSizePxMin = 6;
 
-const gridNoteValueNameToInstances = {
-  'Whole': NoteValue.divisible.whole,
-  'Half': NoteValue.divisible.half,
-  'Quarter': NoteValue.divisible.quarter,
-};
-
 export default {
   model: {
-    prop: 'show',
+    prop: 'shows',
     event: 'update',
   },
 
+  components: {
+    DialogBase,
+    GridNoteSelector,
+  },
+
   props: {
-    show: { type: Boolean, default: false },
+    shows: { type: Boolean, default: false },
   },
 
   data() {
-    let gridNoteValueName = Object.keys(gridNoteValueNameToInstances)
-      .find(gritNoteValueName => {
-        let gridNoteValue = gridNoteValueNameToInstances[gritNoteValueName];
-        return (this.$store.state.config.gridNoteValue === gridNoteValue);
-      });
     return {
       $_valid: true,
       $_staffLineStepPx: this.$store.state.config.staffLineStepPx,
       $_systemMarginTopPx: this.$store.state.config.systemMarginTopPx,
       $_systemMarginBottomPx: this.$store.state.config.systemMarginBottomPx,
-      $_gridNoteValueName: gridNoteValueName,
+      $_gridNoteValue: this.$store.state.config.gridNoteValue,
       $_chordFontSizePx: this.$store.state.config.chordFontSizePx,
       // $_defaultChord: this.$store.state.config.defaultChord,
       // $_selectedNoteColor: this.$store.state.config.selectedNoteColor,
@@ -133,6 +110,11 @@ export default {
   },
 
   computed: {
+    $_shows: {
+      get()      { return this.shows },
+      set(shows) { this.$emit('update', shows) },
+    },
+
     $_staffLineStaffPxMin() { return staffLineStaffPxMin },
 
     $_staffLineStaffPxMax() { return staffLineStaffPxMax },
@@ -143,14 +125,10 @@ export default {
 
     $_chordFontSizePxMin() { return chordFontSizePxMin },
 
-    $_gridNoteValueNames() {
-      return Object.keys(gridNoteValueNameToInstances);
-    },
-
     $_rules() {
       return {
         staffLineStepPx: [
-          input_utils.isTextFieldEmpty,
+          input_utils.isTextFieldNotEmpty,
           staffLineStepPx => {
             if (staffLineStepPx < staffLineStaffPxMin) {
               return 'Staff line staff must be more than or equal to ' + String(staffLineStaffPxMin) + '.';
@@ -162,7 +140,7 @@ export default {
         ],
 
         systemMarginTopPx: [
-          input_utils.isTextFieldEmpty,
+          input_utils.isTextFieldNotEmpty,
           systemMarginTopPx => {
             if (systemMarginTopPx < systemMarginTopPxMin) {
               return 'System margin must be more than or equal to ' + String(systemMarginTopPxMin) + '.';
@@ -172,7 +150,7 @@ export default {
         ],
 
         systemMarginBottomPx: [
-          input_utils.isTextFieldEmpty,
+          input_utils.isTextFieldNotEmpty,
           systemMarginBottomPx => {
             if (systemMarginBottomPx < systemMerginBottomPxMin) {
               return 'System margin must be more than or equal to ' + String(systemMerginBottomPxMin) + '.';
@@ -182,12 +160,12 @@ export default {
         ],
 
         gridNoteValue: [
-          input_utils.isTextFieldEmpty,
+          input_utils.isTextFieldNotEmpty,
           () => { return true },
         ],
 
         chordFontSizePx: [
-          input_utils.isTextFieldEmpty,
+          input_utils.isTextFieldNotEmpty,
           chordFontSizePx => {
             if (chordFontSizePx < chordFontSizePxMin) {
               return 'Chord font size must be more than or equal to ' + String(chordFontSizePxMin) + '.';
@@ -208,26 +186,17 @@ export default {
   },
 
   methods: {
-    $_close() {
-      this.$emit('update', false);
-    },
-
-    $_cancel() {
-      this.$_close();
-    },
-
-    $_submit() {
+    $_ok() {
       this.$store.dispatch(
         'setConfig',
         {
           staffLineStepPx: Number(this.$data.$_staffLineStepPx),
           systemMarginTopPx: Number(this.$data.$_systemMarginTopPx),
           systemMarginBottomPx: Number(this.$data.$_systemMarginBottomPx),
-          gridNoteValue: gridNoteValueNameToInstances[this.$data.$_gridNoteValueName],
+          gridNoteValue: this.$data.$_gridNoteValue,
           chordFontSizePx: Number(this.$data.$_chordFontSizePx),
         },
       )
-      this.$_close();
     },
   },
 }

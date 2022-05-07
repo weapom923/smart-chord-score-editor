@@ -3,34 +3,37 @@ class NotePitchSymbol {
     this.name = name;
   }
 
-  cyclicNoteNumber() {
-    switch (this.name) {
-      case NotePitchSymbol.c.name:
-        return 0;
-      case NotePitchSymbol.d.name:
-        return 2;
-      case NotePitchSymbol.e.name:
-        return 4;
-      case NotePitchSymbol.f.name:
-        return 5;
-      case NotePitchSymbol.g.name:
-        return 7;
-      case NotePitchSymbol.a.name:
-        return 9;
-      case NotePitchSymbol.b.name:
-        return 11;
-    }
-    return null;
-  }
-
-  toString() {
-    return this.name;
-  }
-
   getRawObj() {
     let rawObj = new Object();
     rawObj.name = this.name;
     return rawObj;
+  }
+
+  isEqualTo(that) {
+    return this.name === that.name;
+  }
+
+  clone() {
+    switch (this) {
+      case NotePitchSymbol.c:
+        return NotePitchSymbol.c;
+      case NotePitchSymbol.d:
+        return NotePitchSymbol.d;
+      case NotePitchSymbol.e:
+        return NotePitchSymbol.e;
+      case NotePitchSymbol.f:
+        return NotePitchSymbol.f;
+      case NotePitchSymbol.g:
+        return NotePitchSymbol.g;
+      case NotePitchSymbol.a:
+        return NotePitchSymbol.a;
+      case NotePitchSymbol.b:
+        return NotePitchSymbol.b;
+      default:
+        return new NotePitchSymbol(
+          this.name,
+        );
+    }
   }
 
   static loadFromRawObj(rawObj) {
@@ -49,6 +52,30 @@ class NotePitchSymbol {
         return NotePitchSymbol.a;
       case NotePitchSymbol.b.name:
         return NotePitchSymbol.b;
+    }
+    return null;
+  }
+
+  toString() {
+    return this.name;
+  }
+
+  cyclicNoteNumber() {
+    switch (this.name) {
+      case NotePitchSymbol.c.name:
+        return 0;
+      case NotePitchSymbol.d.name:
+        return 2;
+      case NotePitchSymbol.e.name:
+        return 4;
+      case NotePitchSymbol.f.name:
+        return 5;
+      case NotePitchSymbol.g.name:
+        return 7;
+      case NotePitchSymbol.a.name:
+        return 9;
+      case NotePitchSymbol.b.name:
+        return 11;
     }
     return null;
   }

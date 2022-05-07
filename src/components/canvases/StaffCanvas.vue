@@ -3,7 +3,7 @@
     id="staff-canvas"
     ref="canvas"
     v-bind="$attrs"
-    v-on:click="$_onClick"
+    v-on="$listeners"
   />
 </template>
 
@@ -74,10 +74,6 @@ export default {
         canvas.lineTo(...canvas_utils.dotByDotOffsetCoordArgs(canvasRightEndOffsetPx, verticalOffsetPx));
         canvas.stroke();
       }
-    },
-
-    $_onClick() {
-      this.$emit('click');
     },
   },
 }

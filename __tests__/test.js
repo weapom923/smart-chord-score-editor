@@ -2,6 +2,9 @@ import ScoreTextParser from '../src/modules/ScoreTextParser.js'
 import ChordTextParser from '../src/modules/ChordTextParser.js'
 import Chord from '../src/modules/Chord.js'
 import Bar from '../src/modules/Bar.js'
+import BarRepeatEnding from '../src/modules/BarRepeatEnding.js'
+import BarBreak from '../src/modules/BarBreak.js'
+import BarLine from '../src/modules/BarLine.js'
 import Clef from '../src/modules/Clef.js'
 import PartInBar from '../src/modules/PartInBar.js'
 import Score from '../src/modules/Score.js'
@@ -90,7 +93,7 @@ test('split into divisible note values 8', () => {
 
 test('parse score text', () => {
   expect(
-    ScoreTextParser.parse('||: Cm7 | Eb ||\nBb7 :||\n', new NoteValue(4, 4), null)
+    ScoreTextParser.parse('||: Cm7 | Eb ||\nBb7 :||\n', new NoteValue(4, 4), Scale.cMajor, new Score.Metadata())
   ).toStrictEqual(
     new Score(
       new Score.Metadata(),
@@ -113,16 +116,18 @@ test('parse score text', () => {
                       ),
                       NoteValue.divisible.whole,
                       Note.Type.normal,
+                      false,
                     ),
                   ],
                   PartInBar.Type.chord,
                 ),
               ],
-              Clef.Type.treble,
-              null,
-              false,
+              Clef.treble,
+              Scale.cMajor,
+              BarBreak.empty,
               BarLine.Start.repeatStart,
               BarLine.End.single,
+              BarRepeatEnding.empty,
             ),
             new Bar(
               new NoteValue(4, 4),
@@ -139,16 +144,18 @@ test('parse score text', () => {
                       ),
                       NoteValue.divisible.whole,
                       Note.Type.normal,
+                      false,
                     ),
                   ],
                   PartInBar.Type.chord,
                 ),
               ],
-              Clef.Type.treble,
-              null,
-              true,
+              Clef.treble,
+              Scale.cMajor,
+              BarBreak.system,
               BarLine.Start.empty,
               BarLine.End.double,
+              BarRepeatEnding.empty,
             ),
             new Bar(
               new NoteValue(4, 4),
@@ -165,16 +172,18 @@ test('parse score text', () => {
                       ),
                       NoteValue.divisible.whole,
                       Note.Type.normal,
+                      false,
                     ),
                   ],
                   PartInBar.Type.chord,
                 ),
               ],
-              Clef.Type.treble,
-              null,
-              true,
+              Clef.treble,
+              Scale.cMajor,
+              BarBreak.system,
               BarLine.Start.empty,
               BarLine.End.repeatEnd,
+              BarRepeatEnding.empty,
             ),
           ],
         ),

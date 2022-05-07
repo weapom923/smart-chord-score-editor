@@ -1,5 +1,6 @@
 import Score from './Score.js';
 import Bar from './Bar.js';
+import BarBreak from './BarBreak.js';
 import BarLine from './BarLine.js';
 import Clef from './Clef.js';
 import Note from './Note.js';
@@ -8,6 +9,7 @@ import Section from './Section.js';
 import PartInBar from './PartInBar.js';
 import ChordTextParser from './ChordTextParser.js';
 import utils from './utils.js';
+import BarRepeatEnding from './BarRepeatEnding.js';
 
 class ScoreTextParser {
   static normalizeScoreText(scoreText) {
@@ -183,21 +185,23 @@ class ScoreTextParser {
                 (chord, chordIdx) => new Note(
                   chord,
                   barNoteValues[chordIdx],
-                  Note.Type.normal
+                  Note.Type.normal,
+                  false,
                 ),
               ),
               PartInBar.Type.chord,
             ),
           ],
-          Clef.Type.treble,
+          Clef.treble,
           scale,
-          false,
+          BarBreak.empty,
           barArgInSystem.barLineStart,
           barArgInSystem.barLineEnd,
+          BarRepeatEnding.empty,
         ));
       }
       let lastBarInSystem = barsInSystem[barsInSystem.length - 1];
-      lastBarInSystem.terminatesSystem = true;
+      lastBarInSystem.break = BarBreak.system;
       bars.push(...barsInSystem);
     }
     return bars;

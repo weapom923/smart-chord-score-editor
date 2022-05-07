@@ -20,6 +20,43 @@ class Chord {
     return rawObj;
   }
 
+  isEqualTo(that) {
+    if (!this.root.isEqualTo(that.root)) return false;
+    if (this.triad !== that.triad) return false;
+    if (this.sixthOrSeventh !== that.sixthOrSeventh) return false;
+    if (this.tensions.size !== that.tensions.size) return false;
+    for (let tensionNotePitchOfThis of this.tensions.values()) {
+      let isSameTensionNotePitchFound = false;
+      for (let tensionNotePitchOfThat of that.tensions.values()) {
+        if (tensionNotePitchOfThis.isEqualTo(tensionNotePitchOfThat)) {
+          isSameTensionNotePitchFound = true;
+          break;
+        }
+      }
+      if (!isSameTensionNotePitchFound) return false;
+    }
+    if ((this.bass === null) && (that.bass !== null)) return false;
+    if ((this.bass !== null) && (that.bass === null)) return false;
+    if ((this.bass !== null) && (that.bass !== null)) {
+      if (!this.bass.isEqualTo(that.bass)) return false;
+    }
+    return true;
+  }
+
+  clone() {
+    let tensions = new Set();
+    this.tensions.forEach(tensionNotePitch => {
+      tensions.add(tensionNotePitch.clone());
+    });
+    return new Chord(
+      this.root.clone(),
+      this.triad,
+      this.sixthOrSeventh,
+      tensions,
+      (this.bass === null)? null : this.bass.clone(),
+    );
+  }
+
   static loadFromRawObj(rawObj) {
     return new Chord(
       NotePitch.loadFromRawObj(rawObj.root),
@@ -88,6 +125,15 @@ Object.defineProperty(
       gFlat: NotePitch.gFlat,
       gSharp: NotePitch.gSharp,
     },
+    writable: false,
+  },
+);
+
+Object.defineProperty(
+  Chord,
+  'default',
+  {
+    value: new Chord(Chord.Root.a, Chord.Triad.major),
     writable: false,
   },
 );

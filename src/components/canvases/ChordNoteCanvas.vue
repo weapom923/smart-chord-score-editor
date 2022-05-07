@@ -4,6 +4,7 @@
     id="note-canvas-container"
     v-bind:style="$_style"
     v-bind="$attrs"
+    v-on="$listeners"
   />
 </template>
 
@@ -18,8 +19,9 @@ import utils from '../../modules/utils.js'
 
 const noteStemLegnthRate = 3.5;
 const noteFlagWidthRate = 2;
-const noteHeadHorizontalOffsetPx = 0;
-const noteHeadWidthPx = 16;
+const noteHeadHorizontalOffsetPx = 0.5;
+const noteHeadSlideWidthPx = 8;
+const noteHeadWidthPx = 8;
 const noteDotRadiusRate = 0.15;
 const noteDotMarginPx = 2;
 
@@ -30,15 +32,34 @@ export default {
 
   watch: {
     note: {
-      handler() { this.draw() },
+      handler() {
+        this.$_setDirty(true);
+        this.draw();
+        this.$emit('width-update', this.$_noteWidthPx);
+        this.$emit(
+          'tie-point-update',
+          {
+            tieStartPointOffset: this.$_tieStartPointOffset,
+            tieEndPointOffset: this.$_tieEndPointOffset,
+          },
+        );
+      },
       deep: true,
+      immediate: true,
     },
 
     invertStemDirection() { this.draw() },
 
     $_noteWidthPx(newCanvasWidthPx) {
       this.$_setCanvasWidthPx(newCanvasWidthPx);
-      this.$emit('note-element-update', { element: this.$el, widthPx: newCanvasWidthPx });
+      this.$emit('width-update', newCanvasWidthPx);
+      this.$emit(
+        'tie-point-update',
+        {
+          tieStartPointOffset: this.$_tieStartPointOffset,
+          tieEndPointOffset: this.$_tieEndPointOffset,
+        },
+      );
     },
 
     $_noteHeightPx(newCanvasHeightPx) {
@@ -49,11 +70,15 @@ export default {
   mounted() {
     this.$_setCanvasWidthPx(this.$_noteWidthPx);
     this.$_setCanvasHeightPx(this.$_noteHeightPx);
-    this.$emit('note-element-update', { element: this.$el, widthPx: this.$_noteWidthPx });
-  },
-
-  destroyed() {
-    this.$emit('note-element-update', { element: null, widthPx: null });
+    this.$emit('element-update', this.$el);
+    this.$emit('width-update', this.$_noteWidthPx);
+    this.$emit(
+      'tie-point-update',
+      {
+        tieStartPointOffset: this.$_tieStartPointOffset,
+        tieEndPointOffset: this.$_tieEndPointOffset,
+      },
+    );
   },
 
   props: {
@@ -77,7 +102,7 @@ export default {
       if (this.invertStemDirection) {
         return noteHeadHorizontalOffsetPx;
       } else {
-        return noteHeadHorizontalOffsetPx + noteHeadWidthPx;
+        return noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx;
       }
     },
     $_noteStemBeginPointVerticalOffsetPx() {
@@ -116,12 +141,12 @@ export default {
     },
     $_noteWidthPx() {
       if (this.$_isDotted) {
-        let noteBaseWidthPx = noteHeadHorizontalOffsetPx + noteHeadWidthPx;
+        let noteBaseWidthPx = noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx;
         let noteExpandedWidthPx = utils.max(this.$_noteDotRadiusPx * 2 + noteDotMarginPx, this.$_noteFlagWidthPx);
         return noteBaseWidthPx + noteExpandedWidthPx;
       } else {
         let noteBaseWidthPx = noteHeadHorizontalOffsetPx;
-        let noteExpandedWidthPx = utils.max(noteHeadWidthPx, this.$_noteFlagWidthPx);
+        let noteExpandedWidthPx = utils.max(noteHeadWidthPx + noteHeadSlideWidthPx, this.$_noteFlagWidthPx);
         return noteBaseWidthPx + noteExpandedWidthPx;
       }
     },
@@ -131,6 +156,18 @@ export default {
       } else {
         return this.$_noteHeadHeightPx;
       }
+    },
+    $_tieStartPointOffset() {
+      return new DOMPoint(
+        noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx,
+        -(this.$_noteHeadHeightPx / 2),
+      );
+    },
+    $_tieEndPointOffset() {
+      return new DOMPoint(
+        noteHeadHorizontalOffsetPx + noteHeadSlideWidthPx,
+        -(this.$_noteHeadHeightPx / 2),
+      );
     },
     $_style() {
       if (this.$_hasNoteStem && !this.invertStemDirection) {
@@ -166,20 +203,20 @@ export default {
         canvas.strokeStyle = self.color.getStyleString();
         canvas.lineWidth = 2;
         canvas.beginPath();
-        canvas.moveTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx + 1));
-        canvas.lineTo(noteHeadHorizontalOffsetPx, self.$_noteHeadVerticalOffsetPx + 1);
+        canvas.moveTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx));
+        canvas.lineTo(noteHeadHorizontalOffsetPx, self.$_noteHeadVerticalOffsetPx);
         canvas.stroke();
         canvas.beginPath();
-        canvas.moveTo(noteHeadHorizontalOffsetPx + 16, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx + 1));
-        canvas.lineTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx + 1);
+        canvas.moveTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx));
+        canvas.lineTo(noteHeadHorizontalOffsetPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx);
         canvas.stroke();
         canvas.beginPath();
-        canvas.moveTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx));
-        canvas.lineTo(noteHeadHorizontalOffsetPx + 16, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx));
+        canvas.moveTo(noteHeadHorizontalOffsetPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx - 1));
+        canvas.lineTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx - (self.$_noteHeadHeightPx - 1));
         canvas.stroke();
         canvas.beginPath();
         canvas.moveTo(noteHeadHorizontalOffsetPx, self.$_noteHeadVerticalOffsetPx);
-        canvas.lineTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx);
+        canvas.lineTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx, self.$_noteHeadVerticalOffsetPx);
         canvas.stroke();
       }
 
@@ -187,9 +224,9 @@ export default {
         canvas.beginPath();
         canvas.fillStyle = self.color.getStyleString();
         canvas.lineWidth = 1;
-        canvas.moveTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx - self.$_noteHeadHeightPx);
-        canvas.lineTo(noteHeadHorizontalOffsetPx + 16, self.$_noteHeadVerticalOffsetPx - self.$_noteHeadHeightPx);
-        canvas.lineTo(noteHeadHorizontalOffsetPx + 8, self.$_noteHeadVerticalOffsetPx);
+        canvas.moveTo(noteHeadHorizontalOffsetPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx - self.$_noteHeadHeightPx);
+        canvas.lineTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx, self.$_noteHeadVerticalOffsetPx - self.$_noteHeadHeightPx);
+        canvas.lineTo(noteHeadHorizontalOffsetPx + noteHeadWidthPx, self.$_noteHeadVerticalOffsetPx);
         canvas.lineTo(noteHeadHorizontalOffsetPx, self.$_noteHeadVerticalOffsetPx);
         canvas.fill();
       }
@@ -199,7 +236,7 @@ export default {
         canvas.fillStyle = self.color.getStyleString();
         canvas.lineWidth = 1;
         canvas.arc(
-          noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteDotMarginPx + self.$_noteDotRadiusPx,
+          noteHeadHorizontalOffsetPx + noteHeadWidthPx + noteHeadSlideWidthPx + noteDotMarginPx + self.$_noteDotRadiusPx,
           self.$_noteHeadVerticalOffsetPx - (self.$_staffLineStepPx / 2),
           self.$_noteDotRadiusPx, 0, 2 * Math.PI);
         canvas.fill();

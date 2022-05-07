@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import NoteSelectorButtons from '@/components/footer_editor/parts/NoteSelectorButtons.vue';
+import NoteSelectorButtons from './parts/NoteSelectorButtons.vue';
 
 export default {
   components: {
