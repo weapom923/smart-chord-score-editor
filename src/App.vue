@@ -67,6 +67,7 @@ import ScoreMetadataEditorDialog from './components/dialog/ScoreMetadataEditorDi
 import SectionEditorDialog from './components/dialog/SectionEditorDialog.vue';
 import GenerateSectionDialog from './components/dialog/GenerateSectionDialog.vue';
 import AppInfoDialog from './components/dialog/AppInfoDialog.vue';
+import HelpDialog from './components/dialog/HelpDialog.vue';
 import Encoding from 'encoding-japanese';
 import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
@@ -148,6 +149,7 @@ export default {
     SectionEditorDialog,
     GenerateSectionDialog,
     AppInfoDialog,
+    HelpDialog,
   },
 
   watch: {
@@ -475,6 +477,10 @@ export default {
       this.$data.$_snackBar.message = message;
     },
 
+    $_showHelpDialog() {
+      this.$_openDialog('help-dialog');
+    },
+
     $_toggleFooterEditorMaximizedAndMinimized() {
       this.$data.$_isFooterEditorMinimized = !this.$data.$_isFooterEditorMinimized;
     },
@@ -671,6 +677,9 @@ export default {
               break;
             case 'Delete':
               removeSelectedBars(this);
+              break;
+            case 'KeyH':
+              this.$_showHelpDialog();
               break;
             case 'KeyE':
               this.$_toggleFooterEditorMaximizedAndMinimized();
