@@ -19,13 +19,18 @@
         />
 
       </template>
-
+      
       <component
         v-model="$data.$_dialog.shows"
         v-bind:is="$data.$_dialog.componentName"
         v-bind="$data.$_dialog.props"
       />
     </v-main>
+
+    <snack-bar
+      v-model="$data.$_snackBar.shows"
+      v-bind:message="$data.$_snackBar.message"
+    />
 
     <v-footer
       app outlined class="pa-0"
@@ -67,6 +72,7 @@ import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
 import ScorePage from './pages/ScorePage.vue';
 import { ScorePageDefinition } from './pages/ScorePage.vue';
+import SnackBar from './components/snack_bar/SnackBar.vue';
 import EditorComponent from './components/footer_editor/EditorComponent.vue';
 import Score from './modules/Score.js';
 import Bar from './modules/Bar.js';
@@ -135,6 +141,7 @@ export default {
   components: {
     AppBar,
     ScorePage,
+    SnackBar,
     EditorComponent,
     GlobalConfigEditorDialog,
     ScoreMetadataEditorDialog,
@@ -214,6 +221,10 @@ export default {
         shows: false,
         componentName: null,
         props: null,
+      },
+      $_snackBar: {
+        shows: false,
+        message: null,
       },
       $_isFooterEditorMinimized: true,
       $_isUndoDisabled: true,
@@ -492,6 +503,12 @@ export default {
       this.$data.$_dialog.props = props;
     },
 
+    $_showSnackBar(message) {
+      console.log(message);
+      this.$data.$_snackBar.shows = true;
+      this.$data.$_snackBar.message = message;
+    },
+
     $_toggleFooterEditorMaximizedAndMinimized() {
       this.$data.$_isFooterEditorMinimized = !this.$data.$_isFooterEditorMinimized;
     },
@@ -618,6 +635,9 @@ export default {
 
     $_setPrintLayoutEnabled(enabled) {
       this.$data.$_isPrintLayoutEnabled = enabled;
+      if (enabled) {
+        this.$_showSnackBar('Press any key to exit print layout.');
+      }
     },
 
     async $_onKeydown(event) {
