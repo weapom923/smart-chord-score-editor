@@ -149,7 +149,7 @@ export default {
           await this.$_generateNewScore();
         } else {
           this.$_setScore(newScore);
-          ScoreSnapshotManager.initialize(newScore);
+          ScoreSnapshotManager.register(newScore);
         }
       },
       immediate: true,
@@ -305,7 +305,7 @@ export default {
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
         this.$_setScore(score);
-        ScoreSnapshotManager.initialize(score);
+        ScoreSnapshotManager.register(score);
       },
 
       loadScoreFromTextFile: async () => {
@@ -318,7 +318,7 @@ export default {
           this.$store.state.config.defaultScale,
         );
         this.$_setScore(score);
-        ScoreSnapshotManager.initialize(score);
+        ScoreSnapshotManager.register(score);
       },
 
       saveScoreFile: this.$_saveScoreFile,
@@ -452,7 +452,7 @@ export default {
       let score = Score.generateNew('Untitled', '', '');
       this.$_setScore(score);
       await this.$_unselectBar();
-      ScoreSnapshotManager.initialize(score);
+      ScoreSnapshotManager.register(score);
     },
 
     $_setScore(score) {
