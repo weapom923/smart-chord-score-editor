@@ -19,13 +19,18 @@
         />
 
       </template>
-
+      
       <component
         v-model="$data.$_dialog.shows"
         v-bind:is="$data.$_dialog.componentName"
         v-bind="$data.$_dialog.props"
       />
     </v-main>
+
+    <snack-bar
+      v-model="$data.$_snackBar.shows"
+      v-bind:message="$data.$_snackBar.message"
+    />
 
     <v-footer
       app outlined class="pa-0"
@@ -62,11 +67,13 @@ import ScoreMetadataEditorDialog from './components/dialog/ScoreMetadataEditorDi
 import SectionEditorDialog from './components/dialog/SectionEditorDialog.vue';
 import GenerateSectionDialog from './components/dialog/GenerateSectionDialog.vue';
 import AppInfoDialog from './components/dialog/AppInfoDialog.vue';
+import HelpDialog from './components/dialog/HelpDialog.vue';
 import Encoding from 'encoding-japanese';
 import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
 import ScorePage from './pages/ScorePage.vue';
 import { ScorePageDefinition } from './pages/ScorePage.vue';
+import SnackBar from './components/snack_bar/SnackBar.vue';
 import EditorComponent from './components/footer_editor/EditorComponent.vue';
 import Score from './modules/Score.js';
 import Bar from './modules/Bar.js';
@@ -76,6 +83,7 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
+import cookie_utils from './modules/cookie_utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -134,22 +142,29 @@ export default {
   components: {
     AppBar,
     ScorePage,
+    SnackBar,
     EditorComponent,
     GlobalConfigEditorDialog,
     ScoreMetadataEditorDialog,
     SectionEditorDialog,
     GenerateSectionDialog,
     AppInfoDialog,
+    HelpDialog,
   },
 
   watch: {
     score: {
       async handler(newScore) {
         if (newScore === null) {
-          await this.$_generateNewScore();
+          let scoreJsonFromCookie = cookie_utils.getCookie('score');
+          if (scoreJsonFromCookie === null) {
+            await this.$_generateNewScore();
+          } else {
+            let scoreFromCookie = Score.loadJson(scoreJsonFromCookie);
+            this.$_setNewScore(scoreFromCookie);
+          }
         } else {
-          this.$_setScore(newScore);
-          ScoreSnapshotManager.initialize(newScore);
+          this.$_setNewScore(newScore);
         }
       },
       immediate: true,
@@ -169,7 +184,7 @@ export default {
     window.addEventListener('keydown', this.$_onKeydown);
   },
 
-  mounted() {
+  async mounted() {
     this.$data.$_windowResizeObserver = new ResizeObserver(this.$_rerenderScore);
     this.$data.$_windowResizeObserver.observe(document.documentElement);
     this.$data.$_footerResizeObserver = new ResizeObserver(resizeObserverEntries => {
@@ -178,6 +193,7 @@ export default {
       this.$refs.main.$el.style.paddingBottom = String(borderBoxSize.blockSize) + 'px';
     });
     this.$data.$_footerResizeObserver.observe(this.$refs.footer.$el);
+    await this.$store.dispatch('loadConfigFromCookie');
   },
 
   beforeDestroy() {
@@ -207,6 +223,10 @@ export default {
         shows: false,
         componentName: null,
         props: null,
+      },
+      $_snackBar: {
+        shows: false,
+        message: null,
       },
       $_isFooterEditorMinimized: true,
       $_isUndoDisabled: true,
@@ -304,8 +324,7 @@ export default {
         let scoreJsonString = await loadFileAsUTF8Text(fileInterface);
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
-        this.$_setScore(score);
-        ScoreSnapshotManager.initialize(score);
+        this.$_setNewScore(score);
       },
 
       loadScoreFromTextFile: async () => {
@@ -317,47 +336,12 @@ export default {
           this.$store.state.config.defaultBarValue,
           this.$store.state.config.defaultScale,
         );
-        this.$_setScore(score);
-        ScoreSnapshotManager.initialize(score);
+        this.$_setNewScore(score);
       },
 
       saveScoreFile: this.$_saveScoreFile,
 
-      generateNewSection: (sectionIdx) => {
-        let baseSectionIdx = null;
-        let numSection = this.$data.$_score.numSections;
-        if (sectionIdx > 0)  {
-          baseSectionIdx = sectionIdx - 1;
-        } else if (numSection > 0)  {
-          baseSectionIdx = 0;
-        }
-        let barValue = null;
-        let clef = null;
-        let scale = null;
-        let partInBarTypes = null;
-        if (baseSectionIdx !== null) {
-          let baseSection = this.$data.$_score.getSection(baseSectionIdx);
-          let numBarsInBaseSection = baseSection.bars.length;
-          let baseBar = baseSection.bars[numBarsInBaseSection - 1];
-          barValue = baseBar.value;
-          clef = baseBar.clef;
-          scale = baseBar.scale;
-          partInBarTypes = baseBar.parts.map(part => part.type);
-        }
-        this.$_openDialog(
-          'generate-section-dialog',
-          {
-            barValue,
-            clef,
-            scale,
-            partInBarTypes,
-            callback: (section) => {
-              this.$data.$_score.sections.splice(sectionIdx, 0, section);
-              this.$_registerScoreSnapshot();
-            },
-          }
-        );
-      },
+      generateNewSection: this.$_generateNewSection,
 
       updatePart: (sectionIdx, barIdx, partIdx, part) => {
         let currentPart = this.$data.$_score.getPart(sectionIdx, barIdx, partIdx);
@@ -450,13 +434,18 @@ export default {
 
     async $_generateNewScore() {
       let score = Score.generateNew('Untitled', '', '');
-      this.$_setScore(score);
       await this.$_unselectBar();
-      ScoreSnapshotManager.initialize(score);
+      this.$_setNewScore(score);
+    },
+
+    $_setNewScore(score) {
+      this.$_setScore(score);
+      ScoreSnapshotManager.register(score);
     },
 
     $_setScore(score) {
-      this.$data.$_score = score;
+      this.$set(this.$data, '$_score', score);
+      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_saveScoreFile() {
@@ -473,12 +462,23 @@ export default {
 
     $_registerScoreSnapshot() {
       ScoreSnapshotManager.register(this.$data.$_score);
+      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_openDialog(dialogComponentName, props = {}) {
       this.$data.$_dialog.componentName = dialogComponentName;
       this.$data.$_dialog.shows = true;
       this.$data.$_dialog.props = props;
+    },
+
+    $_showSnackBar(message) {
+      console.log(message);
+      this.$data.$_snackBar.shows = true;
+      this.$data.$_snackBar.message = message;
+    },
+
+    $_showHelpDialog() {
+      this.$_openDialog('help-dialog');
     },
 
     $_toggleFooterEditorMaximizedAndMinimized() {
@@ -601,12 +601,51 @@ export default {
       await this.$store.dispatch('expandSelectedBars', { sectionIdx, barIdx });
     },
 
+    $_generateNewSection(sectionIdx) {
+      let baseSectionIdx = null;
+      let numSection = this.$data.$_score.numSections;
+      if (sectionIdx > 0)  {
+        baseSectionIdx = sectionIdx - 1;
+      } else if (numSection > 0)  {
+        baseSectionIdx = 0;
+      }
+      let barValue = null;
+      let clef = null;
+      let scale = null;
+      let partInBarTypes = null;
+      if (baseSectionIdx !== null) {
+        let baseSection = this.$data.$_score.getSection(baseSectionIdx);
+        let numBarsInBaseSection = baseSection.bars.length;
+        let baseBar = baseSection.bars[numBarsInBaseSection - 1];
+        barValue = baseBar.value;
+        clef = baseBar.clef;
+        scale = baseBar.scale;
+        partInBarTypes = baseBar.parts.map(part => part.type);
+      }
+      this.$_openDialog(
+        'generate-section-dialog',
+        {
+          barValue,
+          clef,
+          scale,
+          partInBarTypes,
+          callback: (section) => {
+            this.$data.$_score.sections.splice(sectionIdx, 0, section);
+            this.$_registerScoreSnapshot();
+          },
+        }
+      );
+    },
+
     $_registerFooterComponentInstance(footerComponentInstance) {
       this.$data.$_footerComponentInstance = footerComponentInstance;
     },
 
     $_setPrintLayoutEnabled(enabled) {
       this.$data.$_isPrintLayoutEnabled = enabled;
+      if (enabled) {
+        this.$_showSnackBar('Press any key to exit print layout.');
+      }
     },
 
     async $_onKeydown(event) {
@@ -639,6 +678,9 @@ export default {
             case 'Delete':
               removeSelectedBars(this);
               break;
+            case 'KeyH':
+              this.$_showHelpDialog();
+              break;
             case 'KeyE':
               this.$_toggleFooterEditorMaximizedAndMinimized();
               break;
@@ -667,6 +709,9 @@ export default {
             case 'KeyN':
               await insertBarAfter(this);
               break;
+            case 'KeyM':
+              insertSectionAfter(this);
+              break;
           }
           break;
         case keyEventTypeEnum.keyWithShift:
@@ -692,6 +737,9 @@ export default {
               break;
             case 'KeyN':
               await insertBarBefore(this);
+              break;
+            case 'KeyM':
+              insertSectionBefore(this);
               break;
             case 'ArrowRight':
               await incrementSelectedBarsFirstIdx(this);
@@ -815,6 +863,18 @@ export default {
           self.$_selectedBarsLast.barIdx,
           self.$_selectedBarsLast.barIdx + 1,
         );
+      }
+
+      function insertSectionBefore(self) {
+        let sectionIdx = self.$_selectedBarsFirst.sectionIdx;
+        if (sectionIdx) sectionIdx = self.$data.$_score.getFirstSectionIdx();
+        self.$_generateNewSection(sectionIdx);
+      }
+
+      function insertSectionAfter(self) {
+        let sectionIdx = self.$_selectedBarsLast.sectionIdx;
+        if (sectionIdx) sectionIdx = self.$data.$_score.numSections;
+        self.$_generateNewSection(sectionIdx);
       }
 
       async function removeSelectedBars(self) {

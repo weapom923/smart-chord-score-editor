@@ -14,6 +14,7 @@
             <v-row>
               <v-col sm="4" cols="12">
                 <v-text-field
+                  autofocus
                   v-model="$data.$_metadata.title"
                   v-bind:rules="$_rules.title"
                   label="Title"

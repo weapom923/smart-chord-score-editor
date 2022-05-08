@@ -13,7 +13,7 @@
             <v-row>
               <v-col sm="4" cols="12">
                 <v-text-field
-                  number
+                  autofocus number
                   type="number"
                   v-model="$data.$_staffLineStepPx"
                   v-bind:rules="$_rules.staffLineStepPx"

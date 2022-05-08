@@ -51,15 +51,10 @@ Object.defineProperty(
 )
 
 export default {
-  initialize(score) {
+  register(score) {
     if (ScoreSnapshotManager.instance === null) {
       ScoreSnapshotManager.instance = new ScoreSnapshotManager(score);
-    } else {
-      this.register(score);
     }
-  },
-
-  register(score) {
     if (ScoreSnapshotManager.instance.getSnapshot().isEqualTo(score)) return;
     ScoreSnapshotManager.instance.register(score);
   },

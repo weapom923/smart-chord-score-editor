@@ -112,9 +112,10 @@ export default {
       }
     },
 
-    $_onEnterKeyDown() {
+    $_onEnterKeyDown(event) {
       if (this.okDisabled) return;
       this.$_onOkClicked();
+      event.preventDefault();
     },
 
     $_onCancelClicked() {
