@@ -339,41 +339,7 @@ export default {
 
       saveScoreFile: this.$_saveScoreFile,
 
-      generateNewSection: (sectionIdx) => {
-        let baseSectionIdx = null;
-        let numSection = this.$data.$_score.numSections;
-        if (sectionIdx > 0)  {
-          baseSectionIdx = sectionIdx - 1;
-        } else if (numSection > 0)  {
-          baseSectionIdx = 0;
-        }
-        let barValue = null;
-        let clef = null;
-        let scale = null;
-        let partInBarTypes = null;
-        if (baseSectionIdx !== null) {
-          let baseSection = this.$data.$_score.getSection(baseSectionIdx);
-          let numBarsInBaseSection = baseSection.bars.length;
-          let baseBar = baseSection.bars[numBarsInBaseSection - 1];
-          barValue = baseBar.value;
-          clef = baseBar.clef;
-          scale = baseBar.scale;
-          partInBarTypes = baseBar.parts.map(part => part.type);
-        }
-        this.$_openDialog(
-          'generate-section-dialog',
-          {
-            barValue,
-            clef,
-            scale,
-            partInBarTypes,
-            callback: (section) => {
-              this.$data.$_score.sections.splice(sectionIdx, 0, section);
-              this.$_registerScoreSnapshot();
-            },
-          }
-        );
-      },
+      generateNewSection: this.$_generateNewSection,
 
       updatePart: (sectionIdx, barIdx, partIdx, part) => {
         let currentPart = this.$data.$_score.getPart(sectionIdx, barIdx, partIdx);
@@ -629,6 +595,42 @@ export default {
       await this.$store.dispatch('expandSelectedBars', { sectionIdx, barIdx });
     },
 
+    $_generateNewSection(sectionIdx) {
+      let baseSectionIdx = null;
+      let numSection = this.$data.$_score.numSections;
+      if (sectionIdx > 0)  {
+        baseSectionIdx = sectionIdx - 1;
+      } else if (numSection > 0)  {
+        baseSectionIdx = 0;
+      }
+      let barValue = null;
+      let clef = null;
+      let scale = null;
+      let partInBarTypes = null;
+      if (baseSectionIdx !== null) {
+        let baseSection = this.$data.$_score.getSection(baseSectionIdx);
+        let numBarsInBaseSection = baseSection.bars.length;
+        let baseBar = baseSection.bars[numBarsInBaseSection - 1];
+        barValue = baseBar.value;
+        clef = baseBar.clef;
+        scale = baseBar.scale;
+        partInBarTypes = baseBar.parts.map(part => part.type);
+      }
+      this.$_openDialog(
+        'generate-section-dialog',
+        {
+          barValue,
+          clef,
+          scale,
+          partInBarTypes,
+          callback: (section) => {
+            this.$data.$_score.sections.splice(sectionIdx, 0, section);
+            this.$_registerScoreSnapshot();
+          },
+        }
+      );
+    },
+
     $_registerFooterComponentInstance(footerComponentInstance) {
       this.$data.$_footerComponentInstance = footerComponentInstance;
     },
@@ -698,6 +700,9 @@ export default {
             case 'KeyN':
               await insertBarAfter(this);
               break;
+            case 'KeyM':
+              insertSectionAfter(this);
+              break;
           }
           break;
         case keyEventTypeEnum.keyWithShift:
@@ -723,6 +728,9 @@ export default {
               break;
             case 'KeyN':
               await insertBarBefore(this);
+              break;
+            case 'KeyM':
+              insertSectionBefore(this);
               break;
             case 'ArrowRight':
               await incrementSelectedBarsFirstIdx(this);
@@ -846,6 +854,18 @@ export default {
           self.$_selectedBarsLast.barIdx,
           self.$_selectedBarsLast.barIdx + 1,
         );
+      }
+
+      function insertSectionBefore(self) {
+        let sectionIdx = self.$_selectedBarsFirst.sectionIdx;
+        if (sectionIdx) sectionIdx = self.$data.$_score.getFirstSectionIdx();
+        self.$_generateNewSection(sectionIdx);
+      }
+
+      function insertSectionAfter(self) {
+        let sectionIdx = self.$_selectedBarsLast.sectionIdx;
+        if (sectionIdx) sectionIdx = self.$data.$_score.numSections;
+        self.$_generateNewSection(sectionIdx);
       }
 
       async function removeSelectedBars(self) {
