@@ -113,7 +113,7 @@ async function getFileInterface(accept = null) {
           window.clearTimeout(timeoutId);
           resolve(null);
         },
-        100,
+        1000,
       );
     };
     window.addEventListener('focus', windowFocusEventHandler);
