@@ -295,7 +295,7 @@ export default {
 
     $_lastSectionIdx() {
       if (!this.$_isScoreLoaded) return null;
-      return this.$data.$_score.getLastSectionIdx();
+      return this.$data.$_score.lastSectionIdx;
     },
 
     $_lastBarIdx() {
@@ -418,9 +418,11 @@ export default {
 
       setPrintLayoutEnabled: this.$_setPrintLayoutEnabled,
 
-      showInfo: () => {
+      showInfoDialog: () => {
         this.$_openDialog('app-info-dialog');
       },
+
+      showHelpDialog: this.$_showHelpDialog,
     };
   },
 
@@ -785,10 +787,10 @@ export default {
 
       async function selectAllBars(self) {
         if (self.$data.$_score.numSections === 0) return;
-        let firstSectionIdx = self.$data.$_score.getFirstSectionIdx();
+        let firstSectionIdx = self.$data.$_score.firstSectionIdx;
         let firstBarIdx = self.$data.$_score.getFirstBarIdx(firstSectionIdx);
         await self.$_selectBar(firstSectionIdx, firstBarIdx);
-        let lastSectionIdx = self.$data.$_score.getLastSectionIdx();
+        let lastSectionIdx = self.$data.$_score.lastSectionIdx;
         let lastBarIdx = self.$data.$_score.getLastBarIdx(lastSectionIdx);
         await self.$_expandSelectedBars(lastSectionIdx, lastBarIdx);
       }
@@ -867,14 +869,14 @@ export default {
 
       function insertSectionBefore(self) {
         let sectionIdx = self.$_selectedBarsFirst.sectionIdx;
-        if (sectionIdx) sectionIdx = self.$data.$_score.getFirstSectionIdx();
+        if (sectionIdx === null) sectionIdx = self.$data.$_score.firstSectionIdx;
         self.$_generateNewSection(sectionIdx);
       }
 
       function insertSectionAfter(self) {
         let sectionIdx = self.$_selectedBarsLast.sectionIdx;
-        if (sectionIdx) sectionIdx = self.$data.$_score.numSections;
-        self.$_generateNewSection(sectionIdx);
+        if (sectionIdx === null) sectionIdx = self.$data.$_score.lastSectionIdx;
+        self.$_generateNewSection(sectionIdx + 1);
       }
 
       async function removeSelectedBars(self) {

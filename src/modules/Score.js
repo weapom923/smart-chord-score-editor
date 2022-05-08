@@ -221,12 +221,12 @@ class Score {
     return this.sections.length;
   }
 
-  getFirstSectionIdx() {
+  get firstSectionIdx() {
     if (this.numSections === 0) return null;
     return 0;
   }
 
-  getLastSectionIdx() {
+  get lastSectionIdx() {
     if (this.numSections === 0) return null;
     return this.numSections - 1;
   }
