@@ -17,6 +17,7 @@
             <v-row>
               <v-col sm="4" cols="12">
                 <v-text-field
+                  autofocus
                   v-model="$data.$_name"
                   v-bind:rules="$_rules.name"
                   label="Section Name"
