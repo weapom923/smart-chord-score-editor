@@ -421,6 +421,8 @@ export default {
       showInfoDialog: () => {
         this.$_openDialog('app-info-dialog');
       },
+
+      showHelpDialog: this.$_showHelpDialog,
     };
   },
 

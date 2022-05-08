@@ -104,6 +104,10 @@ export default {
           'mdi-cog', 'global config',
           () => { this.openGlobalConfigEditorDialog() },
         ),
+        showHelp: new MenuItemDefinition(
+          'mdi-help-circle', 'show help',
+          () => { this.showHelpDialog(true) },
+        ),
         showInfo: new MenuItemDefinition(
           'mdi-information', 'show info',
           () => { this.showInfoDialog(true) },
@@ -123,6 +127,7 @@ export default {
     'openGlobalConfigEditorDialog',
     'setPrintLayoutEnabled',
     'showInfoDialog',
+    'showHelpDialog',
   ],
 }
 </script>
