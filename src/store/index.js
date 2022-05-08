@@ -6,6 +6,7 @@ import Chord from '../modules/Chord.js'
 import Clef from '../modules/Clef.js'
 import PartInBar from '../modules/PartInBar.js'
 import Color from '../modules/Color.js'
+import cookie_utils from '../modules/cookie_utils.js'
 
 Vue.use(Vuex);
 
@@ -36,6 +37,24 @@ const store = new Vuex.Store({
   },
 
   mutations: {
+    loadConfigFromCookie(state) {
+      let configJsonFromCookie = cookie_utils.getCookie('config');
+      if (configJsonFromCookie !== null) {
+        let rawConfigFromCookie = JSON.parse(configJsonFromCookie);
+        state.config.staffLineStepPx = rawConfigFromCookie.staffLineStepPx;
+        state.config.systemMarginTopPx = rawConfigFromCookie.systemMarginTopPx;
+        state.config.systemMarginBottomPx = rawConfigFromCookie.systemMarginBottomPx;
+        state.config.gridNoteValue = NoteValue.loadFromRawObj(rawConfigFromCookie.gridNoteValue);
+        state.config.chordFontSizePx = rawConfigFromCookie.chordFontSizePx;
+        state.config.defaultChord = Chord.loadFromRawObj(rawConfigFromCookie.defaultChord);
+        state.config.defaultBarValue = NoteValue.loadFromRawObj(rawConfigFromCookie.defaultBarValue);
+        state.config.defaultClef = Clef.loadFromRawObj(rawConfigFromCookie.defaultClef);
+        state.config.defaultScale = Scale.loadFromRawObj(rawConfigFromCookie.defaultScale);
+        state.config.defaultPartInBarTypes = rawConfigFromCookie.defaultPartInBarTypes;
+        state.config.selectedNoteColor = Color.loadFromRawObj(rawConfigFromCookie.selectedNoteColor);
+      }
+    },
+
     unselectBar(state) {
       state.selectedBarsFirst.sectionIdx = null;
       state.selectedBarsFirst.barIdx = null;
@@ -167,10 +186,28 @@ const store = new Vuex.Store({
       state.config.systemMarginBottomPx = config.systemMarginBottomPx;
       state.config.gridNoteValue = config.gridNoteValue;
       state.config.chordFontSizePx = config.chordFontSizePx;
+
+      let configRawObj = new Object();
+      configRawObj.staffLineStepPx = state.config.staffLineStepPx;
+      configRawObj.systemMarginTopPx = state.config.systemMarginTopPx;
+      configRawObj.systemMarginBottomPx = state.config.systemMarginBottomPx;
+      configRawObj.gridNoteValue = state.config.gridNoteValue.getRawObj();
+      configRawObj.chordFontSizePx = state.config.chordFontSizePx;
+      configRawObj.defaultChord = state.config.defaultChord.getRawObj();
+      configRawObj.defaultBarValue = state.config.defaultBarValue.getRawObj();
+      configRawObj.defaultClef = state.config.defaultClef.getRawObj();
+      configRawObj.defaultScale = state.config.defaultScale.getRawObj();
+      configRawObj.defaultPartInBarTypes = state.config.defaultPartInBarTypes;
+      configRawObj.selectedNoteColor = state.config.selectedNoteColor.getRawObj();
+      cookie_utils.setCookie('config', JSON.stringify(configRawObj));
     },
   },
 
   actions: {
+    loadConfigFromCookie(context) {
+      context.commit('loadConfigFromCookie');
+    },
+
     selectBar(context, { sectionIdx, barIdx }) {
       context.commit('selectBar', { sectionIdx, barIdx });
     },

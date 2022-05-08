@@ -76,6 +76,7 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
+import cookie_utils from './modules/cookie_utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -146,10 +147,15 @@ export default {
     score: {
       async handler(newScore) {
         if (newScore === null) {
-          await this.$_generateNewScore();
+          let scoreJsonFromCookie = cookie_utils.getCookie('score');
+          if (scoreJsonFromCookie === null) {
+            await this.$_generateNewScore();
+          } else {
+            let scoreFromCookie = Score.loadJson(scoreJsonFromCookie);
+            this.$_setNewScore(scoreFromCookie);
+          }
         } else {
-          this.$_setScore(newScore);
-          ScoreSnapshotManager.register(newScore);
+          this.$_setNewScore(newScore);
         }
       },
       immediate: true,
@@ -169,7 +175,7 @@ export default {
     window.addEventListener('keydown', this.$_onKeydown);
   },
 
-  mounted() {
+  async mounted() {
     this.$data.$_windowResizeObserver = new ResizeObserver(this.$_rerenderScore);
     this.$data.$_windowResizeObserver.observe(document.documentElement);
     this.$data.$_footerResizeObserver = new ResizeObserver(resizeObserverEntries => {
@@ -178,6 +184,7 @@ export default {
       this.$refs.main.$el.style.paddingBottom = String(borderBoxSize.blockSize) + 'px';
     });
     this.$data.$_footerResizeObserver.observe(this.$refs.footer.$el);
+    await this.$store.dispatch('loadConfigFromCookie');
   },
 
   beforeDestroy() {
@@ -304,8 +311,7 @@ export default {
         let scoreJsonString = await loadFileAsUTF8Text(fileInterface);
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
-        this.$_setScore(score);
-        ScoreSnapshotManager.register(score);
+        this.$_setNewScore(score);
       },
 
       loadScoreFromTextFile: async () => {
@@ -317,8 +323,7 @@ export default {
           this.$store.state.config.defaultBarValue,
           this.$store.state.config.defaultScale,
         );
-        this.$_setScore(score);
-        ScoreSnapshotManager.register(score);
+        this.$_setNewScore(score);
       },
 
       saveScoreFile: this.$_saveScoreFile,
@@ -450,8 +455,12 @@ export default {
 
     async $_generateNewScore() {
       let score = Score.generateNew('Untitled', '', '');
-      this.$_setScore(score);
       await this.$_unselectBar();
+      this.$_setNewScore(score);
+    },
+
+    $_setNewScore(score) {
+      this.$_setScore(score);
       ScoreSnapshotManager.register(score);
     },
 
@@ -474,6 +483,7 @@ export default {
 
     $_registerScoreSnapshot() {
       ScoreSnapshotManager.register(this.$data.$_score);
+      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_openDialog(dialogComponentName, props = {}) {
