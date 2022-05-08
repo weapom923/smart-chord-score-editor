@@ -456,7 +456,8 @@ export default {
     },
 
     $_setScore(score) {
-      this.$data.$_score = score;
+      this.$set(this.$data, '$_score', score);
+      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_saveScoreFile() {
