@@ -106,7 +106,7 @@ export default {
         ),
         showInfo: new MenuItemDefinition(
           'mdi-information', 'show info',
-          () => { this.showInfo(true) },
+          () => { this.showInfoDialog(true) },
         ),
       };
     },
@@ -122,7 +122,7 @@ export default {
     'openScoreMetadataEditorDialog',
     'openGlobalConfigEditorDialog',
     'setPrintLayoutEnabled',
-    'showInfo',
+    'showInfoDialog',
   ],
 }
 </script>

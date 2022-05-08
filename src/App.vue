@@ -418,7 +418,7 @@ export default {
 
       setPrintLayoutEnabled: this.$_setPrintLayoutEnabled,
 
-      showInfo: () => {
+      showInfoDialog: () => {
         this.$_openDialog('app-info-dialog');
       },
     };
