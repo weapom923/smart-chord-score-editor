@@ -116,11 +116,13 @@ export default {
           delete this.$data.$_barElements[barIdx];
           delete this.$data.$_barNoteTieStartPointOffsets[barIdx];
           delete this.$data.$_barNoteTieEndPointOffsets[barIdx];
+          delete this.$data.$_isTiedToNextPartNote[barIdx];
         }
         for (let barIdx of addedBarIdcs) {
           this.$data.$_barElements[barIdx] = null;
           this.$data.$_barNoteTieStartPointOffsets[barIdx] = null;
           this.$data.$_barNoteTieEndPointOffsets[barIdx] = null;
+          this.$data.$_isTiedToNextPartNote[barIdx] = new Array();
         }
       },
       immediate: true,
@@ -155,8 +157,8 @@ export default {
       $_firstTieStyles: null,
       $_tieProps: null,
       $_tieStyles: null,
-      $_isTiedToNextPartNote: null,
-      $_isTiedFromPreviousPartNote: null,
+      $_isTiedToNextPartNote: new Object(),
+      $_isTiedFromPreviousPartNote: new Array(),
     };
   },
 
