@@ -77,7 +77,7 @@ export default {
         ),
         loadScoreFile: new MenuItemDefinition(
           'mdi-folder-open', 'load',
-          () => { this.loadScoreFile() },
+          async () => { await this.loadScoreFile() },
         ),
         saveScoreFile: new MenuItemDefinition(
           'mdi-content-save', 'save',
@@ -85,7 +85,7 @@ export default {
         ),
         loadScoreFromTextFile: new MenuItemDefinition(
           'mdi-import', 'import from text',
-          () => { this.loadScoreFromTextFile() },
+          async () => { await this.loadScoreFromTextFile() },
         ),
         enablePrintLayout: new MenuItemDefinition(
           'mdi-printer-eye', 'enable print layout',

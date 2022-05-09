@@ -113,7 +113,7 @@ async function getFileInterface(accept = null) {
           window.clearTimeout(timeoutId);
           resolve(null);
         },
-        100,
+        10000,
       );
     };
     window.addEventListener('focus', windowFocusEventHandler);
@@ -175,6 +175,7 @@ export default {
       handler() {
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
+        this.$_rerenderScore();
       },
       deep: true,
     },
