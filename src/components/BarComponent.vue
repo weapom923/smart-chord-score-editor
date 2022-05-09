@@ -26,7 +26,7 @@
         id="repeat-ending-container"
         ref="repeatEndingContainer"
         v-if="!$_isBarRepeatEndingEmpty"
-        v-bind:style="$_repeatEndingStyle"
+        v-bind:style="$data.$_barRepeatEndingStyle"
       >
         <bar-repeat-ending-component
           v-bind:bar-repeat-ending="$_bar.repeatEnding"
@@ -110,7 +110,7 @@
 
 #part-container {
   flex-grow: 1;
-  padding: 0 10px;
+  margin: 0 10px;
 }
 </style>
 
@@ -166,14 +166,12 @@ export default {
 
   mounted() {
     this.$emit('bar-element-update', this.$el);
-    this.$data.$_partContainerElementResizeObserver = new ResizeObserver(this.$_updateBarElementBoundingClientRect);
-    this.$data.$_partContainerElementResizeObserver.observe(this.$refs.partContainer);
-    this.$_updateBarElementBoundingClientRect();
-    this.$_updateMarginTopAndBottom();
+    this.$data.$_barElementResizeObserver.observe(this.$el);
+    this.$_updatePositionAndSize();
   },
 
   destroyed() {
-    this.$data.$_partContainerElementResizeObserver.disconnect();
+    this.$data.$_barElementResizeObserver.disconnect();
   },
 
   props: {
@@ -193,13 +191,13 @@ export default {
 
   data() {
     return {
+      $_barElementResizeObserver: new ResizeObserver(this.$_updatePositionAndSize),
       $_partNoteElements: new Array(),
       $_partNoteChordElements: new Array(),
       $_partTieStartPointOffsets: new Array(),
       $_partTieEndPointOffsets: new Array(),
       $_barRepeatEndingElement: null,
-      $_partContainerElementResizeObserver: null,
-      $_partContainerElementBoundingClientRect: null,
+      $_barRepeatEndingStyle: new Object(),
       $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
       $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
     };
@@ -261,17 +259,6 @@ export default {
       };
     },
 
-    $_repeatEndingStyle() {
-      if (this.$data.$_barRepeatEndingElement === null) return 0;
-      let barRepeatEndingElementBoundingClientRect = this.$data.$_barRepeatEndingElement.getBoundingClientRect();
-      return {
-        marginTop: String(-this.$data.$_marginTopPxMax) + 'px',
-        marginRight: String(-this.$data.$_partContainerElementBoundingClientRect.width) + 'px',
-        height: String(this.$data.$_marginTopPxMax - this.$_internalMarginTopPx) + 'px',
-        width: String(this.$data.$_partContainerElementBoundingClientRect.width + barRepeatEndingElementBoundingClientRect.width) + 'px',
-      };
-    },
-
     $_showKeySignature() {
       if (this.showKeySignature !== null) return this.showKeySignature;
       if (this.barIdx === null) return false;
@@ -306,10 +293,6 @@ export default {
   },
 
   methods: {
-    $_updateBarElementBoundingClientRect() {
-      this.$data.$_partContainerElementBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
-    },
-
     $_getSelectedNoteIdxInPart(partIdx) {
       if (this.selectedPartIdx === null) return null;
       if (partIdx === this.selectedPartIdx) return this.selectedNoteIdx;
@@ -325,12 +308,12 @@ export default {
 
     $_onNoteElementsUpdate(partIdx, noteElements) {
       this.$set(this.$data.$_partNoteElements, partIdx, noteElements);
-      this.$nextTick(this.$_updateMarginTopAndBottom);
+      this.$_updateMarginTopAndBottom();
     },
 
     $_onNoteChordElementsUpdate(partIdx, chordElements) {
       this.$set(this.$data.$_partNoteChordElements, partIdx, chordElements);
-      this.$nextTick(this.$_updateMarginTopAndBottom);
+      this.$_updateMarginTopAndBottom();
     },
 
     $_onPartTiePointUpdate(partIdx, { tieStartPointOffset, tieEndPointOffset }) {
@@ -343,7 +326,14 @@ export default {
       this.$data.$_barRepeatEndingElement = barRepeatEndingElement;
     },
 
+    $_updatePositionAndSize() {
+      this.$_emitTiePointUpdate();
+      this.$_updateMarginTopAndBottom();
+      this.$_updateBarRepeatEndingStyle();
+    },
+
     $_emitTiePointUpdate() {
+      let partContainerElementBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
       let barElementBoundingClientRect = this.$el.getBoundingClientRect();
       this.$emit(
         'tie-point-update',
@@ -352,7 +342,7 @@ export default {
             partTieStartPointOffset => {
               if (partTieStartPointOffset === null) return null;
               return new DOMPoint(
-                this.$data.$_partContainerElementBoundingClientRect.x + partTieStartPointOffset.x - barElementBoundingClientRect.x,
+                partContainerElementBoundingClientRect.x + partTieStartPointOffset.x - barElementBoundingClientRect.x,
                 partTieStartPointOffset.y,
               )
             },
@@ -361,7 +351,7 @@ export default {
             partTieEndPointOffset => {
               if (partTieEndPointOffset === null) return null;
               return new DOMPoint(
-                this.$data.$_partContainerElementBoundingClientRect.x + partTieEndPointOffset.x - barElementBoundingClientRect.x,
+                partContainerElementBoundingClientRect.x + partTieEndPointOffset.x - barElementBoundingClientRect.x,
                 partTieEndPointOffset.y,
               );
             },
@@ -398,6 +388,19 @@ export default {
       this.$data.$_marginBottomPxMax = maxBottomOffsetPx;
       this.$emit('margin-top-px-update', this.$data.$_marginTopPxMax);
       this.$emit('margin-bottom-px-update', this.$data.$_marginBottomPxMax);
+    },
+
+    $_updateBarRepeatEndingStyle() {
+      if (this.$data.$_barRepeatEndingElement === null) return 0;
+      let barElementBoundingClientRect = this.$el.getBoundingClientRect();
+      let barRepeatEndingElementBoundingClientRect = this.$data.$_barRepeatEndingElement.getBoundingClientRect();
+      let barRepeatEndingRightOffsetPx = barRepeatEndingElementBoundingClientRect.x + barRepeatEndingElementBoundingClientRect.width - barElementBoundingClientRect.x;
+      this.$data.$_barRepeatEndingStyle = {
+        marginTop: String(-this.$data.$_marginTopPxMax) + 'px',
+        marginRight: String(-(barElementBoundingClientRect.width - barRepeatEndingRightOffsetPx)) + 'px',
+        height: String(this.$data.$_marginTopPxMax - this.$_internalMarginTopPx) + 'px',
+        width: String(barElementBoundingClientRect.width) + 'px',
+      };
     },
 
     $_onClickNote(partIdx, noteIdx) {

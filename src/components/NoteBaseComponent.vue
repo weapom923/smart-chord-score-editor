@@ -124,7 +124,7 @@ export default {
         }
       },
       immediate: true,
-    }
+    },
   },
 
   props: {
@@ -137,6 +137,7 @@ export default {
 
   data() {
     return {
+      $_noteBaseElementResizeObserver: new ResizeObserver(this.$_updatePositionAndSize),
       $_chordElementWidthPx: null,
       $_splitNoteElementWidthPxs: new Array(),
       $_splitNoteTieStartOffsets: new Array(),
@@ -223,6 +224,15 @@ export default {
     },
   },
 
+  mounted() {
+    this.$data.$_noteBaseElementResizeObserver.observe(this.$el);
+    this.$_updatePositionAndSize();
+  },
+
+  destroyed() {
+    this.$data.$_noteBaseElementResizeObserver.disconnect();
+  },
+
   methods: {
     $_isNormalNote(noteType) {
       return noteType === Note.Type.normal;
@@ -250,6 +260,7 @@ export default {
     $_onNoteElementUpdate(splitNoteIdx, element) {
       this.$set(this.$data.$_splitNoteElements, splitNoteIdx, element);
       this.$emit('split-note-elements-update', this.$data.$_splitNoteElements);
+      this.$_updateTiePropsAndStyles();
     },
 
     $_onNoteWidthUpdate(splitNoteIdx, widthPx) {
@@ -259,20 +270,22 @@ export default {
     $_onNoteTiePointUpdate(splitNoteIdx, { tieStartPointOffset, tieEndPointOffset }) {
       this.$set(this.$data.$_splitNoteTieStartOffsets, splitNoteIdx, tieStartPointOffset);
       this.$set(this.$data.$_splitNoteTieEndOffsets, splitNoteIdx, tieEndPointOffset);
-      this.$nextTick(() => {
-        this.$_updateTiePropsAndStyles();
-        this.$emit(
-          'tie-point-update',
-          {
-            tieStartPointOffset: this.$_noteTieStartOffset,
-            tieEndPointOffset: this.$_noteTieEndOffset,
-          },
-        );
-      });
+      this.$emit(
+        'tie-point-update',
+        {
+          tieStartPointOffset: this.$_noteTieStartOffset,
+          tieEndPointOffset: this.$_noteTieEndOffset,
+        },
+      );
+      this.$_updateTiePropsAndStyles();
     },
 
     $_onClickNote() {
       this.$emit('click-note');
+    },
+
+    $_updatePositionAndSize() {
+      this.$_updateTiePropsAndStyles();
     },
 
     $_updateTiePropsAndStyles() {
@@ -282,17 +295,19 @@ export default {
         let nextSplitNoteIdx = splitNoteIdx + 1;
         let tieProp = new Object();
         let tieStyle = new Object();
+        let currentSplitNoteElement = this.$data.$_splitNoteElements[splitNoteIdx];
+        let nextSplitNoteElement = this.$data.$_splitNoteElements[nextSplitNoteIdx];
+        let splitNoteTieStartOffset = this.$data.$_splitNoteTieStartOffsets[splitNoteIdx];
+        let splitNoteTieEndOffset = this.$data.$_splitNoteTieEndOffsets[nextSplitNoteIdx];
         if (
-          (this.$data.$_splitNoteElements[splitNoteIdx] !== null) && 
-          (this.$data.$_splitNoteElements[nextSplitNoteIdx] !== null) && 
-          (this.$data.$_splitNoteTieStartOffsets[splitNoteIdx] !== null) && 
-          (this.$data.$_splitNoteTieEndOffsets[nextSplitNoteIdx] !== null))
+          !utils.isNullOrUndefined(currentSplitNoteElement) && 
+          !utils.isNullOrUndefined(nextSplitNoteElement) && 
+          !utils.isNullOrUndefined(splitNoteTieStartOffset) && 
+          !utils.isNullOrUndefined(splitNoteTieEndOffset))
         {
           let noteBaseElementBoundingClientRect = this.$el.getBoundingClientRect();
-          let currentSplitNoteElementBoundingClientRect = this.$data.$_splitNoteElements[splitNoteIdx].getBoundingClientRect();
-          let splitNoteTieStartOffset = this.$data.$_splitNoteTieStartOffsets[splitNoteIdx];
-          let nextSplitNoteElementBoundingClientRect = this.$data.$_splitNoteElements[nextSplitNoteIdx].getBoundingClientRect();
-          let splitNoteTieEndOffset = this.$data.$_splitNoteTieEndOffsets[nextSplitNoteIdx];
+          let currentSplitNoteElementBoundingClientRect = currentSplitNoteElement.getBoundingClientRect();
+          let nextSplitNoteElementBoundingClientRect = nextSplitNoteElement.getBoundingClientRect();
           let relativeTieStartHorizontalOffsetPx = (currentSplitNoteElementBoundingClientRect.x - noteBaseElementBoundingClientRect.x) + splitNoteTieStartOffset.x;
           let relativeTieStartVerticalOffsetPx = splitNoteTieStartOffset.y;
           let relativeTieEndHorizontalOffsetPx = (nextSplitNoteElementBoundingClientRect.x - noteBaseElementBoundingClientRect.x) + splitNoteTieEndOffset.x;

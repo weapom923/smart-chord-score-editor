@@ -76,6 +76,7 @@ export default {
 
   data() {
     return {
+      $_partInBarElementResizeObserver: new ResizeObserver(this.$_updatePositionAndSize),
       $_resizeObserver: null,
       $_noteTieStartOffsets: new Array(),
       $_noteTieEndOffsets: new Array(),
@@ -142,6 +143,15 @@ export default {
     },
   },
 
+  mounted() {
+    this.$data.$_partInBarElementResizeObserver.observe(this.$el);
+    this.$_updatePositionAndSize();
+  },
+
+  destroyed() {
+    this.$data.$_partInBarElementResizeObserver.disconnect();
+  },
+
   methods: {
     $_isNoteSelected(noteIdx) {
       if (this.selectedNoteIdx === null) return false;
@@ -151,6 +161,7 @@ export default {
     $_onSplitNoteElementsUpdate(noteIdx, splitNoteElements) {
       this.$set(this.$data.$_splitNoteElements, noteIdx, splitNoteElements);
       this.$emit('note-elements-update', this.$data.$_splitNoteElements);
+      this.$_updatePositionAndSize();
     },
 
     $_onNoteChordElementUpdate(noteIdx, noteChordElement) {
@@ -161,10 +172,22 @@ export default {
     $_onNoteTiePointUpdate(noteIdx, { tieStartPointOffset, tieEndPointOffset }) {
       this.$set(this.$data.$_noteTieStartOffsets, noteIdx, tieStartPointOffset);
       this.$set(this.$data.$_noteTieEndOffsets, noteIdx, tieEndPointOffset);
+      this.$_updatePositionAndSize();
+    },
+
+    $_onClickNote(noteIdx) {
+      this.$emit('click-note', noteIdx);
+    },
+
+    $_updatePositionAndSize() {
+      this.$_updateTiePropsAndStyles();
+      this.$_emitTiePointUpdate();
+    },
+
+    $_emitTiePointUpdate() {
       let firstSplitNoteElements = this.$data.$_splitNoteElements[this.$_firstNoteIdx];
       if (utils.isNullOrUndefined(firstSplitNoteElements)) return;
-      let firstSplitNoteIdxOfFirstNote = 0;
-      let firstNoteElement = firstSplitNoteElements[firstSplitNoteIdxOfFirstNote];
+      let firstNoteElement = firstSplitNoteElements[0];
       if (utils.isNullOrUndefined(firstNoteElement)) return;
       let lastSplitNoteElements = this.$data.$_splitNoteElements[this.$_lastNoteIdx];
       if (utils.isNullOrUndefined(lastSplitNoteElements)) return;
@@ -190,7 +213,6 @@ export default {
           lastNoteTieStartOffset.y,
         );
       }
-      this.$nextTick(this.$_updateTiePropsAndStyles);
       this.$emit(
         'tie-point-update',
         {
@@ -198,10 +220,6 @@ export default {
           tieStartPointOffset: partTieStartPointOffset,
         },
       );
-    },
-
-    $_onClickNote(noteIdx) {
-      this.$emit('click-note', noteIdx);
     },
 
     $_updateTiePropsAndStyles() {
@@ -214,10 +232,10 @@ export default {
       for (let noteIdx = 0; noteIdx < this.$_lastNoteIdx; ++noteIdx) {
         let nextNoteIdx = noteIdx + 1;
         if (
-          (this.$data.$_splitNoteElements[noteIdx] !== null) && 
-          (this.$data.$_splitNoteElements[nextNoteIdx] !== null) && 
-          (this.$data.$_noteTieStartOffsets[noteIdx] !== null) && 
-          (this.$data.$_noteTieEndOffsets[nextNoteIdx] !== null) &&
+          !utils.isNullOrUndefined(this.$data.$_splitNoteElements[noteIdx]) && 
+          !utils.isNullOrUndefined(this.$data.$_splitNoteElements[nextNoteIdx]) && 
+          !utils.isNullOrUndefined(this.$data.$_noteTieStartOffsets[noteIdx]) && 
+          !utils.isNullOrUndefined(this.$data.$_noteTieEndOffsets[nextNoteIdx]) &&
           (this.$_part.notes[nextNoteIdx].tied))
         {
           let partElementBoundingClientRect = this.$el.getBoundingClientRect();

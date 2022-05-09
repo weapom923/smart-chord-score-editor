@@ -102,7 +102,6 @@ export default {
   watch: {
     score: {
       handler() {
-        this.$_updateTiePropsAndStyles();
         this.$_rerenderSystem();
       },
       deep: true,
@@ -144,6 +143,7 @@ export default {
   data() {
     return {
       $_renderComponent: true,
+      $_systemElementResizeObserver: new ResizeObserver(this.$_updatePositionAndSize),
       $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
       $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
       $_marginTopPx: new Object(),
@@ -192,6 +192,15 @@ export default {
     },
   },
 
+  mounted() {
+    this.$data.$_systemElementResizeObserver.observe(this.$el);
+    this.$_updatePositionAndSize();
+  },
+
+  destroyed() {
+    this.$data.$_systemElementResizeObserver.disconnect();
+  },
+
   methods: {
     $_rerenderSystem() {
       this.$data.$_renderComponent = false;
@@ -228,6 +237,7 @@ export default {
 
     $_onBarElementsUpdate(barIdx, barElement) {
       this.$set(this.$data.$_barElements, barIdx, barElement);
+      this.$_updateTiePropsAndStyles();
     },
 
     $_onTiePointUpdate(barIdx, { tieStartPointOffsets, tieEndPointOffsets }) {
@@ -274,6 +284,10 @@ export default {
 
     $_onMouseupStaff(barIdx, event) {
       this.$emit('mouseup-staff', { barIdx, event });
+    },
+
+    $_updatePositionAndSize() {
+      this.$_updateTiePropsAndStyles();
     },
 
     $_updateTiePropsAndStyles() {

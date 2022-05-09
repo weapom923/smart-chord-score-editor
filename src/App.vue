@@ -175,6 +175,7 @@ export default {
       handler() {
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
+        this.$_rerenderScore();
       },
       deep: true,
     },
