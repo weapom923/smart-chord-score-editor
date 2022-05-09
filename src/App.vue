@@ -549,9 +549,8 @@ export default {
     },
 
     async $_copyBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx) {
-      let copiedBars = this.$data.$_score
-        .getBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx)
-        .map(bar => (bar.clone()));
+      let bars = await this.$data.$_score.getBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx);
+      let copiedBars = bars.map(bar => (bar.clone()));
       await this.$store.dispatch('setCopiedBars', copiedBars);
     },
 

@@ -4,6 +4,7 @@
       <v-card-title>Help</v-card-title>
 
       <v-card-text>
+        <v-card-subtitle>Common</v-card-subtitle>
         <v-simple-table dense class="text-left">
           <thead>
             <tr><th>Keys</th><th>Description</th></tr>
@@ -13,8 +14,6 @@
             <tr><td>Shift+ArrowRight</td><td>Select(expand) a next bar.</td></tr>
             <tr><td>ArrowLeft</td><td>Select a previous bar.</td></tr>
             <tr><td>Shift+ArrowLeft</td><td>Select(expand) a previous bar.</td></tr>
-            <tr><td>Ctrl+Shift+ArrowRight</td><td>Select a next note.</td></tr>
-            <tr><td>Ctrl+Shift+ArrowLeft</td><td>Select a previous note.</td></tr>
             <tr><td>Ctrl+Z</td><td>Undo a change.</td></tr>
             <tr><td>Ctrl+Shift+Z</td><td>Redo a change.</td></tr>
             <tr><td>Ctrl+S</td><td>Save a score to local storage.</td></tr>
@@ -28,9 +27,24 @@
             <tr><td>Enter</td><td>Break a system before a selected bar.</td></tr>
             <tr><td>Shift+Enter</td><td>Break a page before a selected bar.</td></tr>
             <tr><td>Backspace</td><td>Remove a break before a selected bar.</td></tr>
-            <tr><td>E</td><td>Open/Close a bar editor.</td></tr>
+            <tr><td>E</td><td>Open/close a bar editor.</td></tr>
             <tr><td>H</td><td>Show a help dialog.</td></tr>
             <tr><td>P</td><td>Enable a print layout.</td></tr>
+          </tbody>
+        </v-simple-table>
+
+        <v-card-subtitle>Bar editor</v-card-subtitle>
+        <v-simple-table dense class="text-left">
+          <thead>
+            <tr><th>Keys</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Ctrl+Shift+ArrowRight</td><td>Select a next note.</td></tr>
+            <tr><td>Ctrl+Shift+ArrowLeft</td><td>Select a previous note.</td></tr>
+            <tr><td>F</td><td>Fill a selected bar with a new note.</td></tr>
+            <tr><td>Shift+F</td><td>Fill a selected bar with a new rest note.</td></tr>
+            <tr><td>T</td><td>Tie/untie a selected note to a previous note.</td></tr>
+            <tr><td>R</td><td>Convert a selected note to a rest/normal note.</td></tr>
           </tbody>
         </v-simple-table>
       </v-card-text>

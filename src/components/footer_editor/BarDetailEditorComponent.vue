@@ -57,6 +57,11 @@ export default {
     BarValueTextAreaAndSelector,
   },
 
+  watch: {
+    async '$_selectedBarsFirst'() { await this.$_updateSelectedBars() },
+    async '$_selectedBarsLast'() { await this.$_updateSelectedBars() },
+  },
+
   props: {
     score: { type: Score },
   },
@@ -64,6 +69,7 @@ export default {
   data() {
     return {
       $_barValueIsInvalid: false,
+      $_selectedBars: new Array(),
     };
   },
 
@@ -78,16 +84,9 @@ export default {
 
     $_selectedBar() {
       if (this.score === null) return null;
-      return this.score.sections[this.$_selectedBarsFirst.sectionIdx].bars[this.$_selectedBarsFirst.barIdx];
-    },
-
-    $_selectedBars() {
-      if (this.score === null) return new Array();
-      return this.score.getBars(
+      return this.score.getBar(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBarsLast.sectionIdx,
-        this.$_selectedBarsLast.barIdx,
       );
     },
   },
@@ -97,11 +96,22 @@ export default {
   ],
 
   methods: {
-    $_onChangeBarLineStart(newBarLineStart) {
+    async $_getSelectedBars() {
+      if (this.score === null) return new Array();
+      return await this.score.getBars(
+        this.$_selectedBarsFirst.sectionIdx,
+        this.$_selectedBarsFirst.barIdx,
+        this.$_selectedBarsLast.sectionIdx,
+        this.$_selectedBarsLast.barIdx,
+      );
+    },
+
+    async $_onChangeBarLineStart(newBarLineStart) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,
@@ -116,11 +126,12 @@ export default {
       );
     },
 
-    $_onChangeBarLineEnd(newBarLineEnd) {
+    async $_onChangeBarLineEnd(newBarLineEnd) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,
@@ -135,11 +146,12 @@ export default {
       );
     },
 
-    $_onChangeRepeatEnding(barRepeatEnding) {
+    async $_onChangeRepeatEnding(barRepeatEnding) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,
@@ -154,11 +166,12 @@ export default {
       );
     },
 
-    $_onChangeBarBreak(barBreak) {
+    async $_onChangeBarBreak(barBreak) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,
@@ -173,11 +186,12 @@ export default {
       );
     },
 
-    $_onUpdateBarValue(barValue) {
+    async $_onUpdateBarValue(barValue) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             barValue,
             selectedBar.parts,
@@ -192,11 +206,12 @@ export default {
       );
     },
 
-    $_onUpdateClef(clef) {
+    async $_onUpdateClef(clef) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,
@@ -211,11 +226,12 @@ export default {
       );
     },
 
-    $_onUpdateScale(scale) {
+    async $_onUpdateScale(scale) {
+      let selectedBars = await this.$_getSelectedBars();
       this.replaceBars(
         this.$_selectedBarsFirst.sectionIdx,
         this.$_selectedBarsFirst.barIdx,
-        this.$_selectedBars.map(
+        selectedBars.map(
           selectedBar => new Bar(
             selectedBar.value,
             selectedBar.parts,

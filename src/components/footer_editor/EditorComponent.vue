@@ -38,31 +38,32 @@
           cols="9"
           id="bar-component-container"
           ref="barComponentContainer"
+          v-show="$_isSingleBarSelected"
         >
-          <template v-if="$_isSingleBarSelected">
-            <bar-editor-component
-              flat tile class="pa-0"
-              v-bind:score="score"
-              v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
-              v-bind:selected-section-idx="$_singlySelectedSectionIdx"
-              v-bind:selected-bar-idx="$_singlySelectedBarIdx"
-              v-bind:selected-part-idx="$data.$_selectedPartIdx"
-              v-bind:selected-note-idx="$data.$_selectedNoteIdx"
-              v-on:insert-note="$_onInsertNote"
-              v-on:select-note="$_onSelectNote"
-            />
-            <note-editor-component
-              flat tile class="pa-0"
-              v-bind:score="score"
-              v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
-              v-bind:selected-section-idx="$_singlySelectedSectionIdx"
-              v-bind:selected-bar-idx="$_singlySelectedBarIdx"
-              v-bind:selected-part-idx="$data.$_selectedPartIdx"
-              v-bind:selected-note-idx="$data.$_selectedNoteIdx"
-              v-on:update-part="$_onUpdatePart"
-              v-on:set-temporal-part="$_onSetTemporalPart"
-            />
-          </template>
+          <bar-editor-component
+            ref="barEditorComponent"
+            flat tile class="pa-0"
+            v-bind:score="score"
+            v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
+            v-bind:selected-section-idx="$_singlySelectedSectionIdx"
+            v-bind:selected-bar-idx="$_singlySelectedBarIdx"
+            v-bind:selected-part-idx="$data.$_selectedPartIdx"
+            v-bind:selected-note-idx="$data.$_selectedNoteIdx"
+            v-on:insert-note="$_onInsertNote"
+            v-on:select-note="$_onSelectNote"
+            v-on:register-component="$_registerBarEditorComponentInstance"
+          />
+          <note-editor-component
+            flat tile class="pa-0"
+            v-bind:score="score"
+            v-bind:temporal-selected-part="$data.$_temporalSelectedPart"
+            v-bind:selected-section-idx="$_singlySelectedSectionIdx"
+            v-bind:selected-bar-idx="$_singlySelectedBarIdx"
+            v-bind:selected-part-idx="$data.$_selectedPartIdx"
+            v-bind:selected-note-idx="$data.$_selectedNoteIdx"
+            v-on:update-part="$_onUpdatePart"
+            v-on:set-temporal-part="$_onSetTemporalPart"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -125,6 +126,7 @@ export default {
       $_selectedPartIdx: 0,
       $_selectedNoteIdx: 0,
       $_temporalSelectedPart: null,
+      $_barEditorComponentInstance: null,
     };
   },
 
@@ -194,6 +196,9 @@ export default {
 
   methods: {
     onKeydown(keyEventType, event) {
+      if (this.$data.$_barEditorComponentInstance !== null) {
+        if (this.$data.$_barEditorComponentInstance.onKeydown(keyEventType, event)) return true;
+      }
       switch (keyEventType) {
         case keyEventTypeEnum.keyWithCtrlAndShift:
           switch (event.code) {
@@ -219,6 +224,10 @@ export default {
         --self.$data.$_selectedNoteIdx;
         return true;
       }
+    },
+
+    $_registerBarEditorComponentInstance(barEditorComponentInstance) {
+      this.$data.$_barEditorComponentInstance = barEditorComponentInstance;
     },
 
     $_resetSelection() {
