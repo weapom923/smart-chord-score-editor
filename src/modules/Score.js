@@ -196,10 +196,10 @@ class Score {
     }
   }
 
-  getBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx) {
+  async getBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx) {
     if ((firstSectionIdx === null) || (firstBarIdx === null) || (lastSectionIdx === null) || (lastBarIdx === null)) return null;
     let bars = new Array();
-    this.iterateBars(
+    await this.iterateBars(
       firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx,
       (sectionIdx, barIdx) => {
         let bar = this.getBar(sectionIdx, barIdx);
