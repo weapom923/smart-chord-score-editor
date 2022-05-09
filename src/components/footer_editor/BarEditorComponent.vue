@@ -42,7 +42,7 @@
       <v-btn
         small icon
         v-bind:disabled="$_isFillBarWithNoteButtonDisabled"
-        v-on:click="$_fillBarWithNote"
+        v-on:click="$_fillBarWithNote($event.shiftKey)"
       >
         <v-icon>mdi-music-note-plus</v-icon>
       </v-btn>
@@ -84,6 +84,7 @@ import PartInBar from '../../modules/PartInBar.js';
 import Note from '../../modules/Note.js';
 import NoteValue from '../../modules/NoteValue.js';
 import Color from '../../modules/Color.js';
+import { keyEventTypeEnum } from '../../modules/KeyEventType.js';
 
 export default {
   components: {
@@ -309,7 +310,43 @@ export default {
     'selectPreviousBar',
   ],
 
+  mounted() {
+    this.$emit('register-component', this);
+  },
+
+  destroyed() {
+    this.$emit('register-component', null);
+  },
+
   methods: {
+    onKeydown(keyEventType, event) {
+      switch (keyEventType) {
+        case keyEventTypeEnum.key:
+          switch (event.code) {
+            case 'KeyT':
+              this.$_toggleSelectedNoteTied();
+              return true;
+            case 'KeyF':
+              if (this.$_isFillBarWithNoteButtonDisabled) break;
+              this.$_fillBarWithNote(false);
+              return true;
+            case 'KeyR':
+              this.$_toggleSelectedNoteType();
+              return true;
+          }
+          break;
+        case keyEventTypeEnum.keyWithShift:
+          switch (event.code) {
+            case 'KeyF':
+              if (this.$_isFillBarWithNoteButtonDisabled) break;
+              this.$_fillBarWithNote(true);
+              return true;
+          }
+          break;
+      }
+      return false;
+    },
+
     $_updateTempScore() {
       if (this.score === null) return;
       if (this.$_selectedBar === null) return;
@@ -355,11 +392,11 @@ export default {
       this.removeBars(this.selectedSectionIdx, this.selectedBarIdx, this.selectedSectionIdx, this.selectedBarIdx);
     },
 
-    $_fillBarWithNote(event) {
+    $_fillBarWithNote(withShiftKey) {
       let remainingNoteValue = this.$_remainingNoteValue;
       let numExistingNotes = this.$_selectedPart.notes.length;
       let note = null;
-      if (event.shiftKey) {
+      if (withShiftKey) {
         note = new Note(null, remainingNoteValue, Note.Type.rest, false);
       } else {
         switch (this.$_selectedPart.type) {
