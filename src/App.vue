@@ -870,13 +870,21 @@ export default {
       function insertSectionBefore(self) {
         let sectionIdx = self.$_selectedBarsFirst.sectionIdx;
         if (sectionIdx === null) sectionIdx = self.$data.$_score.firstSectionIdx;
-        self.$_generateNewSection(sectionIdx);
+        if (sectionIdx === null) {
+          self.$_generateNewSection(0);
+        } else {
+          self.$_generateNewSection(sectionIdx);
+        }
       }
 
       function insertSectionAfter(self) {
         let sectionIdx = self.$_selectedBarsLast.sectionIdx;
         if (sectionIdx === null) sectionIdx = self.$data.$_score.lastSectionIdx;
-        self.$_generateNewSection(sectionIdx + 1);
+        if (sectionIdx === null) {
+          self.$_generateNewSection(0);
+        } else {
+          self.$_generateNewSection(sectionIdx + 1);
+        }
       }
 
       async function removeSelectedBars(self) {

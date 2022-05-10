@@ -63,6 +63,7 @@
     </v-card-actions>
     <v-card-text class="pa-0">
       <system-component
+        v-if="$data.$_tempScore"
         v-bind:score="$data.$_tempScore"
         v-bind:system-definition="$_systemDefinition"
         v-bind:selected-part-idx="0"
@@ -135,6 +136,7 @@ export default {
   computed: {
     $_selectedSection() {
       if (this.score === null) return null;
+      if (this.selectedSectionIdx === null) return null;
       return this.score.sections[this.selectedSectionIdx];
     },
 
@@ -262,10 +264,10 @@ export default {
     },
 
     $_isSelectNextBarButtonDisabled() {
-      let numSections = this.score.sections.length;
-      let isSelectedSectionLastSection = (this.selectedSectionIdx === (numSections - 1));
-      let numBars = this.$_selectedSection.bars.length;
-      let isSelectedBarLastBar = (this.selectedBarIdx === (numBars - 1));
+      if (this.selectedSectionIdx === null) return true;
+      if (this.selectedSectionIdx === null) return true;
+      let isSelectedSectionLastSection = (this.selectedSectionIdx === this.score.lastSectionIdx);
+      let isSelectedBarLastBar = (this.selectedBarIdx === this.score.getLastBarIdx(this.selectedSectionIdx));
       return (isSelectedSectionLastSection && isSelectedBarLastBar);
     },
 
@@ -285,6 +287,7 @@ export default {
     },
 
     $_remainingNoteValue() {
+      if (this.$_selectedBar === null) return null;
       let barValue = this.$_selectedBar.value;
       let totalExistingNoteValue = new NoteValue(0);
       for (let note of this.$_selectedPart.notes) {
@@ -294,6 +297,7 @@ export default {
     },
 
     $_isFillBarWithNoteButtonDisabled() {
+      if (this.$_remainingNoteValue === null) return true;
       return this.$_remainingNoteValue.isLessThanOrEqualTo(0);
     },
 
@@ -354,7 +358,7 @@ export default {
       let tempTargetBar = this.$_selectedBar.clone();
       let tempTargetPart = (this.temporalSelectedPart !== null)? this.temporalSelectedPart : this.$_selectedPart;
       tempTargetBar.parts = [ tempTargetPart ];
-      let tempBars = [ this.$_previousBar, this.$_selectedBar, this.$_nextBar ].filter(bar => (bar !== null));
+      let tempBars = [ this.$_previousBar, tempTargetBar, this.$_nextBar ].filter(bar => (bar !== null));
       this.$data.$_tempScore = new Score(
         this.score.metadata,
         [
