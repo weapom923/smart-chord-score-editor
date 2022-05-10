@@ -358,7 +358,7 @@ export default {
       let tempTargetBar = this.$_selectedBar.clone();
       let tempTargetPart = (this.temporalSelectedPart !== null)? this.temporalSelectedPart : this.$_selectedPart;
       tempTargetBar.parts = [ tempTargetPart ];
-      let tempBars = [ this.$_previousBar, this.$_selectedBar, this.$_nextBar ].filter(bar => (bar !== null));
+      let tempBars = [ this.$_previousBar, tempTargetBar, this.$_nextBar ].filter(bar => (bar !== null));
       this.$data.$_tempScore = new Score(
         this.score.metadata,
         [
