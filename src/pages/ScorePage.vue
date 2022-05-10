@@ -4,6 +4,7 @@
       tile 
       class="pa-5"
       v-bind:elevation="$_pageElevation"
+      v-bind:width="$_pageWidth"
       v-on:mousedown="unselectBar"
     >
       <score-title-component
@@ -92,6 +93,8 @@ export default {
     $_numSections() { return this.score.sections.length },
 
     $_pageElevation() { return ((this.isPrintLayoutEnabled)? 0 : 3) },
+
+    $_pageWidth() { return ((this.isPrintLayoutEnabled)? 1080 : undefined) },
 
     $_sectionDefinitions() {
       let sectionDefinitions = new Array();
