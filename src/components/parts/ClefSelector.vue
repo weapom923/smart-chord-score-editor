@@ -1,10 +1,9 @@
 <template>
   <v-select
-    v-model="$data.$_clefTypeName"
+    label="Clef Sign"
+    v-model="$_clefTypeName"
     v-bind="$attrs"
     v-bind:items="$_clefTypeNames"
-    v-on:input="$_onInput"
-    label="Clef Sign"
   />
 </template>
 
@@ -26,22 +25,19 @@ export default {
     value: { type: Clef },
   },
 
-  data() {
-      let clefTypeName = Object.keys(clefTypeNameToInstances).find(
-        clefTypeName => (clefTypeNameToInstances[clefTypeName] === this.value),
-      );
-    return {
-      $_clefTypeName: clefTypeName,
-    };
-  },
-
   computed: {
     $_clefTypeNames() { return Object.keys(clefTypeNameToInstances) },
-  },
 
-  methods: {
-    $_onInput(clefTypeName) {
-      this.$emit('update', clefTypeNameToInstances[clefTypeName]);
+    $_clefTypeName: {
+      get() {
+        return Object.keys(clefTypeNameToInstances).find(
+          clefTypeName => (clefTypeNameToInstances[clefTypeName] === this.value),
+        );
+      },
+
+      set(clefTypeName) {
+        this.$emit('update', clefTypeNameToInstances[clefTypeName]);
+      },
     },
   },
 }

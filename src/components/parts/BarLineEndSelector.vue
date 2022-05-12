@@ -1,9 +1,8 @@
 <template>
   <v-select
-    v-bind:value="$data.$_barLineEndName"
-    v-bind:items="$_allBarLineEndNames"
-    v-on:input="$_onInput"
     label="Bar Line End"
+    v-model="$_barLineEndName"
+    v-bind:items="$_allBarLineEndNames"
   />
 </template>
 
@@ -27,22 +26,19 @@ export default {
     barLineEnd: { type: BarLine },
   },
 
-  data() {
-    let barLineEndName = Object.keys(barLineEndNameToInstances).find(
-      barLineEndName => (this.barLineEnd === barLineEndNameToInstances[barLineEndName])
-    );
-    return {
-      $_barLineEndName: barLineEndName,
-    };
-  },
-
   computed: {
     $_allBarLineEndNames() { return Object.keys(barLineEndNameToInstances) },
-  },
 
-  methods: {
-    $_onInput(selectedBarLineEndName) {
-      this.$emit('change', barLineEndNameToInstances[selectedBarLineEndName]);
+    $_barLineEndName: {
+      get() {
+        return Object.keys(barLineEndNameToInstances).find(
+          barLineEndName => (this.barLineEnd.isEqualTo(barLineEndNameToInstances[barLineEndName]))
+        );
+      },
+
+      set(barLineEndName) {
+        this.$emit('change', barLineEndNameToInstances[barLineEndName]);
+      },
     },
   },
 }

@@ -1,9 +1,8 @@
 <template>
   <v-select
-    v-bind:value="$data.$_barBreakName"
-    v-bind:items="$_allBarBreakNames"
-    v-on:input="$_onInput"
     label="Bar Break"
+    v-model="$_barBreakName"
+    v-bind:items="$_allBarBreakNames"
   />
 </template>
 
@@ -26,22 +25,18 @@ export default {
     barBreak: { type: BarBreak },
   },
 
-  data() {
-    let barBreakName = Object.keys(barBreakNameToInstances).find(
-      barBreakName => (this.barBreak === barBreakNameToInstances[barBreakName])
-    );
-    return {
-      $_barBreakName: barBreakName,
-    };
-  },
-
   computed: {
     $_allBarBreakNames() { return Object.keys(barBreakNameToInstances) },
-  },
 
-  methods: {
-    $_onInput(selectedBarBreakName) {
-      this.$emit('change', barBreakNameToInstances[selectedBarBreakName]);
+    $_barBreakName: {
+      get() {
+        return Object.keys(barBreakNameToInstances).find(
+          barBreakName => (this.barBreak.isEqualTo(barBreakNameToInstances[barBreakName]))
+        );
+      },
+      set(barBreakName) {
+        this.$emit('change', barBreakNameToInstances[barBreakName]);
+      },
     },
   },
 }

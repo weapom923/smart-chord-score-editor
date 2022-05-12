@@ -1,8 +1,7 @@
 <template>
   <v-btn-toggle
     mandatory tile
-    v-model="$data.$_selectedIdx"
-    v-on:change="$_onChangeSelectedIdx"
+    v-model="$_selectedIdx"
   >
     <v-btn
       small
@@ -30,21 +29,8 @@ export default {
     event: 'change',
   },
 
-  watch: {
-    noteType: {
-      handler() { this.$_updateSelectedIdx() },
-      immediate: true,
-    },
-  },
-
   props: {
     noteType: { type: String },
-  },
-
-  data() {
-    return {
-      $_selectedIdx: null,
-    };
   },
 
   computed: {
@@ -54,17 +40,17 @@ export default {
         new ButtonTextAndNoteType('Note', Note.Type.normal),
       ];
     },
-  },
 
-  methods: {
-    $_updateSelectedIdx() {
-      this.$data.$_selectedIdx = this.$_buttonTextAndNoteTypes.findIndex(buttonTextAndNoteType => {
-        return buttonTextAndNoteType.noteType === this.noteType;
-      });
-    },
+    $_selectedIdx: {
+      get() {
+        return this.$_buttonTextAndNoteTypes.findIndex(
+          buttonTextAndNoteType => { return buttonTextAndNoteType.noteType === this.noteType },
+        );
+      },
 
-    $_onChangeSelectedIdx(selectedIdx) {
-      this.$emit('change', this.$_buttonTextAndNoteTypes[selectedIdx].noteType);
+      set(selectedIdx) {
+        this.$emit('change', this.$_buttonTextAndNoteTypes[selectedIdx].noteType);
+      },
     },
   },
 }
