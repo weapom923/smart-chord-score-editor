@@ -286,10 +286,6 @@ export default {
         return false;
       }
     },
-
-    $_visiblePartNoteElements() {
-      return [ ...this.$data.$_partNoteElements, ...this.$data.$_partNoteChordElements ];
-    },
   },
 
   methods: {
