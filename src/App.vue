@@ -175,7 +175,6 @@ export default {
       handler() {
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
-        this.$_rerenderScore();
       },
       deep: true,
     },
@@ -186,8 +185,6 @@ export default {
   },
 
   async mounted() {
-    this.$data.$_windowResizeObserver = new ResizeObserver(this.$_rerenderScore);
-    this.$data.$_windowResizeObserver.observe(document.documentElement);
     this.$data.$_footerResizeObserver = new ResizeObserver(resizeObserverEntries => {
       let resizeObserverEntry = resizeObserverEntries[0];
       let borderBoxSize = resizeObserverEntry.borderBoxSize[0];
@@ -200,8 +197,6 @@ export default {
   beforeDestroy() {
     this.$data.$_footerResizeObserver.unobserve(this.$refs.footer.$el);
     this.$data.$_footerResizeObserver.disconnect();
-    this.$data.$_windowResizeObserver.unobserve(document.documentElement);
-    this.$data.$_windowResizeObserver.disconnect();
   },
 
   errorCaptured(error) {
@@ -216,7 +211,6 @@ export default {
   data() {
     return {
       $_renderComponent: true,
-      $_windowResizeObserver: null,
       $_footerResizeObserver: null,
       $_footerComponentInstance: null,
       $_score: null,
@@ -428,13 +422,6 @@ export default {
   },
 
   methods: {
-    $_rerenderScore() {
-      this.$data.$_renderComponent = false;
-      this.$nextTick(() => {
-        this.$data.$_renderComponent = true;
-      })
-    },
-
     async $_generateNewScore() {
       let score = Score.generateNew('Untitled', '', '');
       await this.$_unselectBar();

@@ -61,17 +61,15 @@ export default {
       if (!this.$data.$_canvasElement) return;
       if (!this.$data.$_dirty) return;
 
-      this.$nextTick(() => {
-        let canvas = this.$data.$_canvasElement.getContext('2d');
-        let width = this.$data.$_canvasElement.width;
-        let height = this.$data.$_canvasElement.height;
-        clearCanvas(canvas, width, height);
-        if (this.backgroundColor !== null) {
-          drawBackground(canvas, width, height, this.backgroundColor);
-        }
-        callback(this.$data.$_canvasElement);
-        this.$_setDirty(false);
-      });
+      let canvas = this.$data.$_canvasElement.getContext('2d');
+      let width = this.$data.$_canvasElement.width;
+      let height = this.$data.$_canvasElement.height;
+      clearCanvas(canvas, width, height);
+      if (this.backgroundColor !== null) {
+        drawBackground(canvas, width, height, this.backgroundColor);
+      }
+      callback(this.$data.$_canvasElement);
+      this.$_setDirty(false);
 
       function clearCanvas(canvas, width, height) {
         canvas.beginPath();
