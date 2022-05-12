@@ -5,6 +5,7 @@
     v-model="$_partInBarTypeNames"
     v-bind:items="$_allPartInBarTypeNames"
     v-bind:rules="$_rules"
+    v-on:keydown.stop
   />
 </template>
 

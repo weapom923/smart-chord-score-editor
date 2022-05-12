@@ -7,6 +7,7 @@
       small
       v-for="(note, noteIdx) in notes"
       v-bind:key="noteIdx"
+      v-on:keydown.stop
     >
       <template
         v-if="$_isPartTypeChord"

@@ -4,6 +4,7 @@
     label="Bar Repeat Ending"
     v-model="$_barRepeatEndingNumbers"
     v-bind:items="$_allBarRepeatEndingNumbers"
+    v-on:keydown.stop
   />
 </template>
 

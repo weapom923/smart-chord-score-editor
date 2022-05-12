@@ -7,6 +7,7 @@
       small
       v-for="(buttonTextAndNoteType, buttonTextAndNoteTypeIdx) in $_buttonTextAndNoteTypes"
       v-bind:key="buttonTextAndNoteTypeIdx"
+      v-on:keydown.stop
     >
       {{ buttonTextAndNoteType.buttonText }}
     </v-btn>

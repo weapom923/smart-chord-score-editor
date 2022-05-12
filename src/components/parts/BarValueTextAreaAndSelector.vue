@@ -9,11 +9,13 @@
       v-bind:rules="$_rules"
       v-bind:min="$_barValueNumeratorMin"
       v-on:update:error="$_onUpdateError"
+      v-on:keydown.stop
     />
     <div>/</div>
     <v-select
       v-model="$_barValueDenominator"
       v-bind:items="$_barValueDenominators"
+      v-on:keydown.stop
     />
   </div>
 </template>

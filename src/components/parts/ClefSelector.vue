@@ -4,6 +4,7 @@
     v-model="$_clefTypeName"
     v-bind="$attrs"
     v-bind:items="$_clefTypeNames"
+    v-on:keydown.stop
   />
 </template>
 

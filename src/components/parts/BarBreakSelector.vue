@@ -3,6 +3,7 @@
     label="Bar Break"
     v-model="$_barBreakName"
     v-bind:items="$_allBarBreakNames"
+    v-on:keydown.stop
   />
 </template>
 

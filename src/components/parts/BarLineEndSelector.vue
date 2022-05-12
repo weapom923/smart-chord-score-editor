@@ -3,6 +3,7 @@
     label="Bar Line End"
     v-model="$_barLineEndName"
     v-bind:items="$_allBarLineEndNames"
+    v-on:keydown.stop
   />
 </template>
 

@@ -3,6 +3,7 @@
     v-model="$_scaleName"
     v-bind="$attrs"
     v-bind:items="$_scaleNames"
+    v-on:keydown.stop
     label="Scale"
   />
 </template>

@@ -8,6 +8,7 @@
       v-for="(buttonTextAndNoteValue, buttonTextAndNoteValueIdx) in $_buttonTextAndNoteValues"
       v-bind:key="buttonTextAndNoteValueIdx"
       v-bind:disabled="!buttonTextAndNoteValue.isSafe"
+      v-on:keydown.stop
     >
       {{ buttonTextAndNoteValue.buttonText }}
     </v-btn>

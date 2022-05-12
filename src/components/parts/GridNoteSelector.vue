@@ -4,6 +4,7 @@
     v-model="$_gridNoteValueName"
     v-bind="$attrs"
     v-bind:items="$_gridNoteValueNames"
+    v-on:keydown.stop
   />
 </template>
 
