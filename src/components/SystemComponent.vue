@@ -100,9 +100,29 @@ export default {
   },
 
   watch: {
-    score: {
-      handler() {
-        this.$_rerenderSystem();
+    $_bars: {
+      handler(newBars, oldBars) {
+        if (!areBarsEqualTo(newBars, oldBars)) {
+          this.$_rerenderSystem();
+        }
+
+        function areBarsEqualTo(thisBars, thatBars) {
+          let thisBarIdcs = Object.keys(thisBars);
+          let thatBarIdcs = Object.keys(thatBars);
+          if (thisBarIdcs.length !== thatBarIdcs.length) return false;
+          let thisSortedBars = getValuesSortedByKey(thisBars);
+          let thatSortedBars = getValuesSortedByKey(thatBars);
+          for (let idxOfBars = 0; idxOfBars < thisSortedBars.length; ++idxOfBars) {
+            let newBar = thisSortedBars[idxOfBars];
+            let oldBar = thatSortedBars[idxOfBars];
+            if (!newBar.isEqualTo(oldBar)) return false;
+          }
+          return true;
+
+          function getValuesSortedByKey(object) {
+            return Object.entries(object).sort((a, b) => (Number(a[0]) - Number(b[0]))).map(a => a[1]);
+          }
+        }
       },
       deep: true,
     },
@@ -145,7 +165,10 @@ export default {
   data() {
     return {
       $_renderComponent: true,
-      $_systemElementResizeObserver: new ResizeObserver(this.$_updatePositionAndSize),
+      $_systemElementResizeObserver: new ResizeObserver(() => {
+        this.$_rerenderSystem();
+        this.$_updatePositionAndSize();
+      }),
       $_marginTopPxMax: this.$store.state.config.systemMarginTopPx,
       $_marginBottomPxMax: this.$store.state.config.systemMarginBottomPx,
       $_marginTopPx: new Object(),
@@ -163,8 +186,12 @@ export default {
   },
 
   computed: {
-    $_section() {
-      return this.score.getSection(this.systemDefinition.sectionIdx);
+    $_bars() {
+      let bars = new Object();
+      for (let barIdx of this.$_barIdcs) {
+        bars[barIdx] = this.score.getBar(this.systemDefinition.sectionIdx, barIdx);
+      }
+      return bars;
     },
 
     $_numBars() {

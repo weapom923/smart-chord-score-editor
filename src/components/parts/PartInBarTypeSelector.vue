@@ -1,11 +1,11 @@
 <template>
   <v-select
     multiple
-    v-bind:value="$data.$_partInBarTypeNameArray"
+    label="Part Type"
+    v-model="$_partInBarTypeNames"
     v-bind:items="$_allPartInBarTypeNames"
     v-bind:rules="$_rules"
-    v-on:input="$_onInput"
-    label="Part Type"
+    v-on:keydown.stop
   />
 </template>
 
@@ -28,21 +28,23 @@ export default {
     value: { type: Array },
   },
 
-  data() {
-    let partInBarTypeNameArray = this.value.map(
-      partInBarType => {
-        return Object.keys(partInBarTypeNameToInstances).find(
-          partInBarTypeName => (partInBarType === partInBarTypeNameToInstances[partInBarTypeName])
-        )
-      },
-    );
-    return {
-      $_partInBarTypeNameArray: partInBarTypeNameArray,
-    };
-  },
-
   computed: {
     $_allPartInBarTypeNames() { return Object.keys(partInBarTypeNameToInstances) },
+
+    $_partInBarTypeNames: {
+      get() {
+        return this.value.map(
+          partInBarType => Object.keys(partInBarTypeNameToInstances).find(
+            partInBarTypeName => (partInBarType === partInBarTypeNameToInstances[partInBarTypeName])
+          )
+        );
+      },
+
+      set(partInBarTypeNames) {
+        this.$emit('update', partInBarTypeNames.map(partInBarTypeName => partInBarTypeNameToInstances[partInBarTypeName]));
+      },
+    },
+
     $_rules() {
       return [
         partInBarTypeNameArray => {
@@ -52,12 +54,6 @@ export default {
           return true;
         },
       ];
-    },
-  },
-
-  methods: {
-    $_onInput(partInBarTypeNames) {
-      this.$emit('update', partInBarTypeNames.map(partInBarTypeName => partInBarTypeNameToInstances[partInBarTypeName]));
     },
   },
 }

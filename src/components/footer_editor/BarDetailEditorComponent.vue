@@ -69,7 +69,6 @@ export default {
   data() {
     return {
       $_barValueIsInvalid: false,
-      $_selectedBars: new Array(),
     };
   },
 

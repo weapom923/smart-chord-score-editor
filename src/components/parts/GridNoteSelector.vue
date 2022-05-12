@@ -1,10 +1,10 @@
 <template>
   <v-select
-    v-model="$data.$_gridNoteValueName"
+    label="Grid Note Value"
+    v-model="$_gridNoteValueName"
     v-bind="$attrs"
     v-bind:items="$_gridNoteValueNames"
-    v-on:input="$_onInput"
-    label="Grid Note Value"
+    v-on:keydown.stop
   />
 </template>
 
@@ -27,26 +27,21 @@ export default {
     value: { type: NoteValue },
   },
 
-  data() {
-    let gridNoteValueName = Object.keys(gridNoteValueNameToInstances)
-      .find(gritNoteValueName => {
-        let gridNoteValue = gridNoteValueNameToInstances[gritNoteValueName];
-        return (this.$store.state.config.gridNoteValue === gridNoteValue);
-      });
-    return {
-      $_gridNoteValueName: gridNoteValueName,
-    };
-  },
-
   computed: {
     $_gridNoteValueNames() {
       return Object.keys(gridNoteValueNameToInstances);
     },
-  },
 
-  methods: {
-    $_onInput(gridNoteValueName) {
-      this.$emit('update', gridNoteValueNameToInstances[gridNoteValueName]);
+    $_gridNoteValueName: {
+      get() {
+        return Object.keys(gridNoteValueNameToInstances).find(gritNoteValueName => {
+          return (this.$store.state.config.gridNoteValue === gridNoteValueNameToInstances[gritNoteValueName]);
+        });
+      },
+
+      set(gridNoteValueName) {
+        this.$emit('update', gridNoteValueNameToInstances[gridNoteValueName]);
+      },
     },
   },
 }

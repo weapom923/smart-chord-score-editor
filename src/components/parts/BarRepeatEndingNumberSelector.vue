@@ -1,9 +1,10 @@
 <template>
   <v-select
     multiple
+    label="Bar Repeat Ending"
     v-model="$_barRepeatEndingNumbers"
     v-bind:items="$_allBarRepeatEndingNumbers"
-    label="Bar Repeat Ending"
+    v-on:keydown.stop
   />
 </template>
 

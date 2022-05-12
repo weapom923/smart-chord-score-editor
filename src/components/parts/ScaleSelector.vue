@@ -1,9 +1,9 @@
 <template>
   <v-select
-    v-model="$data.$_scaleName"
+    v-model="$_scaleName"
     v-bind="$attrs"
     v-bind:items="$_scaleNames"
-    v-on:input="$_onInput"
+    v-on:keydown.stop
     label="Scale"
   />
 </template>
@@ -50,23 +50,20 @@ export default {
     value: { type: Scale },
   },
 
-  data() {
-    let scaleName = Object.keys(scaleNameToInstances).find(
-      scaleName => (scaleNameToInstances[scaleName] === this.value),
-    );
-    return {
-      $_scaleName: scaleName,
-    };
-  },
-
   computed: {
     $_scaleNames() { return Object.keys(scaleNameToInstances) },
-  },
 
-  methods: {
-    $_onInput(scaleName) {
-      this.$emit('update', scaleNameToInstances[scaleName]);
-    },
+    $_scaleName: {
+      get() {
+        return Object.keys(scaleNameToInstances).find(
+          scaleName => scaleNameToInstances[scaleName].isEqualTo(this.value),
+        );
+      },
+
+      set(scaleName) {
+        this.$emit('update', scaleNameToInstances[scaleName]);
+      },
+    }
   },
 }
 </script>

@@ -1,13 +1,13 @@
 <template>
   <v-btn-toggle
     mandatory tile
-    v-bind:value="noteIdx"
-    v-on:change="$_onChangeNoteIdx"
+    v-model="$_noteIdx"
   >
     <v-btn
       small
       v-for="(note, noteIdx) in notes"
       v-bind:key="noteIdx"
+      v-on:keydown.stop
     >
       <template
         v-if="$_isPartTypeChord"
@@ -47,11 +47,10 @@ export default {
     $_isPartTypeChord() {
       return (this.partType === PartInBar.Type.chord);
     },
-  },
 
-  methods: {
-    $_onChangeNoteIdx(noteIdx) {
-      this.$emit('change', noteIdx);
+    $_noteIdx: {
+      get() { return this.noteIdx },
+      set(noteIdx) { this.$emit('change', noteIdx) },
     },
   },
 }

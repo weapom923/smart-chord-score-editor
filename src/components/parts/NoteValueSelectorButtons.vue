@@ -1,14 +1,14 @@
 <template>
   <v-btn-toggle
     mandatory tile
-    v-model="$data.$_selectedIdx"
-    v-on:change="$_onChangeSelectedIdx"
+    v-model="$_selectedIdx"
   >
     <v-btn
       small
       v-for="(buttonTextAndNoteValue, buttonTextAndNoteValueIdx) in $_buttonTextAndNoteValues"
       v-bind:key="buttonTextAndNoteValueIdx"
       v-bind:disabled="!buttonTextAndNoteValue.isSafe"
+      v-on:keydown.stop
     >
       {{ buttonTextAndNoteValue.buttonText }}
     </v-btn>
@@ -32,23 +32,9 @@ export default {
     event: 'change',
   },
 
-  watch: {
-    unitValue: {
-      handler() { this.$_updateSelectedIdx() },
-      deep: true,
-      immediate: true,
-    },
-  },
-
   props: {
     unitValue: { type: NoteValue, default: () => NoteValue.divisible.eighth },
     safeUnitValue: { type: NoteValue, default: () => NoteValue.divisible.eighth },
-  },
-
-  data() {
-    return {
-      $_selectedIdx: null,
-    };
   },
 
   computed: {
@@ -63,17 +49,17 @@ export default {
         new ButtonTextAndNoteValue('64', NoteValue.divisible.sixtyFourth, this.safeUnitValue),
       ];
     },
-  },
 
-  methods: {
-    $_updateSelectedIdx() {
-      this.$data.$_selectedIdx = this.$_buttonTextAndNoteValues.findIndex(buttonTextAndNoteValue => {
-        return buttonTextAndNoteValue.unitValue.isEqualTo(this.unitValue);
-      });
-    },
+    $_selectedIdx: {
+      get() {
+        return this.$_buttonTextAndNoteValues.findIndex(
+          buttonTextAndNoteValue => buttonTextAndNoteValue.unitValue.isEqualTo(this.unitValue)
+        );
+      },
 
-    $_onChangeSelectedIdx(selectedIdx) {
-      this.$emit('change', this.$_buttonTextAndNoteValues[selectedIdx].unitValue);
+      set(selectedIdx) {
+        this.$emit('change', this.$_buttonTextAndNoteValues[selectedIdx].unitValue);
+      },
     },
   },
 }
