@@ -8,8 +8,9 @@ export default {
     },
   },
 
-  async mounted() {
+  mounted() {
     this.$data.$_canvasElement = this.$refs.canvas;
+    this.$_setDirty(true);
   },
 
   props: {
@@ -19,7 +20,7 @@ export default {
   data() {
     return {
       $_canvasElement: null,
-      $_dirty: true,
+      $_isDirty: false,
     };
   },
 
@@ -30,9 +31,11 @@ export default {
   },
 
   methods: {
-    $_setDirty(dirty) {
-      this.$data.$_dirty = dirty;
-      this.draw();
+    $_setDirty(isDirty) {
+      if (!this.$data.$_isDirty && isDirty) {
+        this.$nextTick(this.draw);
+      }
+      this.$data.$_isDirty = isDirty;
     },
 
     $_setCanvasWidthPx(canvasWidthPx, setStyle = true) {
@@ -53,7 +56,7 @@ export default {
 
     $_draw(callback) {
       if (!this.$data.$_canvasElement) return;
-      if (!this.$data.$_dirty) return;
+      if (!this.$data.$_isDirty) return;
 
       let canvas = this.$data.$_canvasElement.getContext('2d');
       let width = this.$data.$_canvasElement.width;
