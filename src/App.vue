@@ -1,6 +1,7 @@
 <template>
   <v-app id="app">
     <app-bar
+      ref="appBar"
       v-if="!$data.$_isPrintLayoutEnabled"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
@@ -377,6 +378,17 @@ export default {
       selectPreviousBar: this.$_selectPreviousBar,
 
       selectNextBar: this.$_selectNextBar,
+
+      scrollTo: async (element) => {
+        if (this.$data.$_isFooterEditorMinimized) return;
+        await this.$vuetify.goTo(
+          element,
+          {
+            duration: 0,
+            offset: this.$refs.appBar.$el.clientHeight,
+          },
+        );
+      },
 
       openGlobalConfigEditorDialog: () => {
         this.$_openDialog('global-config-editor-dialog');
