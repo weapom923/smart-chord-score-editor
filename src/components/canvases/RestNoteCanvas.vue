@@ -1,6 +1,5 @@
 <template>
   <canvas
-    ref="canvas"
     id="note-canvas-container"
     v-bind:style="$_style"
     v-bind="$attrs"
@@ -29,18 +28,12 @@ export default {
 
   watch: {
     noteValue: {
-      handler() {
-        this.$_setDirty(true);
-        this.draw();
-      },
+      handler() { this.$_setDirty(true) },
       deep: true,
     },
 
     restNotePitch: {
-      handler() {
-        this.$_setDirty(true);
-        this.draw();
-      },
+      handler() { this.$_setDirty(true) },
       deep: true,
     },
 

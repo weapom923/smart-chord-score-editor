@@ -1,6 +1,5 @@
 <template>
   <canvas
-    ref="canvas"
     id="note-canvas-container"
     v-bind:style="$_style"
     v-bind="$attrs"
@@ -34,7 +33,6 @@ export default {
     note: {
       handler() {
         this.$_setDirty(true);
-        this.draw();
         this.$emit('width-update', this.$_noteWidthPx);
         this.$emit(
           'tie-point-update',
@@ -48,7 +46,7 @@ export default {
       immediate: true,
     },
 
-    invertStemDirection() { this.draw() },
+    invertStemDirection() { this.$_setDirty(true) },
 
     $_noteWidthPx(newCanvasWidthPx) {
       this.$_setCanvasWidthPx(newCanvasWidthPx);

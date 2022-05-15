@@ -17,7 +17,7 @@
       <v-spacer />
       <v-btn
         small icon
-        v-if="$_selectedNote"
+        v-if="$_isNoteSelected"
         v-bind:disabled="!$_isSelectedNoteTypeTogglable"
         v-on:click="$_toggleSelectedNoteType"
       >
@@ -26,12 +26,19 @@
       </v-btn>
       <v-btn
         small icon
-        v-if="$_selectedNote"
+        v-if="$_isNoteSelected"
         v-bind:disabled="!$_isSelectedNoteTieable"
         v-on:click="$_toggleSelectedNoteTied"
       >
         <template v-if="$_isSelectedNoteTied">Untie</template>
         <template v-else>Tie</template>
+      </v-btn>
+      <v-btn
+        small icon
+        v-if="$_isNoteSelected"
+        v-on:click="$_removeSelectedNote"
+      >
+        <v-icon>mdi-eraser</v-icon>
       </v-btn>
       <v-btn
         small icon
@@ -149,12 +156,16 @@ export default {
 
     $_selectedPart() {
       if (this.$_selectedBar === null) return null;
-      return this.$_selectedBar.parts[this.selectedPartIdx];
+      let selectedPart = this.$_selectedBar.getPart(this.selectedPartIdx);
+      if (selectedPart === null) return null;
+      return selectedPart;
     },
 
     $_selectedNote() {
       if (this.$_selectedPart === null) return null;
-      return this.$_selectedPart.notes[this.selectedNoteIdx];
+      let selectedNote = this.$_selectedPart.getNote(this.selectedNoteIdx);
+      if (selectedNote === null) return null;
+      return selectedNote;
     },
 
     $_previousBar() {
@@ -236,6 +247,10 @@ export default {
       }
     },
 
+    $_isNoteSelected() {
+      return (this.$_selectedNote !== null);
+    },
+
     $_isSelectedNoteTypeTogglable() {
       if (this.$_selectedNote === null) return null;
       if (this.$_selectedNote.type === Note.Type.rest) {
@@ -309,6 +324,7 @@ export default {
   inject: [
     'insertBar',
     'replaceNote',
+    'updatePart',
     'removeBars',
     'selectNextBar',
     'selectPreviousBar',
@@ -328,13 +344,19 @@ export default {
         case keyEventTypeEnum.key:
           switch (event.code) {
             case 'KeyT':
+              if (!this.$_isNoteSelected) break;
               this.$_toggleSelectedNoteTied();
+              return true;
+            case 'KeyD':
+              if (!this.$_isNoteSelected) break;
+              this.$_removeSelectedNote();
               return true;
             case 'KeyF':
               if (this.$_isFillBarWithNoteButtonDisabled) break;
               this.$_fillBarWithNote(false);
               return true;
             case 'KeyR':
+              if (!this.$_isNoteSelected) break;
               this.$_toggleSelectedNoteType();
               return true;
           }
@@ -390,6 +412,17 @@ export default {
       let newNote = this.$_selectedNote.clone();
       newNote.tied = !newNote.tied;
       this.replaceNote(this.selectedSectionIdx, this.selectedBarIdx, this.selectedPartIdx, this.selectedNoteIdx, newNote);
+    },
+
+    $_removeSelectedNote() {
+      let newPart = this.$_selectedPart.clone();
+      newPart.notes.splice(this.$data.$_selectedNoteIdx, 1);
+      this.updatePart(
+        this.selectedSectionIdx,
+        this.selectedBarIdx,
+        this.selectedPartIdx,
+        newPart,
+      );
     },
 
     $_removeSelectedBar() {

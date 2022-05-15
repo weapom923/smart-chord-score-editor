@@ -200,11 +200,19 @@ export default {
         if (this.$data.$_barEditorComponentInstance.onKeydown(keyEventType, event)) return true;
       }
       switch (keyEventType) {
-        case keyEventTypeEnum.keyWithCtrlAndShift:
+        case keyEventTypeEnum.key:
           switch (event.code) {
-            case 'ArrowRight':
+            case 'KeyN':
               return incrementNoteIdx(this);
-            case 'ArrowLeft':
+            case 'KeyB':
+              return decrementNoteIdx(this);
+          }
+          break;
+        case keyEventTypeEnum.repeatedKey:
+          switch (event.code) {
+            case 'KeyN':
+              return incrementNoteIdx(this);
+            case 'KeyB':
               return decrementNoteIdx(this);
           }
           break;

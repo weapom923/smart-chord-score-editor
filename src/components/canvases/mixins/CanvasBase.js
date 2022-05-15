@@ -2,30 +2,23 @@ import Color from '../../../modules/Color.js'
 
 export default {
   watch: {
-    backgroundColor: {
-      handler() { this.$_setDirty(true) },
-      immediate: true,
-    },
     color: {
       handler() { this.$_setDirty(true) },
       immediate: true,
     },
   },
 
-  async mounted() {
-    this.$data.$_canvasElement = this.$refs.canvas;
+  mounted() {
+    this.$_setDirty(true);
   },
 
   props: {
     color: { type: Color, default: () => Color.black },
-    backgroundColor: { type: Color, default: null },
   },
 
   data() {
     return {
-      $_canvasElement: null,
-      $_backgroundColor: null,
-      $_dirty: true,
+      $_isDirty: false,
     };
   },
 
@@ -36,51 +29,43 @@ export default {
   },
 
   methods: {
-    $_setDirty(dirty) {
-      this.$data.$_dirty = dirty;
-      this.draw();
+    $_setDirty(isDirty) {
+      if (!this.$data.$_isDirty && isDirty) {
+        this.$nextTick(this.draw);
+      }
+      this.$data.$_isDirty = isDirty;
     },
 
     $_setCanvasWidthPx(canvasWidthPx, setStyle = true) {
       if (setStyle) {
-        this.$data.$_canvasElement.style.width = String(canvasWidthPx) + 'px';
+        this.$el.style.width = String(canvasWidthPx) + 'px';
       }
-      this.$data.$_canvasElement.width = canvasWidthPx;
+      this.$el.width = canvasWidthPx;
       this.$_setDirty(true);
     },
 
     $_setCanvasHeightPx(canvasHeightPx, setStyle = true) {
       if (setStyle) {
-        this.$data.$_canvasElement.style.height = String(canvasHeightPx) + 'px';
+        this.$el.style.height = String(canvasHeightPx) + 'px';
       }
-      this.$data.$_canvasElement.height = canvasHeightPx;
+      this.$el.height = canvasHeightPx;
       this.$_setDirty(true);
     },
 
     $_draw(callback) {
-      if (!this.$data.$_canvasElement) return;
-      if (!this.$data.$_dirty) return;
+      if (!this.$el) return;
+      if (!this.$data.$_isDirty) return;
 
-      let canvas = this.$data.$_canvasElement.getContext('2d');
-      let width = this.$data.$_canvasElement.width;
-      let height = this.$data.$_canvasElement.height;
+      let canvas = this.$el.getContext('2d');
+      let width = this.$el.width;
+      let height = this.$el.height;
       clearCanvas(canvas, width, height);
-      if (this.backgroundColor !== null) {
-        drawBackground(canvas, width, height, this.backgroundColor);
-      }
-      callback(this.$data.$_canvasElement);
+      callback(this.$el);
       this.$_setDirty(false);
 
       function clearCanvas(canvas, width, height) {
         canvas.beginPath();
         canvas.clearRect(0, 0, width, height);
-      }
-
-      function drawBackground(canvas, width, height, backgroundColor) {
-        canvas.beginPath();
-        canvas.rect(0, 0, width, height);
-        canvas.fillStyle = backgroundColor.getStyleString();
-        canvas.fill();
       }
     }
   }

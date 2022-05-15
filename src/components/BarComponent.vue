@@ -65,11 +65,10 @@
       v-bind:disabled="!isHoverMenuEnabled"
     >
       <template v-slot:activator="{ on, attrs }">
-        <staff-canvas
-          ref="staffCanvas"
+        <div
+          id="clickable-area"
           v-bind="attrs"
-          v-bind:background-color="$_staffBackgroundColor"
-          v-bind:style="$_staffCanvasStyle"
+          v-bind:style="$_clickableAreaStyle"
           v-on="on"
           v-on:mousedown.stop="$_onMousedownStaff"
           v-on:mouseup.stop="$_onMouseupStaff"
@@ -112,11 +111,15 @@
   flex-grow: 1;
   margin: 0 10px;
 }
+
+#clickable-area {
+  position: absolute;
+  width: 100%;
+}
 </style>
 
 <script>
 import PartInBarComponent from '../components/PartInBarComponent.vue';
-import StaffCanvas from './canvases/StaffCanvas.vue';
 import ClefCanvas from './canvases/ClefCanvas.vue';
 import BarLineCanvas from './canvases/BarLineCanvas.vue';
 import BeatComponent from './BeatComponent.vue';
@@ -134,7 +137,6 @@ export default {
   components: {
     BeatComponent,
     PartInBarComponent,
-    StaffCanvas,
     ClefCanvas,
     BarLineCanvas,
     BarRepeatEndingComponent,
@@ -161,6 +163,13 @@ export default {
         }
       },
       immediate: true,
+    },
+
+    $_bar: {
+      handler() {
+        this.$_setBarElementPositionAndSize();
+      },
+      deep: true,
     },
   },
 
@@ -193,11 +202,7 @@ export default {
 
   data() {
     return {
-      $_barElementResizeObserver: new ResizeObserver(() => {
-        this.$data.$_barElementBoundingClientRect = this.$el.getBoundingClientRect();
-        this.$data.$_partContainerBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
-        this.$_updatePositionAndSize();
-      }),
+      $_barElementResizeObserver: new ResizeObserver(this.$_setBarElementPositionAndSize),
       $_partNoteElements: new Array(),
       $_partNoteChordElements: new Array(),
       $_partTieStartPointOffsets: new Array(),
@@ -255,15 +260,17 @@ export default {
       return this.$_bar.repeatEnding.isEqualTo(BarRepeatEnding.empty);
     },
 
-    $_staffBackgroundColor() {
+    $_barBackgroundColor() {
       if (this.isPrintLayoutEnabled) return this.staffBackgroundColor;
       if (this.$_isBarSelected) return this.selectedStaffBackgroundColor;
       return this.staffBackgroundColor;
     },
 
-    $_staffCanvasStyle() {
+    $_clickableAreaStyle() {
       return {
         marginTop: String(-this.$_internalMarginTopPx) + 'px',
+        height: String(this.$_internalMarginTopPx + this.$_internalMarginBottomPx) + 'px',
+        backgroundColor: this.$_barBackgroundColor.getStyleString(),
       };
     },
 
@@ -328,6 +335,12 @@ export default {
 
     $_onBarRepeatEndingUpdate(barRepeatEndingElement) {
       this.$data.$_barRepeatEndingElement = barRepeatEndingElement;
+    },
+
+    $_setBarElementPositionAndSize() {
+      this.$data.$_barElementBoundingClientRect = this.$el.getBoundingClientRect();
+      this.$data.$_partContainerBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
+      this.$_updatePositionAndSize();
     },
 
     $_updatePositionAndSize() {

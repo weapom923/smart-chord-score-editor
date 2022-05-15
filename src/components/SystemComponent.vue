@@ -4,6 +4,10 @@
     v-if="$data.$_renderComponent"
     v-bind:style="$_systemStyle"
   >
+    <staff-canvas
+      id="staff-canvas"
+      v-bind:style="$_staffCanvasStyle"
+    />
     <template v-for="partIdx of $_partIdcs[systemDefinition.firstBarIdx]">
       <tie-canvas
         v-if="$data.$_isTiedFromPreviousPartNote && $data.$_isTiedFromPreviousPartNote[partIdx]"
@@ -57,10 +61,18 @@
 #system * {
   flex-grow: 1;
 }
+
+#staff-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
 </style>
 
 <script>
 import BarComponent from '../components/BarComponent.vue';
+import StaffCanvas from './canvases/StaffCanvas.vue';
 import Score from '../modules/Score.js';
 import BarBreak from '../modules/BarBreak.js';
 import Note from '../modules/Note.js';
@@ -96,6 +108,7 @@ export {
 export default {
   components: {
     BarComponent,
+    StaffCanvas,
     TieCanvas,
   },
 
@@ -211,6 +224,21 @@ export default {
         partIdcs[barIdx] = Array.from(Array(bar.parts.length), (v, k) => k);
       }
       return partIdcs;
+    },
+
+    $_internalMarginTopPx() {
+      return this.$store.state.config.staffLineStepPx * 2;
+    },
+
+    $_staffHeightPx() {
+      return this.$store.state.config.staffLineStepPx * 4 + 1;
+    },
+
+    $_staffCanvasStyle() {
+      return {
+        marginTop: String(-this.$_internalMarginTopPx) + 'px',
+        height: String(this.$_staffHeightPx) + 'px',
+      };
     },
 
     $_systemStyle() {
