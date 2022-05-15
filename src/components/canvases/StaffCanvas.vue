@@ -1,19 +1,10 @@
 <template>
   <canvas
-    id="staff-canvas"
     ref="canvas"
     v-bind="$attrs"
     v-on="$listeners"
   />
 </template>
-
-<style scoped>
-#staff-canvas {
-  position: absolute;
-  width: 100%;
-  left: 0;
-}
-</style>
 
 <script>
 import CanvasBase from './mixins/CanvasBase.js';
