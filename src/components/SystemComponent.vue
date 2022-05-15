@@ -165,8 +165,6 @@ export default {
   props: {
     score: { type: Score },
     systemDefinition: { type: SystemDefinition },
-    selectedBarsFirstIdx: { type: Number, default: null },
-    selectedBarsLastIdx: { type: Number, default: null },
     selectedPartIdx: { type: Number, default: null },
     selectedNoteIdx: { type: Number, default: null },
     staffBackgroundColor: { type: Color },
