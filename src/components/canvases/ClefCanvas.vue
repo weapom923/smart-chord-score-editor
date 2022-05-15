@@ -1,6 +1,5 @@
 <template>
   <canvas
-    ref="canvas"
     id="clef-canvas"
     v-bind="$attrs"
     v-bind:style="$_style"

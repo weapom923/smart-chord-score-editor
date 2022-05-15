@@ -1,6 +1,5 @@
 <template>
   <canvas
-    ref="canvas"
     v-bind="$attrs"
     v-on="$listeners"
   />

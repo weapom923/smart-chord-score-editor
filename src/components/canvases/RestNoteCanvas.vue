@@ -1,6 +1,5 @@
 <template>
   <canvas
-    ref="canvas"
     id="note-canvas-container"
     v-bind:style="$_style"
     v-bind="$attrs"

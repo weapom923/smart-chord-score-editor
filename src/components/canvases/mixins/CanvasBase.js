@@ -9,7 +9,6 @@ export default {
   },
 
   mounted() {
-    this.$data.$_canvasElement = this.$refs.canvas;
     this.$_setDirty(true);
   },
 
@@ -19,7 +18,6 @@ export default {
 
   data() {
     return {
-      $_canvasElement: null,
       $_isDirty: false,
     };
   },
@@ -40,29 +38,29 @@ export default {
 
     $_setCanvasWidthPx(canvasWidthPx, setStyle = true) {
       if (setStyle) {
-        this.$data.$_canvasElement.style.width = String(canvasWidthPx) + 'px';
+        this.$el.style.width = String(canvasWidthPx) + 'px';
       }
-      this.$data.$_canvasElement.width = canvasWidthPx;
+      this.$el.width = canvasWidthPx;
       this.$_setDirty(true);
     },
 
     $_setCanvasHeightPx(canvasHeightPx, setStyle = true) {
       if (setStyle) {
-        this.$data.$_canvasElement.style.height = String(canvasHeightPx) + 'px';
+        this.$el.style.height = String(canvasHeightPx) + 'px';
       }
-      this.$data.$_canvasElement.height = canvasHeightPx;
+      this.$el.height = canvasHeightPx;
       this.$_setDirty(true);
     },
 
     $_draw(callback) {
-      if (!this.$data.$_canvasElement) return;
+      if (!this.$el) return;
       if (!this.$data.$_isDirty) return;
 
-      let canvas = this.$data.$_canvasElement.getContext('2d');
-      let width = this.$data.$_canvasElement.width;
-      let height = this.$data.$_canvasElement.height;
+      let canvas = this.$el.getContext('2d');
+      let width = this.$el.width;
+      let height = this.$el.height;
       clearCanvas(canvas, width, height);
-      callback(this.$data.$_canvasElement);
+      callback(this.$el);
       this.$_setDirty(false);
 
       function clearCanvas(canvas, width, height) {
