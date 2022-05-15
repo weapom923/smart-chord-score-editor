@@ -29,18 +29,12 @@ export default {
 
   watch: {
     noteValue: {
-      handler() {
-        this.$_setDirty(true);
-        this.draw();
-      },
+      handler() { this.$_setDirty(true) },
       deep: true,
     },
 
     restNotePitch: {
-      handler() {
-        this.$_setDirty(true);
-        this.draw();
-      },
+      handler() { this.$_setDirty(true) },
       deep: true,
     },
 
