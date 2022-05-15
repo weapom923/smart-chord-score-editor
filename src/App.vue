@@ -172,9 +172,11 @@ export default {
     },
 
     '$data.$_score': {
-      handler() {
+      handler(score) {
+        ScoreSnapshotManager.register(score);
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
+        cookie_utils.setCookie('score', score.dumpJson());
       },
       deep: true,
     },
@@ -343,13 +345,11 @@ export default {
         if (currentPart.isEqualTo(part)) return;
         let bar = this.$data.$_score.getBar(sectionIdx, barIdx);
         this.$set(bar.parts, partIdx, part);
-        this.$_registerScoreSnapshot();
       },
 
       insertNote: (sectionIdx, barIdx, partIdx, noteIdx, note) => {
         let part = this.$data.$_score.getPart(sectionIdx, barIdx, partIdx);
         part.notes.splice(noteIdx, 0, note);
-        this.$_registerScoreSnapshot();
       },
 
       insertBar: this.$_insertBar,
@@ -367,7 +367,6 @@ export default {
       replaceNote: (sectionIdx, barIdx, partIdx, noteIdx, note) => {
         let part = this.$data.$_score.getPart(sectionIdx, barIdx, partIdx);
         this.$set(part.notes, noteIdx, note);
-        this.$_registerScoreSnapshot();
       },
 
       unselectBar: this.$_unselectBar,
@@ -390,7 +389,6 @@ export default {
           {
             callback: metadata => {
               this.$set(this.$data.$_score, 'metadata', metadata);
-              this.$_registerScoreSnapshot();
             },
             metadata: this.$data.$_score.metadata,
           }
@@ -403,7 +401,6 @@ export default {
           {
             callback: ({ sectionName }) => {
               this.$set(this.$data.$_score.sections[sectionIdx], 'name', sectionName);
-              this.$_registerScoreSnapshot();
             },
             score: this.$data.$_score,
             sectionIdx: sectionIdx,
@@ -430,12 +427,10 @@ export default {
 
     $_setNewScore(score) {
       this.$_setScore(score);
-      ScoreSnapshotManager.register(score);
     },
 
     $_setScore(score) {
       this.$set(this.$data, '$_score', score);
-      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_saveScoreFile() {
@@ -448,11 +443,6 @@ export default {
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-    },
-
-    $_registerScoreSnapshot() {
-      ScoreSnapshotManager.register(this.$data.$_score);
-      cookie_utils.setCookie('score', this.$data.$_score.dumpJson());
     },
 
     $_openDialog(dialogComponentName, props = {}) {
@@ -495,7 +485,6 @@ export default {
       let baseBar = this.$data.$_score.getBar(sectionIdx, baseBarIdx);
       let emptyBar = generateEmptyBarFrom(baseBar);
       this.$data.$_score.getSection(sectionIdx).bars.splice(barIdx, 0, emptyBar);
-      this.$_registerScoreSnapshot();
       if (this.$_selectedBarsLast.sectionIdx === sectionIdx) {
         if (this.$_selectedBarsLast.barIdx >= barIdx) {
           await this.$store.dispatch('incrementSelectedBarsLastIdx', this.$data.$_score);
@@ -532,7 +521,6 @@ export default {
           }
         },
       );
-      this.$_registerScoreSnapshot();
     },
 
     async $_copyBars(firstSectionIdx, firstBarIdx, lastSectionIdx, lastBarIdx) {
@@ -567,7 +555,6 @@ export default {
         ({ sectionIdx, barIdx } = this.$data.$_score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
         if ((sectionIdx === null) || (barIdx === null)) break;
       }
-      this.$_registerScoreSnapshot();
     },
 
     async $_selectBar(sectionIdx, barIdx) {
@@ -620,7 +607,6 @@ export default {
           partInBarTypes,
           callback: (section) => {
             this.$data.$_score.sections.splice(sectionIdx, 0, section);
-            this.$_registerScoreSnapshot();
           },
         }
       );
