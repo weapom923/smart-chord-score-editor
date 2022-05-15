@@ -161,10 +161,10 @@ export default {
             await this.$_generateNewScore();
           } else {
             let scoreFromCookie = Score.loadJson(scoreJsonFromCookie);
-            this.$_setNewScore(scoreFromCookie);
+            await this.$_setNewScore(scoreFromCookie);
           }
         } else {
-          this.$_setNewScore(newScore);
+          await this.$_setNewScore(newScore);
         }
       },
       immediate: true,
@@ -321,7 +321,7 @@ export default {
         let scoreJsonString = await loadFileAsUTF8Text(fileInterface);
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
-        this.$_setNewScore(score);
+        await this.$_setNewScore(score);
       },
 
       loadScoreFromTextFile: async () => {
@@ -333,7 +333,7 @@ export default {
           this.$store.state.config.defaultBarValue,
           this.$store.state.config.defaultScale,
         );
-        this.$_setNewScore(score);
+        await this.$_setNewScore(score);
       },
 
       saveScoreFile: this.$_saveScoreFile,
@@ -421,15 +421,15 @@ export default {
   methods: {
     async $_generateNewScore() {
       let score = Score.generateNew('Untitled', '', '');
+      await this.$_setNewScore(score);
+    },
+
+    async $_setNewScore(score) {
+      await this.$_setScore(score);
+    },
+
+    async $_setScore(score) {
       await this.$_unselectBar();
-      this.$_setNewScore(score);
-    },
-
-    $_setNewScore(score) {
-      this.$_setScore(score);
-    },
-
-    $_setScore(score) {
       this.$set(this.$data, '$_score', score);
     },
 
@@ -468,16 +468,14 @@ export default {
     async $_undo() {
       let score = ScoreSnapshotManager.undo();
       if (score) {
-        this.$_setScore(score);
-        await this.$_unselectBar();
+        await this.$_setScore(score);
       }
     },
 
     async $_redo() {
       let score = ScoreSnapshotManager.redo();
       if (score) {
-        this.$_setScore(score);
-        await this.$_unselectBar();
+        await this.$_setScore(score);
       }
     },
 
