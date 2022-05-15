@@ -39,8 +39,8 @@
             <tr><th>Keys</th><th>Description</th></tr>
           </thead>
           <tbody>
-            <tr><td>Ctrl+Shift+ArrowRight</td><td>Select a next note.</td></tr>
-            <tr><td>Ctrl+Shift+ArrowLeft</td><td>Select a previous note.</td></tr>
+            <tr><td>N</td><td>Select a next note.</td></tr>
+            <tr><td>B</td><td>Select a previous note.</td></tr>
             <tr><td>F</td><td>Fill a selected bar with a new note.</td></tr>
             <tr><td>Shift+F</td><td>Fill a selected bar with a new rest note.</td></tr>
             <tr><td>T</td><td>Tie/untie a selected note to a previous note.</td></tr>
