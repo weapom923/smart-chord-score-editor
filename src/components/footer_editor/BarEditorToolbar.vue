@@ -14,6 +14,13 @@
       </span>
     </div>
     <div v-if="$_areMultipleBarsSelected">({{ $_numSelectedBars }} bars selected)</div>
+    <v-spacer />
+    <part-type-selector
+      id="part-type-selector"
+      v-if="!$_areMultipleBarsSelected"
+      v-model="selectedPartIdx"
+      v-bind:bar="$_firstBar"
+    />
   </v-toolbar>
 </template>
 
@@ -56,17 +63,27 @@
 .connector-symbol:after {
   content: '-';
 }
+
+#part-type-selector {
+  flex-grow: 0;
+}
 </style>
 
 <script>
+import PartTypeSelector from '../parts/PartTypeSelector.vue';
 import Score from '../../modules/Score.js'
 import SectionAndBarIdx from '../../modules/SectionAndBarIdx.js'
 
 export default {
+  components: {
+    PartTypeSelector,
+  },
+
   props: {
     score: { type: Score },
     selectedBarsFirst: { type: SectionAndBarIdx },
     selectedBarsLast: { type: SectionAndBarIdx },
+    selectedPartIdx: { type: Number },
   },
 
   computed: {
@@ -99,7 +116,12 @@ export default {
         ({ sectionIdx, barIdx } = this.score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
       }
       return numSelectedBars + 1;
-    }
+    },
+
+    $_selectedPartIdx: {
+      get() { return this.selectedPartIdx },
+      set(selectedPartIdx) { this.$emit('update-selected-part-idx', selectedPartIdx) },
+    },
   },
 }
 </script>
