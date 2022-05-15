@@ -171,6 +171,14 @@ export default {
       },
       deep: true,
     },
+
+    async $_isBarFirstOfSelection() {
+      if (this.isAutoScrollEnabled) await this.scrollTo(this.$el);
+    },
+
+    async $_isBarLastOfSelection() {
+      if (this.isAutoScrollEnabled) await this.scrollTo(this.$el);
+    },
   },
 
   mounted() {
@@ -198,6 +206,7 @@ export default {
     selectedStaffBackgroundColor: { type: Color, default: () => selectedBarStaffBackgroundColor },
     isHoverMenuEnabled: { type: Boolean, default: false },
     isPrintLayoutEnabled: { type: Boolean, default: false },
+    isAutoScrollEnabled: { type: Boolean, default: false },
   },
 
   data() {
@@ -238,6 +247,28 @@ export default {
 
     $_internalMarginBottomPx() {
       return this.$store.state.config.staffLineStepPx * 2 + 1;
+    },
+
+    $_isBarFirstOfSelection() {
+      if (this.$store.state.selectedBarsFirst.sectionIdx === null) return false;
+      if (this.$store.state.selectedBarsFirst.barIdx === null) return false;
+      if (this.$store.state.selectedBarsFirst.sectionIdx === this.sectionIdx) {
+        if (this.$store.state.selectedBarsFirst.barIdx === this.barIdx) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    $_isBarLastOfSelection() {
+      if (this.$store.state.selectedBarsLast.sectionIdx === null) return false;
+      if (this.$store.state.selectedBarsLast.barIdx === null) return false;
+      if (this.$store.state.selectedBarsLast.sectionIdx === this.sectionIdx) {
+        if (this.$store.state.selectedBarsLast.barIdx === this.barIdx) {
+          return true;
+        }
+      } 
+      return false;
     },
 
     $_isBarSelected() {
@@ -302,6 +333,10 @@ export default {
       }
     },
   },
+
+  inject: [
+    'scrollTo',
+  ],
 
   methods: {
     $_getSelectedNoteIdxInPart(partIdx) {

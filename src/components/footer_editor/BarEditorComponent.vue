@@ -416,7 +416,7 @@ export default {
 
     $_removeSelectedNote() {
       let newPart = this.$_selectedPart.clone();
-      newPart.notes.splice(this.$data.$_selectedNoteIdx, 1);
+      newPart.notes.splice(this.selectedNoteIdx, 1);
       this.updatePart(
         this.selectedSectionIdx,
         this.selectedBarIdx,

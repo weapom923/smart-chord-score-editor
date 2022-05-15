@@ -3,30 +3,16 @@
     outlined
     id="editor-component"
   >
+    <bar-editor-toolbar
+      v-bind:score="score"
+      v-bind:selected-bars-first="$_selectedBarsFirst"
+      v-bind:selected-bars-last="$_selectedBarsLast"
+      v-bind:selected-part-idx="$data.$_selectedPartIdx"
+      v-on:update-selected-part-idx="$_onUpdateSelectedPartIdx"
+    />
     <v-container id="editor-container">
       <v-row>
         <v-col cols="3">
-          <v-card>
-            <v-card-text
-              class="pa-0"
-              v-if="$_isSingleBarSelected"
-            >
-              <v-list dense>
-                <v-list-item-group
-                  mandatory
-                  v-model="$data.$_selectedPartIdx"
-                >
-                  <v-list-item
-                    v-for="(part, partIdx) in $_singlySelectedBar.parts"
-                    v-bind:key="partIdx"
-                  >
-                    {{ part.type }}
-                  </v-list-item>
-                </v-list-item-group>
-              </v-list>
-            </v-card-text>
-          </v-card>
-
           <v-card>
             <v-card-text class="pa-0">
               <bar-detail-editor-component v-bind:score="score" />
@@ -88,6 +74,7 @@
 </style>
 
 <script>
+import BarEditorToolbar from '../footer_editor/BarEditorToolbar.vue';
 import BarEditorComponent from '../footer_editor/BarEditorComponent.vue';
 import NoteEditorComponent from '../footer_editor/NoteEditorComponent.vue';
 import BarDetailEditorComponent from '../footer_editor/BarDetailEditorComponent.vue';
@@ -96,6 +83,7 @@ import { keyEventTypeEnum } from '../../modules/KeyEventType.js';
 
 export default {
   components: {
+    BarEditorToolbar,
     BarEditorComponent,
     NoteEditorComponent,
     BarDetailEditorComponent,
@@ -262,6 +250,10 @@ export default {
         newPart,
       );
       this.$data.$_temporalSelectedPart = null;
+    },
+
+    $_onUpdateSelectedPartIdx(selectedPartIdx) {
+      this.$data.$_selectedPartIdx = selectedPartIdx;
     },
 
     $_onSetTemporalPart(newPart, newSelectedNoteIdx) {

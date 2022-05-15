@@ -1,6 +1,7 @@
 <template>
   <v-app id="app">
     <app-bar
+      ref="appBar"
       v-if="!$data.$_isPrintLayoutEnabled"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
@@ -83,7 +84,6 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
-import cookie_utils from './modules/cookie_utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -156,7 +156,7 @@ export default {
     score: {
       async handler(newScore) {
         if (newScore === null) {
-          let scoreJsonFromCookie = cookie_utils.getCookie('score');
+          let scoreJsonFromCookie = window.localStorage.getItem('score');
           if (scoreJsonFromCookie === null) {
             await this.$_generateNewScore();
           } else {
@@ -176,7 +176,7 @@ export default {
         ScoreSnapshotManager.register(score);
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
-        cookie_utils.setCookie('score', score.dumpJson());
+        window.localStorage.setItem('score', score.dumpJson());
       },
       deep: true,
     },
@@ -379,6 +379,17 @@ export default {
 
       selectNextBar: this.$_selectNextBar,
 
+      scrollTo: async (element) => {
+        if (this.$data.$_isFooterEditorMinimized) return;
+        await this.$vuetify.goTo(
+          element,
+          {
+            duration: 0,
+            offset: this.$refs.appBar.$el.clientHeight,
+          },
+        );
+      },
+
       openGlobalConfigEditorDialog: () => {
         this.$_openDialog('global-config-editor-dialog');
       },
@@ -429,8 +440,12 @@ export default {
     },
 
     async $_setScore(score) {
-      await this.$_unselectBar();
-      this.$set(this.$data, '$_score', score);
+      if (score.getBar(this.$_selectedBarsFirst.sectionIdx, this.$_selectedBarsFirst.barIdx) === null) {
+        await this.$_unselectBar();
+      } else if (score.getBar(this.$_selectedBarsLast.sectionIdx, this.$_selectedBarsLast.barIdx) === null) {
+        await this.$_unselectBar();
+      }
+      this.$data.$_score = score;
     },
 
     $_saveScoreFile() {

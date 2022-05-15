@@ -30,6 +30,7 @@
         v-bind:selected-staff-background-color="selectedStaffBackgroundColor"
         v-bind:is-hover-menu-enabled="isBarHoverMenuEnabled"
         v-bind:is-print-layout-enabled="isPrintLayoutEnabled"
+        v-bind:is-auto-scroll-enabled="true"
         v-on:bar-element-update="$_onBarElementsUpdate(barIdx, $event)"
         v-on:tie-point-update="$_onTiePointUpdate(barIdx, $event)"
         v-on:margin-top-px-update="$_onMarginTopPxUpdate(barIdx, $event)"
@@ -165,8 +166,6 @@ export default {
   props: {
     score: { type: Score },
     systemDefinition: { type: SystemDefinition },
-    selectedBarsFirstIdx: { type: Number, default: null },
-    selectedBarsLastIdx: { type: Number, default: null },
     selectedPartIdx: { type: Number, default: null },
     selectedNoteIdx: { type: Number, default: null },
     staffBackgroundColor: { type: Color },
