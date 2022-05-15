@@ -43,6 +43,7 @@
             <tr><td>B</td><td>Select a previous note.</td></tr>
             <tr><td>F</td><td>Fill a selected bar with a new note.</td></tr>
             <tr><td>Shift+F</td><td>Fill a selected bar with a new rest note.</td></tr>
+            <tr><td>D</td><td>Delete a selected note.</td></tr>
             <tr><td>T</td><td>Tie/untie a selected note to a previous note.</td></tr>
             <tr><td>R</td><td>Convert a selected note to a rest/normal note.</td></tr>
           </tbody>
