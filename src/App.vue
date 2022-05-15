@@ -83,7 +83,6 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
-import cookie_utils from './modules/cookie_utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -156,7 +155,7 @@ export default {
     score: {
       async handler(newScore) {
         if (newScore === null) {
-          let scoreJsonFromCookie = cookie_utils.getCookie('score');
+          let scoreJsonFromCookie = window.localStorage.getItem('score');
           if (scoreJsonFromCookie === null) {
             await this.$_generateNewScore();
           } else {
@@ -176,7 +175,7 @@ export default {
         ScoreSnapshotManager.register(score);
         this.$data.$_isUndoDisabled = ScoreSnapshotManager.isFirstSnapshot();
         this.$data.$_isRedoDisabled = ScoreSnapshotManager.isLastSnapshot();
-        cookie_utils.setCookie('score', score.dumpJson());
+        window.localStorage.setItem('score', score.dumpJson());
       },
       deep: true,
     },

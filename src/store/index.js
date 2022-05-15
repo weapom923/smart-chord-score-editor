@@ -6,7 +6,6 @@ import Chord from '../modules/Chord.js'
 import Clef from '../modules/Clef.js'
 import PartInBar from '../modules/PartInBar.js'
 import Color from '../modules/Color.js'
-import cookie_utils from '../modules/cookie_utils.js'
 
 Vue.use(Vuex);
 
@@ -38,7 +37,7 @@ const store = new Vuex.Store({
 
   mutations: {
     loadConfigFromCookie(state) {
-      let configJsonFromCookie = cookie_utils.getCookie('config');
+      let configJsonFromCookie = window.localStorage.getItem('config');
       if (configJsonFromCookie !== null) {
         let rawConfigFromCookie = JSON.parse(configJsonFromCookie);
         state.config.staffLineStepPx = rawConfigFromCookie.staffLineStepPx;
@@ -199,7 +198,7 @@ const store = new Vuex.Store({
       configRawObj.defaultScale = state.config.defaultScale.getRawObj();
       configRawObj.defaultPartInBarTypes = state.config.defaultPartInBarTypes;
       configRawObj.selectedNoteColor = state.config.selectedNoteColor.getRawObj();
-      cookie_utils.setCookie('config', JSON.stringify(configRawObj));
+      window.localStorage.setItem('config', JSON.stringify(configRawObj));
     },
   },
 
