@@ -3,6 +3,11 @@
     outlined
     id="editor-component"
   >
+    <bar-editor-toolbar
+      v-bind:score="score"
+      v-bind:selected-bars-first="$_selectedBarsFirst"
+      v-bind:selected-bars-last="$_selectedBarsLast"
+    />
     <v-container id="editor-container">
       <v-row>
         <v-col cols="3">
@@ -88,6 +93,7 @@
 </style>
 
 <script>
+import BarEditorToolbar from '../footer_editor/BarEditorToolbar.vue';
 import BarEditorComponent from '../footer_editor/BarEditorComponent.vue';
 import NoteEditorComponent from '../footer_editor/NoteEditorComponent.vue';
 import BarDetailEditorComponent from '../footer_editor/BarDetailEditorComponent.vue';
@@ -96,6 +102,7 @@ import { keyEventTypeEnum } from '../../modules/KeyEventType.js';
 
 export default {
   components: {
+    BarEditorToolbar,
     BarEditorComponent,
     NoteEditorComponent,
     BarDetailEditorComponent,
