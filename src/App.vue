@@ -555,8 +555,8 @@ export default {
         let copiedBarPartOnly = bar.clone();
         copiedBarPartOnly.parts = copiedBar.parts.map(part => part.clone());
         ({ sectionIdx, barIdx } = this.$data.$_score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
-        if ((sectionIdx === null) || (barIdx === null)) break;
         copiedBarsPartOnly.push(copiedBarPartOnly);
+        if ((sectionIdx === null) || (barIdx === null)) break;
       }
       this.$_replaceBars(firstSectionIdx, firstBarIdx, copiedBarsPartOnly);
     },
