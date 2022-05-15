@@ -430,7 +430,7 @@ export default {
 
     async $_setScore(score) {
       await this.$_unselectBar();
-      this.$set(this.$data, '$_score', score);
+      this.$data.$_score = score;
     },
 
     $_saveScoreFile() {
