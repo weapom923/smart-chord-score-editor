@@ -428,7 +428,11 @@ export default {
     },
 
     async $_setScore(score) {
-      await this.$_unselectBar();
+      if (score.getBar(this.$_selectedBarsFirst.sectionIdx, this.$_selectedBarsFirst.barIdx) === null) {
+        await this.$_unselectBar();
+      } else if (score.getBar(this.$_selectedBarsLast.sectionIdx, this.$_selectedBarsLast.barIdx) === null) {
+        await this.$_unselectBar();
+      }
       this.$data.$_score = score;
     },
 
