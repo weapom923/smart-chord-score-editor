@@ -6,19 +6,14 @@ import Chord from '../modules/Chord.js'
 import Clef from '../modules/Clef.js'
 import PartInBar from '../modules/PartInBar.js'
 import Color from '../modules/Color.js'
+import SectionAndBarIdx from '../modules/SectionAndBarIdx.js'
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    selectedBarsFirst: {
-      sectionIdx: null,
-      barIdx: null,
-    },
-    selectedBarsLast: {
-      sectionIdx: null,
-      barIdx: null,
-    },
+    selectedBarsFirst: new SectionAndBarIdx(null, null),
+    selectedBarsLast: new SectionAndBarIdx(null, null),
     copiedBars: new Array(),
     config: {
       staffLineStepPx: 10,
