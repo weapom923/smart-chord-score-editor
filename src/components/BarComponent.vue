@@ -164,6 +164,13 @@ export default {
       },
       immediate: true,
     },
+
+    $_bar: {
+      handler() {
+        this.$_setBarElementPositionAndSize();
+      },
+      deep: true,
+    },
   },
 
   mounted() {
@@ -195,11 +202,7 @@ export default {
 
   data() {
     return {
-      $_barElementResizeObserver: new ResizeObserver(() => {
-        this.$data.$_barElementBoundingClientRect = this.$el.getBoundingClientRect();
-        this.$data.$_partContainerBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
-        this.$_updatePositionAndSize();
-      }),
+      $_barElementResizeObserver: new ResizeObserver(this.$_setBarElementPositionAndSize),
       $_partNoteElements: new Array(),
       $_partNoteChordElements: new Array(),
       $_partTieStartPointOffsets: new Array(),
@@ -332,6 +335,12 @@ export default {
 
     $_onBarRepeatEndingUpdate(barRepeatEndingElement) {
       this.$data.$_barRepeatEndingElement = barRepeatEndingElement;
+    },
+
+    $_setBarElementPositionAndSize() {
+      this.$data.$_barElementBoundingClientRect = this.$el.getBoundingClientRect();
+      this.$data.$_partContainerBoundingClientRect = this.$refs.partContainer.getBoundingClientRect();
+      this.$_updatePositionAndSize();
     },
 
     $_updatePositionAndSize() {
