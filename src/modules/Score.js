@@ -141,7 +141,7 @@ class Score {
   getNote(sectionIdx, barIdx, partIdx, noteIdx) {
     let part = this.getPart(sectionIdx, barIdx, partIdx);
     if (part === null) return null;
-    return this.part.getNote(noteIdx);
+    return part.getNote(noteIdx);
   }
 
   getNumParts(sectionIdx, barIdx) {
