@@ -70,7 +70,7 @@
 </style>
 
 <script>
-import PartTypeSelector from '../parts/PartTypeSelector.vue';
+import PartTypeSelector from '../parts/BarPartTypeSelector.vue';
 import Score from '../../modules/Score.js'
 import SectionAndBarIdx from '../../modules/SectionAndBarIdx.js'
 

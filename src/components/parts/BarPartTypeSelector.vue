@@ -1,7 +1,7 @@
 <template>
   <v-select
     label="Part Type"
-    hide-details
+    single-line dense hide-details
     v-model="$_partTypeName"
     v-bind:items="$_allPartTypeNames"
     v-bind:disabled="$_isPartEmpty"
