@@ -106,16 +106,8 @@
 
 <script>
 import Chord from '../modules/Chord.js';
-import TensionNotePitch from '../modules/TensionNotePitch.js';
 import NotePitchComponent from './NotePitchComponent.vue'
 import TensionNotePitchComponent from './TensionNotePitchComponent.vue'
-
-function isHalfDiminished7th(chord) {
-  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.dominantSeventh);
-}
-function isDiminished7th(chord) {
-  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.diminishedSeventh);
-}
 
 export default {
   components: {
@@ -172,87 +164,11 @@ export default {
       return this.chord.bass;
     },
 
-    $_basicChordText() {
-      if (this.chord !== null) {
-        if (isHalfDiminished7th(this.chord)) {
-          return 'm7';
-        }
-        if (isDiminished7th(this.chord)) {
-          return 'dim7';
-        }
-        let basicChordText = '';
-        switch (this.chord.triad) {
-          case Chord.Triad.minor:
-            basicChordText = 'm';
-            break;
-          case Chord.Triad.diminished:
-            basicChordText = 'dim';
-            break;
-          case Chord.Triad.augumented:
-            basicChordText = 'aug';
-            break;
-        }
-        switch (this.chord.sixthOrSeventh) {
-          case Chord.SixthOrSeventh.sixth:
-            basicChordText += '6';
-            break;
-          case Chord.SixthOrSeventh.dominantSeventh:
-            basicChordText += '7';
-            break;
-          case Chord.SixthOrSeventh.majorSeventh:
-            basicChordText += 'M7';
-            break;
-        }
-        if (basicChordText.length > 0) {
-          return basicChordText;
-        }
-      }
-      return null;
-    },
+    $_basicChordText() { return this.chord.basicChordText },
 
-    $_additionalChordText() {
-      if (this.chord !== null) {
-        if (isHalfDiminished7th(this.chord)) {
-          return '-5';
-        }
-        switch (this.chord.triad) {
-          case Chord.Triad.suspendedFourth:
-            return 'sus4';
-          case Chord.Triad.suspendedSecond:
-            return 'sus2';
-        }
-      }
-      return null;
-    },
+    $_additionalChordText() { return this.chord.additionalChordText },
 
-    $_sortedTensionNotes() {
-      let sortedTensionNotes = new Array();
-      if (this.chord !== null) {
-        if (this.chord.tensions.has(TensionNotePitch.flatNinth)) {
-          sortedTensionNotes.push(TensionNotePitch.flatNinth);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.ninth)) {
-          sortedTensionNotes.push(TensionNotePitch.ninth);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.sharpNinth)) {
-          sortedTensionNotes.push(TensionNotePitch.sharpNinth);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.eleventh)) {
-          sortedTensionNotes.push(TensionNotePitch.eleventh);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.sharpEleventh)) {
-          sortedTensionNotes.push(TensionNotePitch.sharpEleventh);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.flatThirteenth)) {
-          sortedTensionNotes.push(TensionNotePitch.flatThirteenth);
-        }
-        if (this.chord.tensions.has(TensionNotePitch.thirteenth)) {
-          sortedTensionNotes.push(TensionNotePitch.thirteenth);
-        }
-        return (sortedTensionNotes.length > 0)? sortedTensionNotes : null;
-      }
-      return null;
-    },
+    $_sortedTensionNotes() { return this.chord.sortedTensionNotes },
 
     $_fontSizePx() {
       return (this.fontSizePx === null)? this.$store.state.config.chordFontSizePx : this.fontSizePx;

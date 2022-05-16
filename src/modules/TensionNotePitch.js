@@ -41,6 +41,28 @@ class TensionNotePitch {
     this._isNatural = !this.isFlat && !this.isSharp;
     return this._isNatural;
   }
+
+  get symbolText() {
+    switch (this.symbol) {
+      case TensionNotePitch.Symbol.ninth:      return '9';
+      case TensionNotePitch.Symbol.eleventh:   return '11';
+      case TensionNotePitch.Symbol.thirteenth: return '13';
+      default:                                 return null;
+    }
+  }
+
+  get flatOrSharpText() {
+    if (this.isSharp) return '♯';
+    if (this.isFlat) return '♭';
+    return null;
+  }
+
+  toString() {
+    let string = '';
+    if (this.flatOrSharpText) string += this.flatOrSharpText;
+    if (this.symbolText) string += this.symbolText;
+    return string;
+  }
 }
 
 Object.defineProperty(

@@ -36,21 +36,6 @@
 <script>
 import TensionNotePitch from '../modules/TensionNotePitch.js';
 
-function getNoteSymbolText(note) {
-  switch (note.symbol) {
-    case TensionNotePitch.Symbol.ninth:      return '9';
-    case TensionNotePitch.Symbol.eleventh:   return '11';
-    case TensionNotePitch.Symbol.thirteenth: return '13';
-    default:                                 return null;
-  }
-}
-
-function getNoteFlatOrSharpText(note) {
-  if (note.isSharp) return '♯';
-  if (note.isFlat) return '♭';
-  return null;
-}
-
 export default {
   props: {
     tensionNote: { type: TensionNotePitch, default: null },
@@ -60,12 +45,12 @@ export default {
   computed: {
     $_tensionNoteText() {
       if (this.tensionNote === null) return '';
-      return getNoteSymbolText(this.tensionNote);
+      return this.tensionNote.symbolText;
     },
 
     $_tensionNoteFlatOrSharpText() {
       if (this.tensionNote === null) return null;
-      return getNoteFlatOrSharpText(this.tensionNote);
+      return this.tensionNote.flatOrSharpText;
     },
 
     $_tensionNoteStyle() {
