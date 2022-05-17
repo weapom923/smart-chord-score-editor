@@ -90,8 +90,8 @@ class NotePitch {
 
   toString() {
     let notePitchString = this.symbol.toString();
-    if (this.isFlat) notePitchString += '♭';
-    if (this.isSharp) notePitchString += '♯';
+    if (this.isFlat) notePitchString += 'b';
+    if (this.isSharp) notePitchString += '#';
     return notePitchString;
   }
 

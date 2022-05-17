@@ -1,6 +1,14 @@
 import NotePitch from './NotePitch.js';
 import TensionNotePitch from './TensionNotePitch.js';
 
+function isHalfDiminished7th(chord) {
+  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.dominantSeventh);
+}
+
+function isDiminished7th(chord) {
+  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.diminishedSeventh);
+}
+
 class Chord {
   constructor(root, triad, sixthOrSeventh = null, tensions = new Set(), bass = null) {
     this.root = root;
@@ -65,6 +73,94 @@ class Chord {
       new Set(rawObj.tensions.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
       (rawObj.bass === null)? null : NotePitch.loadFromRawObj(rawObj.bass),
     );
+  }
+
+  get sortedTensionNotes() {
+    let sortedTensionNotes = new Array();
+    if (this.tensions.has(TensionNotePitch.flatNinth)) {
+      sortedTensionNotes.push(TensionNotePitch.flatNinth);
+    }
+    if (this.tensions.has(TensionNotePitch.ninth)) {
+      sortedTensionNotes.push(TensionNotePitch.ninth);
+    }
+    if (this.tensions.has(TensionNotePitch.sharpNinth)) {
+      sortedTensionNotes.push(TensionNotePitch.sharpNinth);
+    }
+    if (this.tensions.has(TensionNotePitch.eleventh)) {
+      sortedTensionNotes.push(TensionNotePitch.eleventh);
+    }
+    if (this.tensions.has(TensionNotePitch.sharpEleventh)) {
+      sortedTensionNotes.push(TensionNotePitch.sharpEleventh);
+    }
+    if (this.tensions.has(TensionNotePitch.flatThirteenth)) {
+      sortedTensionNotes.push(TensionNotePitch.flatThirteenth);
+    }
+    if (this.tensions.has(TensionNotePitch.thirteenth)) {
+      sortedTensionNotes.push(TensionNotePitch.thirteenth);
+    }
+    return (sortedTensionNotes.length > 0)? sortedTensionNotes : null;
+  }
+
+  get basicChordText() {
+    if (isHalfDiminished7th(this)) {
+      return 'm7';
+    }
+    if (isDiminished7th(this)) {
+      return 'dim7';
+    }
+    let basicChordText = '';
+    switch (this.triad) {
+      case Chord.Triad.minor:
+        basicChordText = 'm';
+        break;
+      case Chord.Triad.diminished:
+        basicChordText = 'dim';
+        break;
+      case Chord.Triad.augumented:
+        basicChordText = 'aug';
+        break;
+    }
+    switch (this.sixthOrSeventh) {
+      case Chord.SixthOrSeventh.sixth:
+        basicChordText += '6';
+        break;
+      case Chord.SixthOrSeventh.dominantSeventh:
+        basicChordText += '7';
+        break;
+      case Chord.SixthOrSeventh.majorSeventh:
+        basicChordText += 'M7';
+        break;
+    }
+    if (basicChordText.length > 0) {
+      return basicChordText;
+    }
+    return null;
+  }
+
+  get additionalChordText() {
+    if (isHalfDiminished7th(this)) {
+      return '-5';
+    }
+    switch (this.triad) {
+      case Chord.Triad.suspendedFourth:
+        return 'sus4';
+      case Chord.Triad.suspendedSecond:
+        return 'sus2';
+    }
+    return null;
+  }
+
+  toString() {
+    let string = '';
+    string += String(this.root);
+    if (this.basicChordText) string += this.basicChordText;
+    if (this.additionalChordText) string += this.additionalChordText;
+    if (this.sortedTensionNotes) {
+      string += '(';
+      string += this.sortedTensionNotes.map(tension => String(tension)).join(' ');
+      string += ')';
+    }
+    return string;
   }
 }
 

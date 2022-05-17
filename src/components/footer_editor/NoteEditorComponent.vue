@@ -31,6 +31,7 @@ import Note from '../../modules/Note.js'
 import NoteValue from '../../modules/NoteValue.js'
 import NoteValueSelectorButtons from '../parts/NoteValueSelectorButtons.vue'
 import ChordEditorComponent from '../footer_editor/ChordEditorComponent.vue'
+import { keyEventTypeEnum } from '../../modules/KeyEventType.js'
 
 export default {
   components: {
@@ -48,10 +49,6 @@ export default {
       handler() { this.$_setNoteValueSliderValues() },
       deep: true,
     },
-  },
-
-  mounted() {
-    this.$_initialize();
   },
 
   props: {
@@ -190,9 +187,37 @@ export default {
 
   inject: [
     'replaceNote',
+    'openChordTextEditorDialog',
   ],
 
+  mounted() {
+    this.$_initialize();
+    this.$emit('register-component', this);
+  },
+
+  destroyed() {
+    this.$emit('register-component', null);
+  },
+
   methods: {
+    onKeydown(keyEventType, event) {
+      switch (keyEventType) {
+        case keyEventTypeEnum.key:
+          switch (event.code) {
+            case 'KeyC':
+              if (!this.$_isChordNoteAvailable) break;
+              this.openChordTextEditorDialog(
+                this.$_selectedNote.pitchOrChord,
+                this.selectedPartIdx,
+                this.selectedNoteIdx,
+              );
+              return true;
+          }
+          break;
+      }
+      return false;
+    },
+
     $_noteValueToSliderValue(noteValue) {
       return noteValue.divide(this.$data.$_noteValueSliderUnitValue).toNumber();
     },

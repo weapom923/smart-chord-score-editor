@@ -67,6 +67,7 @@ import GlobalConfigEditorDialog from './components/dialog/GlobalConfigEditorDial
 import ScoreMetadataEditorDialog from './components/dialog/ScoreMetadataEditorDialog.vue';
 import SectionEditorDialog from './components/dialog/SectionEditorDialog.vue';
 import GenerateSectionDialog from './components/dialog/GenerateSectionDialog.vue';
+import ChordTextEditorDialog from './components/dialog/ChordTextEditorDialog.vue';
 import AppInfoDialog from './components/dialog/AppInfoDialog.vue';
 import HelpDialog from './components/dialog/HelpDialog.vue';
 import Encoding from 'encoding-japanese';
@@ -148,6 +149,7 @@ export default {
     ScoreMetadataEditorDialog,
     SectionEditorDialog,
     GenerateSectionDialog,
+    ChordTextEditorDialog,
     AppInfoDialog,
     HelpDialog,
   },
@@ -426,6 +428,31 @@ export default {
       },
 
       showHelpDialog: this.$_showHelpDialog,
+
+      openChordTextEditorDialog: (chord, partIdx, noteIdx) => {
+        console.log(
+          chord,
+          this.$_selectedBarsFirst.sectionIdx,
+          this.$_selectedBarsFirst.barIdx,
+          partIdx,
+          noteIdx,
+        );
+        this.$_openDialog(
+          'chord-text-editor-dialog',
+          {
+            callback: ({ chord }) => {
+              let note = this.$data.$_score.getNote(
+                this.$_selectedBarsFirst.sectionIdx,
+                this.$_selectedBarsFirst.barIdx,
+                partIdx,
+                noteIdx,
+              )
+              note.pitchOrChord = chord;
+            },
+            chord: chord,
+          },
+        );
+      },
     };
   },
 
@@ -555,8 +582,8 @@ export default {
         let copiedBarPartOnly = bar.clone();
         copiedBarPartOnly.parts = copiedBar.parts.map(part => part.clone());
         ({ sectionIdx, barIdx } = this.$data.$_score.getNextSectionAndBarIdx({ sectionIdx, barIdx }));
-        if ((sectionIdx === null) || (barIdx === null)) break;
         copiedBarsPartOnly.push(copiedBarPartOnly);
+        if ((sectionIdx === null) || (barIdx === null)) break;
       }
       this.$_replaceBars(firstSectionIdx, firstBarIdx, copiedBarsPartOnly);
     },

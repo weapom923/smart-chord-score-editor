@@ -1,6 +1,6 @@
 <template>
   <v-select
-    multiple
+    solo hide-detail
     label="Part Type"
     v-model="$_partInBarTypeNames"
     v-bind:items="$_allPartInBarTypeNames"
