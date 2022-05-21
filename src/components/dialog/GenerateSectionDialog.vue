@@ -12,6 +12,7 @@
         <v-form
           ref="form"
           v-model="$data.$_valid"
+          v-on:submit.prevent
         >
           <v-container>
             <v-row>

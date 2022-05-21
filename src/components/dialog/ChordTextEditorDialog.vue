@@ -14,7 +14,10 @@
           v-bind:chord="$data.$_parsedChord"
           v-bind:font-size-px="12"
         />
-        <v-form v-model="$data.$_valid">
+        <v-form
+          v-model="$data.$_valid"
+          v-on:submit.prevent
+        >
           <v-text-field
             autofocus
             v-model="$data.$_chordText"
@@ -55,6 +58,7 @@ export default {
   data() {
     return {
       $_valid: true,
+      $_chord: null,
       $_chordText: '',
       $_parsedChord: null,
       $_parseErrorMessage: null,
@@ -74,7 +78,7 @@ export default {
 
   methods: {
     $_initialize() {
-      this.$data.$_chordText = String(this.chord);
+      this.$data.$_chordText = (this.chord === null)? '' : String(this.chord);
     },
 
     $_ok() {
@@ -91,6 +95,8 @@ export default {
         this.$data.$_chord = null;
         if (error instanceof ChordTextParser.ParseError) {
           this.$data.$_parseErrorMessage = 'Invalid chord text.';
+        } else if (error instanceof Chord.InvalidChordError) {
+          this.$data.$_parseErrorMessage = 'Invalid chord.';
         } else {
           this.$data.$_parseErrorMessage = 'Unexpected error.';
         }

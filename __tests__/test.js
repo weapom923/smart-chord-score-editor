@@ -264,15 +264,15 @@ test('parse CM9', () => {
   );
 });
 
-test('parse CM9(11 13)', () => {
-  expect(ChordTextParser.parse('CM9(11 13)')).toStrictEqual(
+test('parse CM9(#11 13)', () => {
+  expect(ChordTextParser.parse('CM9(#11 13)')).toStrictEqual(
     new Chord(
       Chord.Root.c,
       Chord.Triad.major,
       Chord.SixthOrSeventh.majorSeventh,
       new Set([
         TensionNotePitch.ninth,
-        TensionNotePitch.eleventh,
+        TensionNotePitch.sharpEleventh,
         TensionNotePitch.thirteenth,
       ]),
       null,
