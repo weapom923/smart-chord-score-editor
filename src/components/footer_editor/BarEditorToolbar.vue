@@ -16,7 +16,7 @@
       </div>
       <div v-if="$_areMultipleBarsSelected">({{ $_numSelectedBars }} bars selected)</div>
       <v-spacer />
-      <part-type-selector
+      <bar-part-type-selector
         id="part-type-selector"
         v-if="!$_areMultipleBarsSelected"
         v-model="selectedPartIdx"
@@ -80,13 +80,13 @@
 </style>
 
 <script>
-import PartTypeSelector from '../parts/BarPartTypeSelector.vue';
+import BarPartTypeSelector from '../parts/BarPartTypeSelector.vue';
 import Score from '../../modules/Score.js'
 import SectionAndBarIdx from '../../modules/SectionAndBarIdx.js'
 
 export default {
   components: {
-    PartTypeSelector,
+    BarPartTypeSelector,
   },
 
   props: {
