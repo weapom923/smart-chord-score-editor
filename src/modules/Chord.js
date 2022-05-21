@@ -178,7 +178,6 @@ class Chord {
         break;
       case Chord.Triad.suspendedFourth:
         selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.sixth);
-        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.majorSeventh);
         selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
         break;
       case Chord.Triad.suspendedSecond:
