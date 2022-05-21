@@ -16,9 +16,9 @@
         {{ $_basicChordText }}
       </div>
       <div id="additionals" v-if="$_sortedTensionNotes || $_additionalChordText">
-        <div v-if="$_sortedTensionNotes" id="tensions-container">
+        <div v-if="$_sortedTensionNotes" id="tension-notes-container">
           (
-          <div id="tensions">
+          <div id="tension-notes">
             <tension-note-pitch-component
               v-for="(tensionNote, tensionNoteIdx) in $_sortedTensionNotes"
               v-bind:key="tensionNoteIdx"
@@ -74,13 +74,13 @@
   align-items: flex-start;
 }
 
-#tensions-container {
+#tension-notes-container {
   display: flex;
   flex-flow: row;
   align-items: center;
 }
 
-#tensions {
+#tension-notes {
   display: flex;
   flex-flow: column-reverse;
   align-items: center;

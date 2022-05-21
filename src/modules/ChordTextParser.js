@@ -1,6 +1,5 @@
 import Chord from './Chord.js'
 import NotePitch from './NotePitch.js'
-import TensionNotePitch from './TensionNotePitch.js'
 
 class ChordTextParser {
   static parseBassNote(chordText) {
@@ -45,13 +44,13 @@ class ChordTextParser {
 
   static parseTensionNotes(chordText) {
     const validTensionNotes = {
-      '9': TensionNotePitch.ninth,
-      'b9': TensionNotePitch.flatNinth,
-      '#9': TensionNotePitch.sharpNinth,
-      '11': TensionNotePitch.eleventh,
-      '#11': TensionNotePitch.sharpEleventh,
-      '13': TensionNotePitch.thirteenth,
-      'b13': TensionNotePitch.flatThirteenth,
+      '9': Chord.TensionNote.ninth,
+      'b9': Chord.TensionNote.flatNinth,
+      '#9': Chord.TensionNote.sharpNinth,
+      '11': Chord.TensionNote.eleventh,
+      '#11': Chord.TensionNote.sharpEleventh,
+      '13': Chord.TensionNote.thirteenth,
+      'b13': Chord.TensionNote.flatThirteenth,
     };
     const validTensionNotations = Object.keys(validTensionNotes);
     let chordWithTensionNotationRegexp = new RegExp('(?<remaining>.+)\\((?<tensionNotations>.+)\\)');
@@ -78,7 +77,7 @@ class ChordTextParser {
 
   static parseOtherTension(chordText) {
     const validOtherTensionNotes = {
-      'add9': TensionNotePitch.ninth,
+      'add9': Chord.TensionNote.ninth,
     };
     let indexOfOtherTensionNotesNotation = chordText.length;
     if (chordText.endsWith('add9')) {
@@ -96,27 +95,27 @@ class ChordTextParser {
       '9': [
         Chord.Triad.major,
         Chord.SixthOrSeventh.dominantSeventh,
-        TensionNotePitch.ninth,
+        Chord.TensionNote.ninth,
       ],
       'm9': [
         Chord.Triad.minor,
         Chord.SixthOrSeventh.dominantSeventh,
-        TensionNotePitch.ninth,
+        Chord.TensionNote.ninth,
       ],
       'M9': [
         Chord.Triad.major,
         Chord.SixthOrSeventh.majorSeventh,
-        TensionNotePitch.ninth,
+        Chord.TensionNote.ninth,
       ],
       'mM9': [
         Chord.Triad.major,
         Chord.SixthOrSeventh.majorSeventh,
-        TensionNotePitch.ninth,
+        Chord.TensionNote.ninth,
       ],
       'dim9': [
         Chord.Triad.diminished,
         Chord.SixthOrSeventh.diminishedSeventh,
-        TensionNotePitch.ninth,
+        Chord.TensionNote.ninth,
       ],
     };
     let indexOfTriadSeventhAndNinthNotation = chordText.length;
@@ -261,7 +260,7 @@ class ChordTextParser {
   static parse(chordText) {
     let triad = undefined;
     let sixthOrSeventh = undefined;
-    let tensions = new Set();
+    let tensionNotes = new Set();
     let bass = undefined;
 
     chordText = chordText.trim();
@@ -275,9 +274,9 @@ class ChordTextParser {
     {
       let result = ChordTextParser.parseTensionNotes(chordText);
       chordText = result[0];
-      let tensionsTemp = result[1];
-      if (tensionsTemp !== null) {
-        tensionsTemp.forEach(tension => { tensions.add(tension) })
+      let tensionNotesTemp = result[1];
+      if (tensionNotesTemp !== null) {
+        tensionNotesTemp.forEach(tensionNote => { tensionNotes.add(tensionNote) })
       }
     }
 
@@ -286,7 +285,7 @@ class ChordTextParser {
       chordText = result[0];
       let otherTension = result[1];
       if (otherTension !== null) {
-        tensions.add(otherTension);
+        tensionNotes.add(otherTension);
       }
     }
 
@@ -307,7 +306,7 @@ class ChordTextParser {
         if (triad === undefined) triad = triadSeventhAndNinth[0];
         sixthOrSeventh = triadSeventhAndNinth[1];
         let ninth = triadSeventhAndNinth[2];
-        tensions.add(ninth);
+        tensionNotes.add(ninth);
       }
     }
 
@@ -345,7 +344,7 @@ class ChordTextParser {
 
     if (triad === undefined) triad = Chord.Triad.major;
 
-    return new Chord(root, triad, sixthOrSeventh, tensions, bass);
+    return new Chord(root, triad, sixthOrSeventh, tensionNotes, bass);
   }
 }
 

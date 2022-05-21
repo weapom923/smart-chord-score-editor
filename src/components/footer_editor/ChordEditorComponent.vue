@@ -81,17 +81,17 @@
       <v-btn-toggle
         multiple tile
         class="chord-component-selector"
-        v-bind:value="$data.$_tensionNotePitchIdcs"
-        v-on:change="$_updateTensionNotePitches"
+        v-bind:value="$data.$_tensionNoteIdcs"
+        v-on:change="$_updateTensionNotees"
       >
         <v-btn
           small
           class="chord-component-selector-button"
-          v-for="(tensionNotePitchText, tensionNotePitchIdx) in $_tensionNotePitchTexts"
-          v-bind:key="tensionNotePitchIdx"
-          v-bind:disabled="$_isTensionNotePitchDisabled[tensionNotePitchIdx]"
+          v-for="(tensionNoteText, tensionNoteIdx) in $_tensionNoteTexts"
+          v-bind:key="tensionNoteIdx"
+          v-bind:disabled="$_isTensionNoteDisabled[tensionNoteIdx]"
         >
-          {{ tensionNotePitchText }}
+          {{ tensionNoteText }}
         </v-btn>
       </v-btn-toggle>
 
@@ -162,7 +162,6 @@
 
 <script>
 import Chord from '../../modules/Chord.js'
-import TensionNotePitch from '../../modules/TensionNotePitch.js'
 import Note from '../../modules/Note.js'
 import NotePitch from '../../modules/NotePitch.js'
 import NotePitchSymbol from '../../modules/NotePitchSymbol.js'
@@ -188,31 +187,25 @@ export default {
     },
 
     '$data.$_triadIdx'() {
-      let sixthOrSeventhIdx = this.$data.$_sixthOrSeventhIdx;
-      if (this.$_isSixthOrSeventhDisabled[sixthOrSeventhIdx]) {
-        sixthOrSeventhIdx = this.$_sixthOrSevenths.findIndex(
-          sixthOrSeventh => (sixthOrSeventh === null)
-        );
-      }
-      let sixthOrSeventh = this.$_sixthOrSevenths[sixthOrSeventhIdx];
-      let tensionNotePitchIdcs = [ ...this.$data.$_tensionNotePitchIdcs ];
-      for (let tensionNotePitchIdx of tensionNotePitchIdcs) {
-        if (this.$_isTensionNotePitchDisabled[tensionNotePitchIdx]) {
-          let idxInTensionNotePitchIdcs = tensionNotePitchIdcs.findIndex(
-            currentTensionNotePitchIdx => (currentTensionNotePitchIdx === tensionNotePitchIdx)
-          );
-          tensionNotePitchIdcs.splice(idxInTensionNotePitchIdcs, 1);
+      let sixthOrSeventh = null;
+      if (this.$data.$_sixthOrSeventhIdx !== null) {
+        sixthOrSeventh = this.$_sixthOrSevenths[this.$data.$_sixthOrSeventhIdx];
+        if (this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)) {
+          sixthOrSeventh = null;
         }
       }
-      let tensionNotePitches = new Set();
-      for (let tensionNotePitchIdx of tensionNotePitchIdcs) {
-        tensionNotePitches.add(this.$_tensionNotePitches[tensionNotePitchIdx]);
+      let tensionNotes = new Set(this.chord.tensionNotes);
+      for (let tensionNoteIdx of this.$data.$_tensionNoteIdcs) {
+        let tensionNote = this.$_tensionNotes[tensionNoteIdx];
+        if (!this.chord.selectableTensionNotes.has(tensionNote)) {
+          tensionNotes.delete(tensionNote);
+        }
       }
       let newChord = new Chord(
         this.chord.root,
         this.chord.triad,
         sixthOrSeventh,
-        tensionNotePitches,
+        tensionNotes,
         this.chord.bass,
       )
       this.$emit('change', newChord);
@@ -230,7 +223,7 @@ export default {
       $_rootNoteAccidentalSignIdx: null,
       $_triadIdx: null,
       $_sixthOrSeventhIdx: null,
-      $_tensionNotePitchIdcs: [],
+      $_tensionNoteIdcs: [],
       $_bassNoteSymbolIdx: null,
       $_bassNoteAccidentalSignIdx: null,
     };
@@ -266,7 +259,6 @@ export default {
 
     $_bassNoteSymbolTextToInstance() {
       return [
-        [ '', null ],
         [ '/A', NotePitchSymbol.a ],
         [ '/B', NotePitchSymbol.b ],
         [ '/C', NotePitchSymbol.c ],
@@ -304,7 +296,6 @@ export default {
 
     $_sixthOrSeventhTextToInstance() {
       return [
-        [ '', undefined ],
         [ '6', Chord.SixthOrSeventh.sixth ],
         [ '7', Chord.SixthOrSeventh.dominantSeventh ],
         [ 'M7', Chord.SixthOrSeventh.majorSeventh ],
@@ -314,133 +305,30 @@ export default {
     $_sixthOrSeventhTexts() { return this.$_sixthOrSeventhTextToInstance.map(first) },
     $_sixthOrSevenths() { return this.$_sixthOrSeventhTextToInstance.map(second) },
 
-    $_tensionNotePitchTextToInstance() {
+    $_tensionNoteTextToInstance() {
       return [
-        [ '', undefined ],
-        [ '♭9', TensionNotePitch.flatNinth ],
-        [ '9', TensionNotePitch.ninth ],
-        [ '♯9', TensionNotePitch.sharpNinth ],
-        [ '11', TensionNotePitch.eleventh ],
-        [ '♯11', TensionNotePitch.sharpEleventh ],
-        [ '♭13', TensionNotePitch.flatThirteenth ],
-        [ '13', TensionNotePitch.thirteenth ],
+        [ '♭9', Chord.TensionNote.flatNinth ],
+        [ '9', Chord.TensionNote.ninth ],
+        [ '♯9', Chord.TensionNote.sharpNinth ],
+        [ '11', Chord.TensionNote.eleventh ],
+        [ '♯11', Chord.TensionNote.sharpEleventh ],
+        [ '♭13', Chord.TensionNote.flatThirteenth ],
+        [ '13', Chord.TensionNote.thirteenth ],
       ];
     },
-    $_tensionNotePitchTexts() { return this.$_tensionNotePitchTextToInstance.map(first) },
-    $_tensionNotePitches() { return this.$_tensionNotePitchTextToInstance.map(second) },
+    $_tensionNoteTexts() { return this.$_tensionNoteTextToInstance.map(first) },
+    $_tensionNotes() { return this.$_tensionNoteTextToInstance.map(second) },
 
     $_isSixthOrSeventhDisabled() {
-      let isSixthOrSeventhDisabled = new Array(this.$_sixthOrSevenths.length);
-      isSixthOrSeventhDisabled.fill(false);
-
-      let disable = (targetSixthOrSeventh) => {
-        let targetSixthOrSeventhIdx = this.$_sixthOrSevenths.findIndex(sixthOrSeventh => {
-          return targetSixthOrSeventh === sixthOrSeventh;
-        });
-        isSixthOrSeventhDisabled[targetSixthOrSeventhIdx] = true;
-      };
-
-      let triad = this.$_triads[this.$data.$_triadIdx];
-      switch (triad) {
-        case Chord.Triad.suspendedFourth:
-          disable(Chord.SixthOrSeventh.sixth);
-          disable(Chord.SixthOrSeventh.majorSeventh);
-          disable(Chord.SixthOrSeventh.diminishedSeventh);
-          break;
-        case Chord.Triad.suspendedSecond:
-          disable(Chord.SixthOrSeventh.sixth);
-          disable(Chord.SixthOrSeventh.diminishedSeventh);
-          disable(Chord.SixthOrSeventh.dominantSeventh);
-          disable(Chord.SixthOrSeventh.majorSeventh);
-          break;
-        case Chord.Triad.diminished:
-          disable(Chord.SixthOrSeventh.sixth);
-          disable(Chord.SixthOrSeventh.majorSeventh);
-          break;
-        case Chord.Triad.augumented:
-          disable(Chord.SixthOrSeventh.diminishedSeventh);
-          disable(Chord.SixthOrSeventh.sixth);
-          break;
-      }
-      return isSixthOrSeventhDisabled;
+      return this.$_sixthOrSevenths.map(
+        sixthOrSeventh => !this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)
+      );
     },
-    
-    $_isTensionNotePitchDisabled() {
-      let isTensionNotePitchDisabled = new Array(this.$_tensionNotePitches.length);
-      isTensionNotePitchDisabled.fill(false);
 
-      let disable = (targetTensionNotePitch) => {
-        let targetTensionNotePitchIdx = this.$_tensionNotePitches.findIndex(tensionNotePitch => {
-          if (tensionNotePitch === undefined) return false;
-          return targetTensionNotePitch.isEqualTo(tensionNotePitch);
-        });
-        isTensionNotePitchDisabled[targetTensionNotePitchIdx] = true;
-      };
-
-      let triad = this.$_triads[this.$data.$_triadIdx];
-      switch (triad) {
-        case Chord.Triad.major:
-          disable(TensionNotePitch.eleventh);
-          break;
-        case Chord.Triad.minor:
-          disable(TensionNotePitch.sharpNinth);
-          break;
-        case Chord.Triad.suspendedFourth:
-          disable(TensionNotePitch.eleventh);
-          disable(TensionNotePitch.sharpEleventh);
-          break;
-        case Chord.Triad.suspendedSecond:
-          disable(TensionNotePitch.ninth);
-          disable(TensionNotePitch.sharpNinth);
-          disable(TensionNotePitch.flatNinth);
-          break;
-        case Chord.Triad.diminished:
-          disable(TensionNotePitch.sharpNinth);
-          disable(TensionNotePitch.flatNinth);
-          disable(TensionNotePitch.sharpEleventh);
-          break;
-        case Chord.Triad.augumented:
-          disable(TensionNotePitch.flatNinth);
-          disable(TensionNotePitch.thirteenth);
-          break;
-      }
-
-      let sixthOrSeventh = this.$_sixthOrSevenths[this.$data.$_sixthOrSeventhIdx];
-      switch (sixthOrSeventh) {
-        case Chord.SixthOrSeventh.diminishedSeventh:
-          disable(TensionNotePitch.thirteenth);
-          break;
-      }
-
-      for (let tensionNotePitchIdx of this.$data.$_tensionNotePitchIdcs) {
-        let tensionNotePitch = this.$_tensionNotePitches[tensionNotePitchIdx];
-        switch (tensionNotePitch) {
-          case TensionNotePitch.ninth:
-            disable(TensionNotePitch.flatNinth);
-            disable(TensionNotePitch.sharpNinth);
-            break;
-          case TensionNotePitch.flatNinth:
-            disable(TensionNotePitch.ninth);
-            break;
-          case TensionNotePitch.sharpNinth:
-            disable(TensionNotePitch.ninth);
-            break;
-          case TensionNotePitch.eleventh:
-            disable(TensionNotePitch.sharpEleventh);
-            break;
-          case TensionNotePitch.sharpEleventh:
-            disable(TensionNotePitch.eleventh);
-            break;
-          case TensionNotePitch.thirteenth:
-            disable(TensionNotePitch.flatThirteenth);
-            break;
-          case TensionNotePitch.flatThirteenth:
-            disable(TensionNotePitch.thirteenth);
-            break;
-        }
-      }
-
-      return isTensionNotePitchDisabled;
+    $_isTensionNoteDisabled() {
+      return this.$_tensionNotes.map(
+        tensionNote => !this.chord.selectableTensionNotes.has(tensionNote)
+      );
     },
   },
 
@@ -463,13 +351,13 @@ export default {
       } else {
         this.$data.$_sixthOrSeventhIdx = null;
       }
-      this.$data.$_tensionNotePitchIdcs = this.$_tensionNotePitches
-        .filter(tensionNotePitch => {
-          return this.chord.tensions.has(tensionNotePitch);
+      this.$data.$_tensionNoteIdcs = this.$_tensionNotes
+        .filter(tensionNote => {
+          return this.chord.tensionNotes.has(tensionNote);
         })
-        .map(tensionNotePitch => {
-          return this.$_tensionNotePitches.findIndex(_tensionNotePitch => {
-            return _tensionNotePitch === tensionNotePitch;
+        .map(tensionNote => {
+          return this.$_tensionNotes.findIndex(_tensionNote => {
+            return _tensionNote === tensionNote;
           })
         });
       if (this.chord.bass !== null) {
@@ -498,7 +386,7 @@ export default {
         NotePitch.findPredefinedNotePitch(rootNoteSymbol, this.chord.root.shift),
         this.chord.triad,
         this.chord.sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         this.chord.bass,
       )
       this.$emit('change', newChord);
@@ -510,7 +398,7 @@ export default {
         NotePitch.findPredefinedNotePitch(this.chord.root.symbol, rootNotePitchShift),
         this.chord.triad,
         this.chord.sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         this.chord.bass,
       )
       this.$emit('change', newChord);
@@ -522,7 +410,7 @@ export default {
         this.chord.root,
         triad,
         this.chord.sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         this.chord.bass,
       )
       this.$emit('change', newChord);
@@ -535,37 +423,24 @@ export default {
         this.chord.root,
         this.chord.triad,
         sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         this.chord.bass,
       )
       this.$emit('change', newChord);
     },
 
-    $_updateTensionNotePitches(tensionNotePitchIdcs) {
-      let tensionNotePitches = new Set();
-      for (let tensionNotePitchIdx of tensionNotePitchIdcs) {
-        let tensionNotePitch = this.$_tensionNotePitches[tensionNotePitchIdx];
-        tensionNotePitches.add(tensionNotePitch)
-      }
-      if (tensionNotePitches.has(undefined)) {
-        let newChord = new Chord(
-          this.chord.root,
-          this.chord.triad,
-          this.chord.sixthOrSeventh,
-          new Set(),
-          this.chord.bass,
-        )
-        this.$emit('change', newChord);
-      } else {
-        let newChord = new Chord(
-          this.chord.root,
-          this.chord.triad,
-          this.chord.sixthOrSeventh,
-          tensionNotePitches,
-          this.chord.bass,
-        )
-        this.$emit('change', newChord);
-      }
+    $_updateTensionNotees(tensionNoteIdcs) {
+      let tensionNotes = new Set(tensionNoteIdcs.map(
+        tensionNoteIdx => this.$_tensionNotes[tensionNoteIdx]
+      ));
+      let newChord = new Chord(
+        this.chord.root,
+        this.chord.triad,
+        this.chord.sixthOrSeventh,
+        tensionNotes,
+        this.chord.bass,
+      )
+      this.$emit('change', newChord);
     },
 
     $_updateBassNoteSymbol(bassNoteSymbolIdx) {
@@ -585,7 +460,7 @@ export default {
         this.chord.root,
         this.chord.triad,
         this.chord.sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         newBass,
       )
       this.$emit('change', newChord);
@@ -597,14 +472,14 @@ export default {
         this.chord.root,
         this.chord.triad,
         this.chord.sixthOrSeventh,
-        this.chord.tensions,
+        this.chord.tensionNotes,
         NotePitch.findPredefinedNotePitch(this.chord.bass.symbol, bassNotePitchShift),
       )
       this.$emit('change', newChord);
     },
 
-    $_clearTensionNotePitches() {
-      this.$data.$_tensionNotePitchIdcs.splice(0);
+    $_clearTensionNotees() {
+      this.$data.$_tensionNoteIdcs.splice(0);
     },
   },
 }

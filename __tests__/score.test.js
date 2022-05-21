@@ -1,5 +1,4 @@
 import Chord from '../src/modules/Chord.js'
-import TensionNotePitch from '../src/modules/TensionNotePitch.js'
 import Bar from '../src/modules/Bar.js'
 import BarRepeatEnding from '../src/modules/BarRepeatEnding.js'
 import BarBreak from '../src/modules/BarBreak.js'
@@ -31,7 +30,7 @@ test('equality 1', () => {
                       Chord.Triad.minor,
                       Chord.SixthOrSeventh.dominantSeventh,
                       new Set([
-                        TensionNotePitch.flatNinth,
+                        Chord.TensionNote.flatNinth,
                       ]),
                       NotePitch.d,
                     ),

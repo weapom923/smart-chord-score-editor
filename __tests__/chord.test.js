@@ -1,5 +1,4 @@
 import Chord from '../src/modules/Chord.js'
-import TensionNotePitch from '../src/modules/TensionNotePitch.js'
 
 test('equality 1', () => {
   let chord = new Chord(
@@ -7,9 +6,9 @@ test('equality 1', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.ninth,
-      TensionNotePitch.eleventh,
-      TensionNotePitch.thirteenth,
+      Chord.TensionNote.ninth,
+      Chord.TensionNote.eleventh,
+      Chord.TensionNote.thirteenth,
     ]),
     null,
   );
@@ -22,9 +21,9 @@ test('equality 2', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.ninth,
-      TensionNotePitch.eleventh,
-      TensionNotePitch.thirteenth,
+      Chord.TensionNote.ninth,
+      Chord.TensionNote.eleventh,
+      Chord.TensionNote.thirteenth,
     ]),
     null,
   );
@@ -33,9 +32,9 @@ test('equality 2', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.thirteenth,
-      TensionNotePitch.eleventh,
-      TensionNotePitch.ninth,
+      Chord.TensionNote.thirteenth,
+      Chord.TensionNote.eleventh,
+      Chord.TensionNote.ninth,
     ]),
     null,
   );
@@ -48,8 +47,8 @@ test('equality 3', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.ninth,
-      TensionNotePitch.eleventh,
+      Chord.TensionNote.ninth,
+      Chord.TensionNote.eleventh,
     ]),
     null,
   );
@@ -58,7 +57,7 @@ test('equality 3', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.ninth,
+      Chord.TensionNote.ninth,
     ]),
     null,
   );
@@ -71,9 +70,9 @@ test('equality 4', () => {
     Chord.Triad.major,
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
-      TensionNotePitch.ninth,
-      TensionNotePitch.eleventh,
-      TensionNotePitch.thirteenth,
+      Chord.TensionNote.ninth,
+      Chord.TensionNote.eleventh,
+      Chord.TensionNote.thirteenth,
     ]),
     null,
   );

@@ -1,21 +1,16 @@
 import NotePitch from './NotePitch.js';
 import TensionNotePitch from './TensionNotePitch.js';
 
-function isHalfDiminished7th(chord) {
-  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.dominantSeventh);
-}
-
-function isDiminished7th(chord) {
-  return (chord.triad === Chord.Triad.diminished) && (chord.sixthOrSeventh === Chord.SixthOrSeventh.diminishedSeventh);
-}
-
 class Chord {
-  constructor(root, triad, sixthOrSeventh = null, tensions = new Set(), bass = null) {
+  constructor(root, triad, sixthOrSeventh = null, tensionNotes = new Set(), bass = null) {
     this.root = root;
     this.triad = triad;
     this.sixthOrSeventh = sixthOrSeventh;
-    this.tensions = tensions;
+    this.tensionNotes = tensionNotes;
     this.bass = bass;
+    if (!this.isValid) {
+      throw new Chord.InvalidChordError('Invalid chord.');
+    }
   }
 
   getRawObj() {
@@ -23,7 +18,7 @@ class Chord {
     rawObj.root = this.root.getRawObj();
     rawObj.triad = this.triad;
     rawObj.sixth_or_seventh = (this.sixthOrSeventh === null)? null : this.sixthOrSeventh;
-    rawObj.tensions = Array.from(this.tensions).map(tension => tension.getRawObj());
+    rawObj.tensionNotes = Array.from(this.tensionNotes).map(tensionNote => tensionNote.getRawObj());
     rawObj.bass = (this.bass === null)? null : this.bass.getRawObj();
     return rawObj;
   }
@@ -32,10 +27,10 @@ class Chord {
     if (!this.root.isEqualTo(that.root)) return false;
     if (this.triad !== that.triad) return false;
     if (this.sixthOrSeventh !== that.sixthOrSeventh) return false;
-    if (this.tensions.size !== that.tensions.size) return false;
-    for (let tensionNotePitchOfThis of this.tensions.values()) {
+    if (this.tensionNotes.size !== that.tensionNotes.size) return false;
+    for (let tensionNotePitchOfThis of this.tensionNotes.values()) {
       let isSameTensionNotePitchFound = false;
-      for (let tensionNotePitchOfThat of that.tensions.values()) {
+      for (let tensionNotePitchOfThat of that.tensionNotes.values()) {
         if (tensionNotePitchOfThis.isEqualTo(tensionNotePitchOfThat)) {
           isSameTensionNotePitchFound = true;
           break;
@@ -52,15 +47,15 @@ class Chord {
   }
 
   clone() {
-    let tensions = new Set();
-    this.tensions.forEach(tensionNotePitch => {
-      tensions.add(tensionNotePitch.clone());
+    let tensionNotes = new Set();
+    this.tensionNotes.forEach(tensionNotePitch => {
+      tensionNotes.add(tensionNotePitch.clone());
     });
     return new Chord(
       this.root.clone(),
       this.triad,
       this.sixthOrSeventh,
-      tensions,
+      tensionNotes,
       (this.bass === null)? null : this.bass.clone(),
     );
   }
@@ -70,42 +65,50 @@ class Chord {
       NotePitch.loadFromRawObj(rawObj.root),
       rawObj.triad,
       (rawObj.sixth_or_seventh === null)? null : rawObj.sixth_or_seventh,
-      new Set(rawObj.tensions.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
+      new Set(rawObj.tensionNotes.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
       (rawObj.bass === null)? null : NotePitch.loadFromRawObj(rawObj.bass),
     );
   }
 
   get sortedTensionNotes() {
     let sortedTensionNotes = new Array();
-    if (this.tensions.has(TensionNotePitch.flatNinth)) {
-      sortedTensionNotes.push(TensionNotePitch.flatNinth);
+    if (this.tensionNotes.has(Chord.TensionNote.flatNinth)) {
+      sortedTensionNotes.push(Chord.TensionNote.flatNinth);
     }
-    if (this.tensions.has(TensionNotePitch.ninth)) {
-      sortedTensionNotes.push(TensionNotePitch.ninth);
+    if (this.tensionNotes.has(Chord.TensionNote.ninth)) {
+      sortedTensionNotes.push(Chord.TensionNote.ninth);
     }
-    if (this.tensions.has(TensionNotePitch.sharpNinth)) {
-      sortedTensionNotes.push(TensionNotePitch.sharpNinth);
+    if (this.tensionNotes.has(Chord.TensionNote.sharpNinth)) {
+      sortedTensionNotes.push(Chord.TensionNote.sharpNinth);
     }
-    if (this.tensions.has(TensionNotePitch.eleventh)) {
-      sortedTensionNotes.push(TensionNotePitch.eleventh);
+    if (this.tensionNotes.has(Chord.TensionNote.eleventh)) {
+      sortedTensionNotes.push(Chord.TensionNote.eleventh);
     }
-    if (this.tensions.has(TensionNotePitch.sharpEleventh)) {
-      sortedTensionNotes.push(TensionNotePitch.sharpEleventh);
+    if (this.tensionNotes.has(Chord.TensionNote.sharpEleventh)) {
+      sortedTensionNotes.push(Chord.TensionNote.sharpEleventh);
     }
-    if (this.tensions.has(TensionNotePitch.flatThirteenth)) {
-      sortedTensionNotes.push(TensionNotePitch.flatThirteenth);
+    if (this.tensionNotes.has(Chord.TensionNote.flatThirteenth)) {
+      sortedTensionNotes.push(Chord.TensionNote.flatThirteenth);
     }
-    if (this.tensions.has(TensionNotePitch.thirteenth)) {
-      sortedTensionNotes.push(TensionNotePitch.thirteenth);
+    if (this.tensionNotes.has(Chord.TensionNote.thirteenth)) {
+      sortedTensionNotes.push(Chord.TensionNote.thirteenth);
     }
     return (sortedTensionNotes.length > 0)? sortedTensionNotes : null;
   }
 
+  get isHalfDiminished7th() {
+    return (this.triad === Chord.Triad.diminished) && (this.sixthOrSeventh === Chord.SixthOrSeventh.dominantSeventh);
+  }
+
+  get isDiminished7th() {
+    return (this.triad === Chord.Triad.diminished) && (this.sixthOrSeventh === Chord.SixthOrSeventh.diminishedSeventh);
+  }
+
   get basicChordText() {
-    if (isHalfDiminished7th(this)) {
+    if (this.isHalfDiminished7th) {
       return 'm7';
     }
-    if (isDiminished7th(this)) {
+    if (this.isDiminished7th) {
       return 'dim7';
     }
     let basicChordText = '';
@@ -138,7 +141,7 @@ class Chord {
   }
 
   get additionalChordText() {
-    if (isHalfDiminished7th(this)) {
+    if (this.isHalfDiminished7th) {
       return '-5';
     }
     switch (this.triad) {
@@ -157,10 +160,152 @@ class Chord {
     if (this.additionalChordText) string += this.additionalChordText;
     if (this.sortedTensionNotes) {
       string += '(';
-      string += this.sortedTensionNotes.map(tension => String(tension)).join(' ');
+      string += this.sortedTensionNotes.map(tensionNote => String(tensionNote)).join(' ');
       string += ')';
     }
     return string;
+  }
+
+  get selectableSixthOrSevenths() {
+    let selectableSixthOrSevenths = new Set(Object.values(Chord.SixthOrSeventh));
+
+    switch (this.triad) {
+      case Chord.Triad.major:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
+        break;
+      case Chord.Triad.minor:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
+        break;
+      case Chord.Triad.suspendedFourth:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.sixth);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.majorSeventh);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
+        break;
+      case Chord.Triad.suspendedSecond:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.sixth);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.dominantSeventh);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.majorSeventh);
+        break;
+      case Chord.Triad.diminished:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.sixth);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.majorSeventh);
+        break;
+      case Chord.Triad.augumented:
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.diminishedSeventh);
+        selectableSixthOrSevenths.delete(Chord.SixthOrSeventh.sixth);
+        break;
+    }
+    return selectableSixthOrSevenths;
+  }
+
+  get selectableTensionNotes() {
+    let selectableTensionNotes = new Set(Object.values(Chord.TensionNote));
+
+    switch (this.triad) {
+      case Chord.Triad.major:
+        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+        break;
+      case Chord.Triad.minor:
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        break;
+      case Chord.Triad.suspendedFourth:
+        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
+        break;
+      case Chord.Triad.suspendedSecond:
+        selectableTensionNotes.delete(Chord.TensionNote.ninth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        break;
+      case Chord.Triad.diminished:
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
+        break;
+      case Chord.Triad.augumented:
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+        selectableTensionNotes.delete(Chord.TensionNote.flatThirteenth);
+        selectableTensionNotes.delete(Chord.TensionNote.thirteenth);
+        break;
+    }
+
+    switch (this.sixthOrSeventh) {
+      case Chord.SixthOrSeventh.sixth:
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.flatThirteenth);
+        selectableTensionNotes.delete(Chord.TensionNote.thirteenth);
+        break;
+      case Chord.SixthOrSeventh.diminishedSeventh:
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
+        selectableTensionNotes.delete(Chord.TensionNote.thirteenth);
+        break;
+      case Chord.SixthOrSeventh.dominantSeventh:
+        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+        break;
+      case Chord.SixthOrSeventh.majorSeventh:
+        selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+        selectableTensionNotes.delete(Chord.TensionNote.flatThirteenth);
+        break;
+    }
+
+    for (let tensionNote of this.tensionNotes) {
+      switch (tensionNote) {
+        case Chord.TensionNote.ninth:
+          selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
+          selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+          break;
+        case Chord.TensionNote.flatNinth:
+          selectableTensionNotes.delete(Chord.TensionNote.ninth);
+          break;
+        case Chord.TensionNote.sharpNinth:
+          selectableTensionNotes.delete(Chord.TensionNote.ninth);
+          break;
+        case Chord.TensionNote.eleventh:
+          selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
+          break;
+        case Chord.TensionNote.sharpEleventh:
+          selectableTensionNotes.delete(Chord.TensionNote.eleventh);
+          break;
+        case Chord.TensionNote.thirteenth:
+          selectableTensionNotes.delete(Chord.TensionNote.flatThirteenth);
+          break;
+        case Chord.TensionNote.flatThirteenth:
+          selectableTensionNotes.delete(Chord.TensionNote.thirteenth);
+          break;
+      }
+    }
+    return selectableTensionNotes;
+  }
+
+  get isValid() {
+    if (this.sixthOrSeventh !== null) {
+      let isSixthOrSeventhSelectable = false;
+      for (let selectableSixthOrSeventh of this.selectableSixthOrSevenths) {
+        if (selectableSixthOrSeventh === this.sixthOrSeventh) {
+          isSixthOrSeventhSelectable = true;
+          break;
+        }
+      }
+      if (!isSixthOrSeventhSelectable) return false;
+    }
+    for (let tensionNote of this.tensionNotes) {
+      let isTensionNoteSelectable = false;
+      for (let selectableTensionNote of this.selectableTensionNotes) {
+        if (selectableTensionNote.isEqualTo(tensionNote)) {
+          isTensionNoteSelectable = true;
+          break;
+        }
+      }
+      if (!isTensionNoteSelectable) return false;
+    }
+    return true;
   }
 }
 
@@ -189,6 +334,23 @@ Object.defineProperty(
       majorSeventh: 'majorSeventh',
       diminishedSeventh: 'diminishedSeventh',
       sixth: 'sixth',
+    },
+    writable: false,
+  },
+);
+
+Object.defineProperty(
+  Chord,
+  'TensionNote',
+  {
+    value: {
+      ninth:          TensionNotePitch.ninth,
+      flatNinth:      TensionNotePitch.flatNinth,
+      sharpNinth:     TensionNotePitch.sharpNinth,
+      eleventh:       TensionNotePitch.eleventh,
+      sharpEleventh:  TensionNotePitch.sharpEleventh,
+      thirteenth:     TensionNotePitch.thirteenth,
+      flatThirteenth: TensionNotePitch.flatThirteenth,
     },
     writable: false,
   },
@@ -230,6 +392,19 @@ Object.defineProperty(
   'default',
   {
     value: new Chord(Chord.Root.a, Chord.Triad.major),
+    writable: false,
+  },
+);
+
+Object.defineProperty(
+  Chord,
+  'InvalidChordError',
+  {
+    value: class extends Error {
+      constructor(...args) {
+        super(...args);
+      }
+    },
     writable: false,
   },
 );
