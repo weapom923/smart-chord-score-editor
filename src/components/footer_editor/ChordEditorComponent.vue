@@ -190,7 +190,7 @@ export default {
       let sixthOrSeventh = null;
       if (this.$data.$_sixthOrSeventhIdx !== null) {
         sixthOrSeventh = this.$_sixthOrSevenths[this.$data.$_sixthOrSeventhIdx];
-        if (this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)) {
+        if (!this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)) {
           sixthOrSeventh = null;
         }
       }
