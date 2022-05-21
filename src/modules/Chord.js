@@ -2,14 +2,18 @@ import NotePitch from './NotePitch.js';
 import TensionNotePitch from './TensionNotePitch.js';
 
 class Chord {
-  constructor(root, triad, sixthOrSeventh = null, tensionNotes = new Set(), bass = null) {
+  constructor(root, triad, sixthOrSeventh = null, tensionNotes = new Set(), bass = null, { makesValid = false } = {}) {
     this.root = root;
     this.triad = triad;
     this.sixthOrSeventh = sixthOrSeventh;
     this.tensionNotes = tensionNotes;
     this.bass = bass;
-    if (!this.isValid) {
-      throw new Chord.InvalidChordError('Invalid chord.');
+    if (!this.isValid){
+      if (makesValid) {
+        this.makeValid();
+      } else  {
+        throw new Chord.InvalidChordError('Invalid chord.');
+      }
     }
   }
 
@@ -303,6 +307,34 @@ class Chord {
         }
       }
       if (!isTensionNoteSelectable) return false;
+    }
+    return true;
+  }
+
+  makeValid() {
+    if (this.sixthOrSeventh !== null) {
+      let isSixthOrSeventhSelectable = false;
+      for (let selectableSixthOrSeventh of this.selectableSixthOrSevenths) {
+        if (selectableSixthOrSeventh === this.sixthOrSeventh) {
+          isSixthOrSeventhSelectable = true;
+          break;
+        }
+      }
+      if (!isSixthOrSeventhSelectable) {
+        this.sixthOrSeventh = null;
+      }
+    }
+    for (let tensionNote of this.tensionNotes) {
+      let isTensionNoteSelectable = false;
+      for (let selectableTensionNote of this.selectableTensionNotes) {
+        if (selectableTensionNote.isEqualTo(tensionNote)) {
+          isTensionNoteSelectable = true;
+          break;
+        }
+      }
+      if (!isTensionNoteSelectable) {
+        this.tensionNotes.delete(tensionNote);
+      }
     }
     return true;
   }

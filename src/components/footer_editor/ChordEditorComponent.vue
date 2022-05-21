@@ -185,31 +185,6 @@ export default {
       handler() { this.$_loadChord() },
       immediate: true,
     },
-
-    '$data.$_triadIdx'() {
-      let sixthOrSeventh = null;
-      if (this.$data.$_sixthOrSeventhIdx !== null) {
-        sixthOrSeventh = this.$_sixthOrSevenths[this.$data.$_sixthOrSeventhIdx];
-        if (!this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)) {
-          sixthOrSeventh = null;
-        }
-      }
-      let tensionNotes = new Set(this.chord.tensionNotes);
-      for (let tensionNoteIdx of this.$data.$_tensionNoteIdcs) {
-        let tensionNote = this.$_tensionNotes[tensionNoteIdx];
-        if (!this.chord.selectableTensionNotes.has(tensionNote)) {
-          tensionNotes.delete(tensionNote);
-        }
-      }
-      let newChord = new Chord(
-        this.chord.root,
-        this.chord.triad,
-        sixthOrSeventh,
-        tensionNotes,
-        this.chord.bass,
-      )
-      this.$emit('change', newChord);
-    },
   },
 
   props: {
@@ -388,6 +363,7 @@ export default {
         this.chord.sixthOrSeventh,
         this.chord.tensionNotes,
         this.chord.bass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -400,6 +376,7 @@ export default {
         this.chord.sixthOrSeventh,
         this.chord.tensionNotes,
         this.chord.bass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -412,6 +389,7 @@ export default {
         this.chord.sixthOrSeventh,
         this.chord.tensionNotes,
         this.chord.bass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -425,6 +403,7 @@ export default {
         sixthOrSeventh,
         this.chord.tensionNotes,
         this.chord.bass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -439,6 +418,7 @@ export default {
         this.chord.sixthOrSeventh,
         tensionNotes,
         this.chord.bass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -462,6 +442,7 @@ export default {
         this.chord.sixthOrSeventh,
         this.chord.tensionNotes,
         newBass,
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
@@ -474,6 +455,7 @@ export default {
         this.chord.sixthOrSeventh,
         this.chord.tensionNotes,
         NotePitch.findPredefinedNotePitch(this.chord.bass.symbol, bassNotePitchShift),
+        { makesValid: true },
       )
       this.$emit('change', newChord);
     },
