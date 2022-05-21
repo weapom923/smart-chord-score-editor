@@ -430,13 +430,6 @@ export default {
       showHelpDialog: this.$_showHelpDialog,
 
       openChordTextEditorDialog: (chord, partIdx, noteIdx) => {
-        console.log(
-          chord,
-          this.$_selectedBarsFirst.sectionIdx,
-          this.$_selectedBarsFirst.barIdx,
-          partIdx,
-          noteIdx,
-        );
         this.$_openDialog(
           'chord-text-editor-dialog',
           {
