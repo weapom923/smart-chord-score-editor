@@ -1,30 +1,38 @@
 <template>
-  <v-toolbar tile dense id="bar-editor-toolbar">
-    <div>
-      <span>
-        <span class="section-index">{{ selectedBarsFirst.sectionIdx + 1 }}</span>
-        <span class="section-title">{{ $_firstSection.name }}</span>
-        <span>bar-{{ selectedBarsFirst.barIdx + 1 }}</span>
-      </span>
-      <span class="connector-symbol" v-if="$_areMultipleBarsSelected" />
-      <span v-if="$_areMultipleBarsSelected">
-        <span class="section-index">{{ selectedBarsLast.sectionIdx + 1 }}</span>
-        <span class="section-title">{{ $_lastSection.name }}</span>
-        <span>bar-{{ selectedBarsLast.barIdx + 1 }}</span>
-      </span>
+  <v-toolbar tile dense>
+    <div class="container" id="bar-editor-toolbar">
+      <div>
+        <span>
+          <span class="section-index">{{ selectedBarsFirst.sectionIdx + 1 }}</span>
+          <span class="section-title">{{ $_firstSection.name }}</span>
+          <span>bar-{{ selectedBarsFirst.barIdx + 1 }}</span>
+        </span>
+        <span class="connector-symbol" v-if="$_areMultipleBarsSelected" />
+        <span v-if="$_areMultipleBarsSelected">
+          <span class="section-index">{{ selectedBarsLast.sectionIdx + 1 }}</span>
+          <span class="section-title">{{ $_lastSection.name }}</span>
+          <span>bar-{{ selectedBarsLast.barIdx + 1 }}</span>
+        </span>
+      </div>
+      <div v-if="$_areMultipleBarsSelected">({{ $_numSelectedBars }} bars selected)</div>
+      <v-spacer />
+      <part-type-selector
+        id="part-type-selector"
+        v-if="!$_areMultipleBarsSelected"
+        v-model="selectedPartIdx"
+        v-bind:bar="$_firstBar"
+      />
     </div>
-    <div v-if="$_areMultipleBarsSelected">({{ $_numSelectedBars }} bars selected)</div>
-    <v-spacer />
-    <part-type-selector
-      id="part-type-selector"
-      v-if="!$_areMultipleBarsSelected"
-      v-model="selectedPartIdx"
-      v-bind:bar="$_firstBar"
-    />
   </v-toolbar>
 </template>
 
 <style scoped>
+#bar-editor-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 #bar-editor-toolbar div:not(:last-child) {
   margin-right: 10px;
 }
@@ -66,6 +74,8 @@
 
 #part-type-selector {
   flex-grow: 0;
+  width: 20%;
+  min-width: 100px;
 }
 </style>
 
