@@ -7,7 +7,7 @@ test('equality 1', () => {
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
       Chord.TensionNote.ninth,
-      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
       Chord.TensionNote.thirteenth,
     ]),
     null,
@@ -22,7 +22,7 @@ test('equality 2', () => {
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
       Chord.TensionNote.ninth,
-      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
       Chord.TensionNote.thirteenth,
     ]),
     null,
@@ -33,7 +33,7 @@ test('equality 2', () => {
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
       Chord.TensionNote.thirteenth,
-      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
       Chord.TensionNote.ninth,
     ]),
     null,
@@ -48,7 +48,7 @@ test('equality 3', () => {
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
       Chord.TensionNote.ninth,
-      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
     ]),
     null,
   );
@@ -71,7 +71,7 @@ test('equality 4', () => {
     Chord.SixthOrSeventh.majorSeventh,
     new Set([
       Chord.TensionNote.ninth,
-      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
       Chord.TensionNote.thirteenth,
     ]),
     null,
