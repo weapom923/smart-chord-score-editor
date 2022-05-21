@@ -14,7 +14,10 @@
           v-bind:chord="$data.$_parsedChord"
           v-bind:font-size-px="12"
         />
-        <v-form v-model="$data.$_valid">
+        <v-form
+          v-model="$data.$_valid"
+          v-on:submit.prevent
+        >
           <v-text-field
             autofocus
             v-model="$data.$_chordText"

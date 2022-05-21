@@ -8,7 +8,10 @@
       <v-card-title>Global Config</v-card-title>
   
       <v-card-text>
-        <v-form v-model="$data.$_valid">
+        <v-form
+          v-model="$data.$_valid"
+          v-on:submit.prevent
+        >
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
