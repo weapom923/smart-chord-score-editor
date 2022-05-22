@@ -15,6 +15,7 @@
       />
       <template v-if="$_isChordNoteAvailable">
         <chord-editor-component
+          class="mt-3"
           v-bind:note-type="$_selectedNote.type"
           v-bind:chord="$_selectedNote.pitchOrChord"
           v-on:change="$_onChangeSelectedNotePitchOrChord"
