@@ -1,33 +1,37 @@
 <template>
   <div id="section-container">
-    <div id="section-name-container">
-      <v-menu
-        open-on-hover
-        close-on-click
-        close-on-content-click
-        bottom
-        offset-y
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <span
-            v-if="$_isSectionContainingFirstBar"
-            v-bind="attrs"
-            v-on="on"
+    <div
+      id="system-container"
+      v-for="(systemDefinition, systemIdx) of $_systemDefinitions"
+      v-bind:key="systemIdx"
+    >
+      <div class="section-name-container pr-5">
+        <template v-if="systemIdx === 0">
+          <v-menu
+            open-on-hover
+            close-on-click
+            close-on-content-click
+            bottom
+            offset-y
           >
-            {{ $_section.name }}
-          </span>
+            <template v-slot:activator="{ on, attrs }">
+              <div
+                class="section-name-menu-area py-3"
+                v-if="$_isSectionContainingFirstBar"
+                v-bind="attrs"
+                v-on="on"
+              >
+                {{ $_section.name }}
+              </div>
+            </template>
+  
+            <section-name-hover-menu
+              v-bind:section-idx="sectionDefinition.sectionIdx"
+            />
+          </v-menu>
         </template>
-
-        <section-name-hover-menu
-          v-bind:section-idx="sectionDefinition.sectionIdx"
-        />
-      </v-menu>
-    </div>
-
-    <div id="system-container">
+      </div>
       <system-component
-        v-for="(systemDefinition, systemIdx) of $_systemDefinitions"
-        v-bind:key="systemIdx"
         v-bind:score="score"
         v-bind:system-definition="systemDefinition"
         v-bind:is-bar-hover-menu-enabled="$_isBarHoverMenuEnabled"
@@ -42,18 +46,24 @@
 <style scoped>
 #section-container {
   display: flex;
-  flex-direction: row;
+  flex-grow: 1;
+  flex-direction: column;
 }
 
-#section-name-container {
+.section-name-container {
+  display: flex;
   min-width: 100px;
-  padding-top: 20px;
+  align-items: center;
+}
+
+.section-name-menu-area {
+  width: 100%;
+  text-align: right;
 }
 
 #system-container {
   display: flex;
-  flex-grow: 1;
-  flex-direction: column;
+  flex-direction: row;
 }
 </style>
 
