@@ -52,8 +52,8 @@ class Chord {
 
   clone() {
     let tensionNotes = new Set();
-    this.tensionNotes.forEach(tensionNotePitch => {
-      tensionNotes.add(tensionNotePitch.clone());
+    this.tensionNotes.forEach(tensionNote => {
+      tensionNotes.add(tensionNote.clone());
     });
     return new Chord(
       this.root.clone(),
@@ -69,33 +69,29 @@ class Chord {
       NotePitch.loadFromRawObj(rawObj.root),
       rawObj.triad,
       (rawObj.sixth_or_seventh === null)? null : rawObj.sixth_or_seventh,
-      new Set(rawObj.tension_notes.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
+      new Set(rawObj.tension_notes.map(tensionNoteRawObj => TensionNotePitch.loadFromRawObj(tensionNoteRawObj))),
       (rawObj.bass === null)? null : NotePitch.loadFromRawObj(rawObj.bass),
     );
   }
 
   get sortedTensionNotes() {
+    let allSortedTensionNotes = [
+      Chord.TensionNote.flatNinth,
+      Chord.TensionNote.ninth,
+      Chord.TensionNote.sharpNinth,
+      Chord.TensionNote.eleventh,
+      Chord.TensionNote.sharpEleventh,
+      Chord.TensionNote.flatThirteenth,
+      Chord.TensionNote.thirteenth,
+    ];
     let sortedTensionNotes = new Array();
-    if (this.tensionNotes.has(Chord.TensionNote.flatNinth)) {
-      sortedTensionNotes.push(Chord.TensionNote.flatNinth);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.ninth)) {
-      sortedTensionNotes.push(Chord.TensionNote.ninth);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.sharpNinth)) {
-      sortedTensionNotes.push(Chord.TensionNote.sharpNinth);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.eleventh)) {
-      sortedTensionNotes.push(Chord.TensionNote.eleventh);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.sharpEleventh)) {
-      sortedTensionNotes.push(Chord.TensionNote.sharpEleventh);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.flatThirteenth)) {
-      sortedTensionNotes.push(Chord.TensionNote.flatThirteenth);
-    }
-    if (this.tensionNotes.has(Chord.TensionNote.thirteenth)) {
-      sortedTensionNotes.push(Chord.TensionNote.thirteenth);
+    for (let targetTensionNote of allSortedTensionNotes) {
+      for (let tensionNote of this.tensionNotes) {
+        if (targetTensionNote.isEqualTo(tensionNote)) {
+          sortedTensionNotes.push(targetTensionNote);
+          break;
+        }
+      }
     }
     return (sortedTensionNotes.length > 0)? sortedTensionNotes : null;
   }
