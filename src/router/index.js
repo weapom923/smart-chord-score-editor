@@ -13,7 +13,7 @@ const router = new VueRouter({
       path: '/*',
       component: App,
       props: route => {
-        if (route.path === '/') {
+        if (['/', ''].includes(route.path)) {
           let scoreJsonFromCookie = window.localStorage.getItem('score');
           if (scoreJsonFromCookie !== null) {
             return { score: Score.loadJson(scoreJsonFromCookie) };
