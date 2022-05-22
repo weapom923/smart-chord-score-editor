@@ -3,11 +3,11 @@
     <v-card-title class="justify-center">
       <h1>{{ scoreMetadata.title }}</h1>
     </v-card-title>
-    <v-card-text class="d-flex">
+    <v-card-text class="d-flex px-0">
       <v-spacer />
       <v-list dense class="flex-shrink-0">
         <v-list-item
-          class="credit-content-container"
+          class="credit-content-container px-0"
           v-for="(name, creditTitle) in $_credits"
           v-bind:key="creditTitle"
         >

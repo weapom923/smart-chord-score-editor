@@ -1,134 +1,123 @@
 <template>
-  <div>
-    <v-switch
-      dense hide-details
-      label="Chord"
-      v-if="!$_isNoteRest"
-      v-bind:input-value="$_chordExists"
-      v-bind:true-value="true"
-      v-bind:false-value="false"
-      v-on:change="$_onChangeChordExists"
-    />
-    <div
-      id="chord-component-selector-container"
-      v-if="$_chordExists"
+  <div id="chord-component-selector-container">
+    <v-btn-toggle
+      mandatory tile
+      class="chord-component-selector root"
+      v-bind:value="$data.$_rootNoteSymbolIdx"
+      v-on:change="$_updateRootNoteSymbol"
     >
-      <v-btn-toggle
-        mandatory tile
-        class="chord-component-selector root"
-        v-bind:value="$data.$_rootNoteSymbolIdx"
-        v-on:change="$_updateRootNoteSymbol"
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(rootNoteSymbolText, rootNoteSymbolIdx) in $_rootNoteSymbolTexts"
+        v-bind:key="rootNoteSymbolIdx"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(rootNoteSymbolText, rootNoteSymbolIdx) in $_rootNoteSymbolTexts"
-          v-bind:key="rootNoteSymbolIdx"
-        >
-          {{ rootNoteSymbolText }}
-        </v-btn>
-      </v-btn-toggle>
+        {{ rootNoteSymbolText }}
+      </v-btn>
+    </v-btn-toggle>
 
-      <v-btn-toggle
-        mandatory tile
-        class="chord-component-selector accidental-sign"
-        v-bind:value="$data.$_rootNoteAccidentalSignIdx"
-        v-on:change="$_updateRootNoteAccidentalSign"
+    <v-btn-toggle
+      mandatory tile
+      class="chord-component-selector accidental-sign"
+      v-bind:value="$data.$_rootNoteAccidentalSignIdx"
+      v-on:change="$_updateRootNoteAccidentalSign"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(noteAccidentalSign, noteAccidentalSignIdx) in $_noteAccidentalSigns"
+        v-bind:key="noteAccidentalSignIdx"
+        v-bind:disabled="!$_chordExists"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(noteAccidentalSign, noteAccidentalSignIdx) in $_noteAccidentalSigns"
-          v-bind:key="noteAccidentalSignIdx"
-        >
-          {{ noteAccidentalSign }}
-        </v-btn>
-      </v-btn-toggle>
+        {{ noteAccidentalSign }}
+      </v-btn>
+    </v-btn-toggle>
 
-      <v-btn-toggle
-        mandatory tile
-        class="chord-component-selector"
-        v-bind:value="$data.$_triadIdx"
-        v-on:change="$_updateTriad"
+    <v-btn-toggle
+      mandatory tile
+      class="chord-component-selector"
+      v-bind:value="$data.$_triadIdx"
+      v-on:change="$_updateTriad"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(triadText, triadIdx) in $_triadTexts"
+        v-bind:key="triadIdx"
+        v-bind:disabled="!$_chordExists"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(triadText, triadIdx) in $_triadTexts"
-          v-bind:key="triadIdx"
-        >
-          {{ triadText }}
-        </v-btn>
-      </v-btn-toggle>
+        {{ triadText }}
+      </v-btn>
+    </v-btn-toggle>
 
-      <v-btn-toggle
-        tile
-        class="chord-component-selector"
-        v-bind:value="$data.$_sixthOrSeventhIdx"
-        v-on:change="$_updateSixthOrSeventh"
+    <v-btn-toggle
+      tile
+      class="chord-component-selector"
+      v-bind:value="$data.$_sixthOrSeventhIdx"
+      v-on:change="$_updateSixthOrSeventh"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(sixthOrSeventhText, sixthOrSeventhIdx) in $_sixthOrSeventhTexts"
+        v-bind:key="sixthOrSeventhIdx"
+        v-bind:disabled="$_isSixthOrSeventhDisabled[sixthOrSeventhIdx]"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(sixthOrSeventhText, sixthOrSeventhIdx) in $_sixthOrSeventhTexts"
-          v-bind:key="sixthOrSeventhIdx"
-          v-bind:disabled="$_isSixthOrSeventhDisabled[sixthOrSeventhIdx]"
-        >
-          {{ sixthOrSeventhText }}
-        </v-btn>
-      </v-btn-toggle>
+        {{ sixthOrSeventhText }}
+      </v-btn>
+    </v-btn-toggle>
 
-      <v-btn-toggle
-        multiple tile
-        class="chord-component-selector"
-        v-bind:value="$data.$_tensionNoteIdcs"
-        v-on:change="$_updateTensionNotees"
+    <v-btn-toggle
+      multiple tile
+      class="chord-component-selector"
+      v-bind:value="$data.$_tensionNoteIdcs"
+      v-on:change="$_updateTensionNotees"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(tensionNoteText, tensionNoteIdx) in $_tensionNoteTexts"
+        v-bind:key="tensionNoteIdx"
+        v-bind:disabled="$_isTensionNoteDisabled[tensionNoteIdx]"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(tensionNoteText, tensionNoteIdx) in $_tensionNoteTexts"
-          v-bind:key="tensionNoteIdx"
-          v-bind:disabled="$_isTensionNoteDisabled[tensionNoteIdx]"
-        >
-          {{ tensionNoteText }}
-        </v-btn>
-      </v-btn-toggle>
+        {{ tensionNoteText }}
+      </v-btn>
+    </v-btn-toggle>
 
-      <v-btn-toggle
-        tile
-        class="chord-component-selector"
-        v-bind:value="$data.$_bassNoteSymbolIdx"
-        v-on:change="$_updateBassNoteSymbol"
+    <v-btn-toggle
+      tile
+      class="chord-component-selector"
+      v-bind:value="$data.$_bassNoteSymbolIdx"
+      v-on:change="$_updateBassNoteSymbol"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-for="(bassNoteSymbolText, bassNoteSymbolIdx) in $_bassNoteSymbolTexts"
+        v-bind:key="bassNoteSymbolIdx"
+        v-bind:disabled="!$_chordExists"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-for="(bassNoteSymbolText, bassNoteSymbolIdx) in $_bassNoteSymbolTexts"
-          v-bind:key="bassNoteSymbolIdx"
-        >
-          {{ bassNoteSymbolText }}
-        </v-btn>
-      </v-btn-toggle>
-  
-      <v-btn-toggle
-        mandatory tile
-        class="chord-component-selector accidental-sign"
-        v-bind:value="$data.$_bassNoteAccidentalSignIdx"
-        v-on:change="$_updateBassNoteAccidentalSign"
+        {{ bassNoteSymbolText }}
+      </v-btn>
+    </v-btn-toggle>
+
+    <v-btn-toggle
+      mandatory tile
+      class="chord-component-selector accidental-sign"
+      v-bind:value="$data.$_bassNoteAccidentalSignIdx"
+      v-on:change="$_updateBassNoteAccidentalSign"
+    >
+      <v-btn
+        small
+        class="chord-component-selector-button"
+        v-bind:disabled="!$_isChordWithBass"
+        v-for="(noteAccidentalSign, noteAccidentalSignIdx) in $_noteAccidentalSigns"
+        v-bind:key="noteAccidentalSignIdx"
       >
-        <v-btn
-          small
-          class="chord-component-selector-button"
-          v-bind:disabled="!$_isChordWithBass"
-          v-for="(noteAccidentalSign, noteAccidentalSignIdx) in $_noteAccidentalSigns"
-          v-bind:key="noteAccidentalSignIdx"
-        >
-          {{ noteAccidentalSign }}
-        </v-btn>
-      </v-btn-toggle>
-  
-    </div>
+        {{ noteAccidentalSign }}
+      </v-btn>
+    </v-btn-toggle>
+
   </div>
 </template>
 
@@ -220,6 +209,7 @@ export default {
 
     $_rootNoteSymbolTextToInstance() {
       return [
+        [ '', null ],
         [ 'A', NotePitchSymbol.a ],
         [ 'B', NotePitchSymbol.b ],
         [ 'C', NotePitchSymbol.c ],
@@ -296,76 +286,93 @@ export default {
 
     $_isSixthOrSeventhDisabled() {
       return this.$_sixthOrSevenths.map(
-        sixthOrSeventh => !this.chord.selectableSixthOrSevenths.has(sixthOrSeventh)
+        sixthOrSeventh => {
+          if (!this.$_chordExists) return true;
+          return !this.chord.selectableSixthOrSevenths.has(sixthOrSeventh);
+        }
       );
     },
 
     $_isTensionNoteDisabled() {
       return this.$_tensionNotes.map(
-        tensionNote => !this.chord.selectableTensionNotes.has(tensionNote)
+        tensionNote => {
+          if (!this.$_chordExists) return true;
+          return !this.chord.selectableTensionNotes.has(tensionNote);
+        }
       );
     },
   },
 
   methods: {
     $_loadChord() {
-      if (!this.$_chordExists) return;
-      this.$data.$_rootNoteSymbolIdx = this.$_rootNoteSymbols.findIndex(rootNoteSymbol => {
-        return rootNoteSymbol === this.chord.root.symbol;
-      });
-      this.$data.$_rootNoteAccidentalSignIdx = this.$_notePitchShifts.findIndex(rootNotePitchShift => {
-        return rootNotePitchShift === this.chord.root.shift;
-      });
-      this.$data.$_triadIdx = this.$_triads.findIndex(triad => {
-        return triad === this.chord.triad;
-      });
-      if (this.chord.sixthOrSeventh !== null) {
-        this.$data.$_sixthOrSeventhIdx = this.$_sixthOrSevenths.findIndex(sixthOrSeventh => {
-          return sixthOrSeventh === this.chord.sixthOrSeventh;
+      if (this.$_chordExists) {
+        this.$data.$_rootNoteSymbolIdx = this.$_rootNoteSymbols.findIndex(rootNoteSymbol => {
+          return rootNoteSymbol === this.chord.root.symbol;
         });
-      } else {
-        this.$data.$_sixthOrSeventhIdx = null;
-      }
-      this.$data.$_tensionNoteIdcs = this.$_tensionNotes
-        .filter(tensionNote => {
-          return this.chord.tensionNotes.has(tensionNote);
-        })
-        .map(tensionNote => {
-          return this.$_tensionNotes.findIndex(_tensionNote => {
-            return _tensionNote === tensionNote;
+        this.$data.$_rootNoteAccidentalSignIdx = this.$_notePitchShifts.findIndex(rootNotePitchShift => {
+          return rootNotePitchShift === this.chord.root.shift;
+        });
+        this.$data.$_triadIdx = this.$_triads.findIndex(triad => {
+          return triad === this.chord.triad;
+        });
+        if (this.chord.sixthOrSeventh !== null) {
+          this.$data.$_sixthOrSeventhIdx = this.$_sixthOrSevenths.findIndex(sixthOrSeventh => {
+            return sixthOrSeventh === this.chord.sixthOrSeventh;
+          });
+        } else {
+          this.$data.$_sixthOrSeventhIdx = null;
+        }
+        this.$data.$_tensionNoteIdcs = this.$_tensionNotes
+          .filter(tensionNote => {
+            return this.chord.tensionNotes.has(tensionNote);
           })
-        });
-      if (this.chord.bass !== null) {
-        this.$data.$_bassNoteSymbolIdx = this.$_bassNoteSymbols.findIndex(bassNoteSymbol => {
-          return bassNoteSymbol === this.chord.bass.symbol;
-        });
-        this.$data.$_bassNoteAccidentalSignIdx = this.$_notePitchShifts.findIndex(bassNotePitchShift => {
-          return bassNotePitchShift === this.chord.bass.shift;
-        });
+          .map(tensionNote => {
+            return this.$_tensionNotes.findIndex(_tensionNote => {
+              return _tensionNote === tensionNote;
+            })
+          });
+        if (this.chord.bass !== null) {
+          this.$data.$_bassNoteSymbolIdx = this.$_bassNoteSymbols.findIndex(bassNoteSymbol => {
+            return bassNoteSymbol === this.chord.bass.symbol;
+          });
+          this.$data.$_bassNoteAccidentalSignIdx = this.$_notePitchShifts.findIndex(bassNotePitchShift => {
+            return bassNotePitchShift === this.chord.bass.shift;
+          });
+        } else {
+          this.$data.$_bassNoteSymbolIdx = null;
+        }
       } else {
+        this.$data.$_rootNoteSymbolIdx = null;
+        this.$data.$_rootNoteAccidentalSignIdx = null;
+        this.$data.$_triadIdx = null;
+        this.$data.$_sixthOrSeventhIdx = null;
+        this.$data.$_tensionNoteIdcs = [];
         this.$data.$_bassNoteSymbolIdx = null;
-      }
-    },
-
-    $_onChangeChordExists(chordExists) {
-      if (chordExists) {
-        this.$emit('change', this.$store.state.config.defaultChord.clone());
-      } else {
-        this.$emit('change', null);
+        this.$data.$_bassNoteAccidentalSignIdx = null;
       }
     },
 
     $_updateRootNoteSymbol(rootNoteSymbolIdx) {
       let rootNoteSymbol = this.$_rootNoteSymbols[rootNoteSymbolIdx];
-      let newChord = new Chord(
-        NotePitch.findPredefinedNotePitch(rootNoteSymbol, this.chord.root.shift),
-        this.chord.triad,
-        this.chord.sixthOrSeventh,
-        this.chord.tensionNotes,
-        this.chord.bass,
-        { makesValid: true },
-      )
-      this.$emit('change', newChord);
+      if (rootNoteSymbol !== null) {
+        if (this.$_chordExists) {
+          let newChord = new Chord(
+            NotePitch.findPredefinedNotePitch(rootNoteSymbol, this.chord.root.shift),
+            this.chord.triad,
+            this.chord.sixthOrSeventh,
+            this.chord.tensionNotes,
+            this.chord.bass,
+            { makesValid: true },
+          );
+          this.$emit('change', newChord);
+        } else {
+          let newChord = Chord.default.clone();
+          newChord.root = NotePitch.findPredefinedNotePitch(rootNoteSymbol, 0);
+          this.$emit('change', newChord);
+        }
+      } else {
+        this.$emit('change', null);
+      }
     },
 
     $_updateRootNoteAccidentalSign(noteAccidentalSignIdx) {

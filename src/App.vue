@@ -378,7 +378,7 @@ export default {
         await this.$vuetify.goTo(
           element,
           {
-            duration: 0,
+            duration: 100,
             offset: this.$refs.appBar.$el.clientHeight,
           },
         );

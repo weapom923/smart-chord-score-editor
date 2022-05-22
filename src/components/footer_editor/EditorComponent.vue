@@ -196,6 +196,16 @@ export default {
               return decrementNoteIdx(this);
           }
           break;
+        case keyEventTypeEnum.keyWithShift:
+          switch (event.code) {
+            case 'KeyN':
+              this.selectNextBar();
+              return true;
+            case 'KeyB':
+              this.selectPreviousBar();
+              return true;
+          }
+          break;
         case keyEventTypeEnum.repeatedKey:
           switch (event.code) {
             case 'KeyN':

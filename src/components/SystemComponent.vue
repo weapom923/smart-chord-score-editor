@@ -37,7 +37,6 @@
         v-on:margin-bottom-px-update="$_onMarginBottomPxUpdate(barIdx, $event)"
         v-on:click-note="$_onClickNote(barIdx, $event)"
         v-on:mousedown-staff="$_onMousedownStaff(barIdx, $event)"
-        v-on:mouseup-staff="$_onMouseupStaff(barIdx, $event)"
       />
       <template v-for="partIdx of $_partIdcs[barIdx]">
         <tie-canvas
@@ -336,10 +335,6 @@ export default {
 
     $_onMousedownStaff(barIdx, event) {
       this.$emit('mousedown-staff', { barIdx, event });
-    },
-
-    $_onMouseupStaff(barIdx, event) {
-      this.$emit('mouseup-staff', { barIdx, event });
     },
 
     $_updatePositionAndSize() {
