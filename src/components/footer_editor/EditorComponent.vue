@@ -49,7 +49,6 @@
             v-bind:selected-note-idx="$data.$_selectedNoteIdx"
             v-on:update-part="$_onUpdatePart"
             v-on:set-temporal-part="$_onSetTemporalPart"
-            v-on:register-component="$_registerNoteEditorComponentInstance"
           />
         </v-col>
       </v-row>
@@ -116,7 +115,6 @@ export default {
       $_selectedNoteIdx: 0,
       $_temporalSelectedPart: null,
       $_barEditorComponentInstance: null,
-      $_noteEditorComponentInstance: null,
     };
   },
 
@@ -189,9 +187,6 @@ export default {
       if (this.$data.$_barEditorComponentInstance !== null) {
         if (this.$data.$_barEditorComponentInstance.onKeydown(keyEventType, event)) return true;
       }
-      if (this.$data.$_noteEditorComponentInstance !== null) {
-        if (this.$data.$_noteEditorComponentInstance.onKeydown(keyEventType, event)) return true;
-      }
       switch (keyEventType) {
         case keyEventTypeEnum.key:
           switch (event.code) {
@@ -229,10 +224,6 @@ export default {
 
     $_registerBarEditorComponentInstance(barEditorComponentInstance) {
       this.$data.$_barEditorComponentInstance = barEditorComponentInstance;
-    },
-
-    $_registerNoteEditorComponentInstance(noteEditorComponentInstance) {
-      this.$data.$_noteEditorComponentInstance = noteEditorComponentInstance;
     },
 
     $_resetSelection() {

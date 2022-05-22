@@ -157,15 +157,7 @@ export default {
   watch: {
     score: {
       async handler(newScore) {
-        if (newScore === null) {
-          let scoreJsonFromCookie = window.localStorage.getItem('score');
-          if (scoreJsonFromCookie === null) {
-            await this.$_generateNewScore();
-          } else {
-            let scoreFromCookie = Score.loadJson(scoreJsonFromCookie);
-            await this.$_setNewScore(scoreFromCookie);
-          }
-        } else {
+        if (newScore !== null) {
           await this.$_setNewScore(newScore);
         }
       },

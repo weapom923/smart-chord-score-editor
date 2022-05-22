@@ -53,6 +53,13 @@
       >
         <v-icon>mdi-music-note-plus</v-icon>
       </v-btn>
+      <v-btn
+        small icon
+        v-if="$_isSelectedNoteTypeChord"
+        v-on:click="$_openChordTextEditorDialog"
+      >
+        <v-icon>mdi-form-textbox</v-icon>
+      </v-btn>
       <v-spacer />
       <v-btn
         small icon
@@ -251,6 +258,14 @@ export default {
       return (this.$_selectedNote !== null);
     },
 
+    $_isSelectedNoteTypeChord() {
+      if (this.$_selectedPart === null) return false;
+      if (this.$_selectedPart.type !== PartInBar.Type.chord) return false;
+      if (this.$_selectedNote === null) return false;
+      if (this.$_isSelectedNoteTypeRest) return false;
+      return true;
+    },
+
     $_isSelectedNoteTypeTogglable() {
       if (this.$_selectedNote === null) return null;
       if (this.$_selectedNote.type === Note.Type.rest) {
@@ -328,6 +343,7 @@ export default {
     'removeBars',
     'selectNextBar',
     'selectPreviousBar',
+    'openChordTextEditorDialog',
   ],
 
   mounted() {
@@ -358,6 +374,10 @@ export default {
             case 'KeyR':
               if (!this.$_isNoteSelected) break;
               this.$_toggleSelectedNoteType();
+              return true;
+            case 'KeyC':
+              if (!this.$_isSelectedNoteTypeChord) break;
+              this.$_openChordTextEditorDialog();
               return true;
           }
           break;
@@ -449,6 +469,14 @@ export default {
         this.selectedPartIdx,
         numExistingNotes,
         note,
+      );
+    },
+
+    $_openChordTextEditorDialog() {
+      this.openChordTextEditorDialog(
+        this.$_selectedNote.pitchOrChord,
+        this.selectedPartIdx,
+        this.selectedNoteIdx,
       );
     },
 
