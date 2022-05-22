@@ -37,7 +37,6 @@
         v-bind:is-bar-hover-menu-enabled="$_isBarHoverMenuEnabled"
         v-bind:is-print-layout-enabled="isPrintLayoutEnabled"
         v-on:mousedown-staff="$_selectBar"
-        v-on:mouseup-staff="$_expandSelectedBars"
       />
     </div>
   </div>
@@ -146,13 +145,9 @@ export default {
   ],
 
   methods: {
-    async $_expandSelectedBars({ barIdx }) {
-      await this.expandSelectedBars(this.sectionDefinition.sectionIdx, barIdx);
-    },
-
     async $_selectBar({ barIdx, event }) {
       if (event.shiftKey) {
-        await this.$_expandSelectedBars({ barIdx });
+        await this.expandSelectedBars(this.sectionDefinition.sectionIdx, barIdx);
       } else {
         await this.selectBar(this.sectionDefinition.sectionIdx, barIdx);
       }

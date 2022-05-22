@@ -71,7 +71,6 @@
           v-bind:style="$_clickableAreaStyle"
           v-on="on"
           v-on:mousedown.stop="$_onMousedownStaff"
-          v-on:mouseup.stop="$_onMouseupStaff"
         />
       </template>
       
@@ -342,10 +341,6 @@ export default {
     $_getSelectedNoteIdxInPart(partIdx) {
       if (this.selectedPartIdx === null) return null;
       if (partIdx === this.selectedPartIdx) return this.selectedNoteIdx;
-    },
-
-    $_onMouseupStaff() {
-      this.$emit('mouseup-staff', event);
     },
 
     $_onMousedownStaff(event) {
