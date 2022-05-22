@@ -211,6 +211,7 @@ class Chord {
         break;
       case Chord.Triad.minor:
         selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
+        selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
         break;
       case Chord.Triad.suspendedFourth:
         selectableTensionNotes.delete(Chord.TensionNote.eleventh);
@@ -246,9 +247,6 @@ class Chord {
         selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
         selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
         selectableTensionNotes.delete(Chord.TensionNote.thirteenth);
-        break;
-      case Chord.SixthOrSeventh.dominantSeventh:
-        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
         break;
       case Chord.SixthOrSeventh.majorSeventh:
         selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
