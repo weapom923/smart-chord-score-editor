@@ -22,7 +22,7 @@ class Chord {
     rawObj.root = this.root.getRawObj();
     rawObj.triad = this.triad;
     rawObj.sixth_or_seventh = (this.sixthOrSeventh === null)? null : this.sixthOrSeventh;
-    rawObj.tensionNotes = Array.from(this.tensionNotes).map(tensionNote => tensionNote.getRawObj());
+    rawObj.tension_notes = Array.from(this.tensionNotes).map(tensionNote => tensionNote.getRawObj());
     rawObj.bass = (this.bass === null)? null : this.bass.getRawObj();
     return rawObj;
   }
@@ -69,7 +69,7 @@ class Chord {
       NotePitch.loadFromRawObj(rawObj.root),
       rawObj.triad,
       (rawObj.sixth_or_seventh === null)? null : rawObj.sixth_or_seventh,
-      new Set(rawObj.tensionNotes.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
+      new Set(rawObj.tension_notes.map(tensionRawObj => TensionNotePitch.loadFromRawObj(tensionRawObj))),
       (rawObj.bass === null)? null : NotePitch.loadFromRawObj(rawObj.bass),
     );
   }
