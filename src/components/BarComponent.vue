@@ -178,6 +178,13 @@ export default {
     async $_isBarLastOfSelection() {
       if (this.isAutoScrollEnabled) await this.scrollTo(this.$el);
     },
+
+    '$store.state.config': {
+      handler() {
+        this.$_updateMarginTopAndBottom();
+      },
+      deep: true,
+    },
   },
 
   mounted() {
