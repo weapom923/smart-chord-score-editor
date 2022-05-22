@@ -40,12 +40,15 @@ class Score {
     return JSON.stringify(this.getRawObj());
   }
 
-  static loadJson(jsonString) {
-    let rawObj = JSON.parse(jsonString);
+  static loadFromRawObj(rawObj) {
     return new Score(
       Score.Metadata.loadFromRawObj(rawObj.metadata),
       rawObj.sections.map(sectionRawObj => Section.loadFromRawObj(sectionRawObj)),
     );
+  }
+
+  static loadJson(jsonString) {
+    return Score.loadFromRawObj(JSON.parse(jsonString))
   }
 
   getPreviousSectionAndBarIdx({ sectionIdx, barIdx }) {
