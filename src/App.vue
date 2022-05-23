@@ -37,28 +37,32 @@
     <v-footer
       app outlined class="pa-0 no-print"
       ref="footer"
-      v-show="$_isScoreLoaded && $_isBarSelected"
+      v-show="$_isScoreLoaded"
     >
-      <v-toolbar dark dense height="20">
-        <v-spacer />
-        <v-btn
-          small icon
-          v-on:click="$_toggleFooterEditorMaximizedAndMinimized"
-        >
-          <v-icon v-if="$data.$_isFooterEditorMinimized">
-            mdi-window-maximize
-          </v-icon>
-          <v-icon v-else>
-            mdi-window-minimize
-          </v-icon>
-        </v-btn>
-      </v-toolbar>
-
-      <editor-component
-        v-if="$_isBarSelected && !$data.$_isFooterEditorMinimized"
-        v-bind:score="$data.$_score"
-        v-on:register-component="$_registerFooterComponentInstance"
-      />
+      <v-card width="100%" tile>
+        <v-toolbar dark dense height="20">
+          <v-spacer />
+          <v-btn
+            small icon
+            v-on:click="$_toggleFooterEditorMaximizedAndMinimized"
+          >
+            <v-icon v-if="$data.$_isFooterEditorMinimized">
+              mdi-window-maximize
+            </v-icon>
+            <v-icon v-else>
+              mdi-window-minimize
+            </v-icon>
+          </v-btn>
+        </v-toolbar>
+  
+        <audio-player />
+  
+        <editor-component
+          v-if="$_isBarSelected && !$data.$_isFooterEditorMinimized"
+          v-bind:score="$data.$_score"
+          v-on:register-component="$_registerFooterComponentInstance"
+        />
+      </v-card>
     </v-footer>
   </v-app>
 </template>
@@ -71,7 +75,6 @@ import GenerateSectionDialog from './components/dialog/GenerateSectionDialog.vue
 import ChordTextEditorDialog from './components/dialog/ChordTextEditorDialog.vue';
 import AppInfoDialog from './components/dialog/AppInfoDialog.vue';
 import HelpDialog from './components/dialog/HelpDialog.vue';
-import Encoding from 'encoding-japanese';
 import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
 import ScorePage from './pages/ScorePage.vue';
@@ -86,6 +89,8 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
+import AudioPlayer from './components/AudioPlayer.vue';
+import utils from './modules/utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -102,47 +107,12 @@ function generateEmptyBarFrom(baseBar) {
   );
 }
 
-async function getFileInterface(accept = null) {
-  return new Promise(resolve => {
-    let inputElement = document.createElement('input');
-    inputElement.type = 'file';
-    inputElement.onchange = (event) => { resolve(event.target.files[0]) };
-    if (accept) inputElement.accept = accept;
-    let windowFocusEventHandler = () => {
-      let timeoutId = window.setTimeout(
-        () => {
-          window.removeEventListener('focus', windowFocusEventHandler);
-          window.clearTimeout(timeoutId);
-          resolve(null);
-        },
-        10000,
-      );
-    };
-    window.addEventListener('focus', windowFocusEventHandler);
-    inputElement.click();
-  })
-}
-
-async function loadFileAsUTF8Text(fileInterface) {
-  let textArrayBuffer = await new Promise((resolve, reject) => {
-    let fileReader = new FileReader();
-    fileReader.onload = (event) => { resolve(event.target.result) };
-    fileReader.onabort = () => { reject(null) };
-    fileReader.readAsArrayBuffer(fileInterface);
-  })
-  if (textArrayBuffer === null) return null;
-  let textUtf8Array = new Uint8Array(textArrayBuffer);
-  let textEncoding = Encoding.detect(textUtf8Array);
-  let textUint8Array = new Uint8Array(Encoding.convert(textUtf8Array, 'UTF8', textEncoding));
-  let textDecoder = new TextDecoder();
-  return textDecoder.decode(textUint8Array.buffer);
-}
-
 export default {
   name: 'App',
 
   components: {
     AppBar,
+    AudioPlayer,
     ScorePage,
     SnackBar,
     EditorComponent,
@@ -319,17 +289,17 @@ export default {
       generateNewScore: this.$_generateNewScore,
 
       loadScoreFile: async () => {
-        let fileInterface = await getFileInterface('application/json');
+        let fileInterface = await utils.getFileInterface('application/json');
         if (fileInterface === null) return;
-        let scoreJsonString = await loadFileAsUTF8Text(fileInterface);
+        let scoreJsonString = await utils.loadFileAsUTF8Text(fileInterface);
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
         await this.$_setNewScore(score);
       },
 
       loadScoreFromTextFile: async () => {
-        let fileInterface = await getFileInterface();
-        let scoreText = await loadFileAsUTF8Text(fileInterface);
+        let fileInterface = await utils.getFileInterface();
+        let scoreText = await utils.loadFileAsUTF8Text(fileInterface);
         if (scoreText === null) return;
         let score = ScoreTextParser.parse(
           scoreText,
