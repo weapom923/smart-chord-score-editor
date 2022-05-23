@@ -5,6 +5,7 @@
       class="no-print"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
+      v-bind:is-print-layout-enabled="$data.$_isPrintLayoutEnabled"
     />
 
     <v-main app ref="main">

@@ -56,11 +56,12 @@ export default {
   props: {
     isUndoDisabled: { type: Boolean },
     isRedoDisabled: { type: Boolean },
+    isPrintLayoutEnabled: { type: Boolean },
   },
 
   computed: {
     $_leftMenuItemDefinitions() {
-      return {
+      let leftMenuItemDefinitions = {
         undo: new MenuItemDefinition(
           'mdi-undo', 'undo',
           async () => { await this.undo() },
@@ -87,11 +88,19 @@ export default {
           'mdi-import', 'import from text',
           async () => { await this.loadScoreFromTextFile() },
         ),
-        enablePrintLayout: new MenuItemDefinition(
+      };
+      if (this.isPrintLayoutEnabled) {
+        leftMenuItemDefinitions.enablePrintLayout = new MenuItemDefinition(
+          'mdi-printer-off', 'disable print layout',
+          () => { this.setPrintLayoutEnabled(false) },
+        );
+      } else {
+        leftMenuItemDefinitions.enablePrintLayout = new MenuItemDefinition(
           'mdi-printer-eye', 'enable print layout',
           () => { this.setPrintLayoutEnabled(true) },
-        ),
-      };
+        );
+      }
+      return leftMenuItemDefinitions;
     },
 
     $_rightMenuItemDefinitions() {
