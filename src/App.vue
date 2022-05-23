@@ -2,7 +2,7 @@
   <v-app id="app">
     <app-bar
       ref="appBar"
-      v-if="!$data.$_isPrintLayoutEnabled"
+      class="no-print"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
     />
@@ -34,9 +34,9 @@
     />
 
     <v-footer
-      app outlined class="pa-0"
+      app outlined class="pa-0 no-print"
       ref="footer"
-      v-show="$_isScoreLoaded && $_isBarSelected && !$data.$_isPrintLayoutEnabled"
+      v-show="$_isScoreLoaded && $_isBarSelected"
     >
       <v-toolbar dark dense height="20">
         <v-spacer />
@@ -907,5 +907,11 @@ export default {
   font-family: 'M PLUS 1p', sans-serif;
   text-align: center;
   color: #2c3e50;
+}
+
+@media print {
+  .no-print{
+    display:none;
+  }
 }
 </style>
