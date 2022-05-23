@@ -448,12 +448,13 @@ export default {
     $_updateBarRepeatEndingStyle() {
       if (this.$data.$_barRepeatEndingElement === null) return 0;
       let barRepeatEndingElementBoundingClientRect = this.$data.$_barRepeatEndingElement.getBoundingClientRect();
+      let barRepeatEndingWidthPx = this.$data.$_barElementBoundingClientRect.x + this.$data.$_barElementBoundingClientRect.width - barRepeatEndingElementBoundingClientRect.x;
       let barRepeatEndingRightOffsetPx = barRepeatEndingElementBoundingClientRect.x + barRepeatEndingElementBoundingClientRect.width - this.$data.$_barElementBoundingClientRect.x;
       this.$data.$_barRepeatEndingStyle = {
         marginTop: String(-this.$data.$_marginTopPxMax) + 'px',
         marginRight: String(-(this.$data.$_barElementBoundingClientRect.width - barRepeatEndingRightOffsetPx)) + 'px',
         height: String(this.$data.$_marginTopPxMax - this.$_internalMarginTopPx) + 'px',
-        width: String(this.$data.$_barElementBoundingClientRect.width) + 'px',
+        width: String(barRepeatEndingWidthPx) + 'px',
       };
     },
 
