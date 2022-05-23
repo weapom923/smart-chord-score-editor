@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar app fixed dark dense>
+  <v-app-bar
+    app fixed dark dense
+    id="app-bar"
+  >
     <v-tooltip
       bottom
       v-for="(menuItemDefinition, menuItemDefinitionId) in $_leftMenuItemDefinitions"
@@ -41,6 +44,12 @@
     </v-tooltip>
   </v-app-bar>
 </template>
+
+<style scoped>
+#app-bar {
+  min-width: fit-content;
+}
+</style>
 
 <script>
 class MenuItemDefinition {

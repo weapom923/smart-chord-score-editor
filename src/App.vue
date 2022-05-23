@@ -188,12 +188,19 @@ export default {
       this.$refs.main.$el.style.paddingBottom = String(borderBoxSize.blockSize) + 'px';
     });
     this.$data.$_footerResizeObserver.observe(this.$refs.footer.$el);
+    this.$data.$_appBarResizeObserver = new ResizeObserver(resizeObserverEntries => {
+      if (this.$data.$_isPrintLayoutEnabled) return;
+      let resizeObserverEntry = resizeObserverEntries[0];
+      let borderBoxSize = resizeObserverEntry.borderBoxSize[0];
+      this.$refs.main.$el.style.minWidth = String(borderBoxSize.inlineSize) + 'px';
+    });
+    this.$data.$_appBarResizeObserver.observe(this.$refs.appBar.$el);
     await this.$store.dispatch('loadConfigFromCookie');
   },
 
   beforeDestroy() {
-    this.$data.$_footerResizeObserver.unobserve(this.$refs.footer.$el);
     this.$data.$_footerResizeObserver.disconnect();
+    this.$data.$_appBarResizeObserver.disconnect();
   },
 
   errorCaptured(error) {
@@ -210,6 +217,7 @@ export default {
       $_renderComponent: true,
       $_footerResizeObserver: null,
       $_footerComponentInstance: null,
+      $_appBarResizeObserver: null,
       $_score: null,
       $_dialog: {
         shows: false,
@@ -646,6 +654,8 @@ export default {
       this.$data.$_isPrintLayoutEnabled = enabled;
       if (enabled) {
         this.$_showSnackBar('Press any key to exit print layout.');
+      } else {
+        this.$refs.main.$el.style.minWidth = undefined;
       }
     },
 
@@ -908,6 +918,7 @@ export default {
   font-family: 'M PLUS 1p', sans-serif;
   text-align: center;
   color: #2c3e50;
+  min-width: fit-content;
 }
 
 @media print {
