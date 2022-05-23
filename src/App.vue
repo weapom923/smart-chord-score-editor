@@ -2,9 +2,10 @@
   <v-app id="app">
     <app-bar
       ref="appBar"
-      v-if="!$data.$_isPrintLayoutEnabled"
+      class="no-print"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
+      v-bind:is-print-layout-enabled="$data.$_isPrintLayoutEnabled"
     />
 
     <v-main app ref="main">
@@ -34,30 +35,34 @@
     />
 
     <v-footer
-      app outlined class="pa-0"
+      app outlined class="pa-0 no-print"
       ref="footer"
-      v-show="$_isScoreLoaded && $_isBarSelected && !$data.$_isPrintLayoutEnabled"
+      v-show="$_isScoreLoaded"
     >
-      <v-toolbar dark dense height="20">
-        <v-spacer />
-        <v-btn
-          small icon
-          v-on:click="$_toggleFooterEditorMaximizedAndMinimized"
-        >
-          <v-icon v-if="$data.$_isFooterEditorMinimized">
-            mdi-window-maximize
-          </v-icon>
-          <v-icon v-else>
-            mdi-window-minimize
-          </v-icon>
-        </v-btn>
-      </v-toolbar>
-
-      <editor-component
-        v-if="$_isBarSelected && !$data.$_isFooterEditorMinimized"
-        v-bind:score="$data.$_score"
-        v-on:register-component="$_registerFooterComponentInstance"
-      />
+      <v-card width="100%" tile>
+        <v-toolbar dark dense height="20">
+          <v-spacer />
+          <v-btn
+            small icon
+            v-on:click="$_toggleFooterEditorMaximizedAndMinimized"
+          >
+            <v-icon v-if="$data.$_isFooterEditorMinimized">
+              mdi-window-maximize
+            </v-icon>
+            <v-icon v-else>
+              mdi-window-minimize
+            </v-icon>
+          </v-btn>
+        </v-toolbar>
+  
+        <audio-player />
+  
+        <editor-component
+          v-if="$_isBarSelected && !$data.$_isFooterEditorMinimized"
+          v-bind:score="$data.$_score"
+          v-on:register-component="$_registerFooterComponentInstance"
+        />
+      </v-card>
     </v-footer>
   </v-app>
 </template>
@@ -70,7 +75,6 @@ import GenerateSectionDialog from './components/dialog/GenerateSectionDialog.vue
 import ChordTextEditorDialog from './components/dialog/ChordTextEditorDialog.vue';
 import AppInfoDialog from './components/dialog/AppInfoDialog.vue';
 import HelpDialog from './components/dialog/HelpDialog.vue';
-import Encoding from 'encoding-japanese';
 import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
 import ScorePage from './pages/ScorePage.vue';
@@ -85,6 +89,8 @@ import BarLine from './modules/BarLine.js';
 import PartInBar from './modules/PartInBar.js';
 import ScoreSnapshotManager from './modules/ScoreSnapshotManager.js';
 import { keyEventTypeEnum, getKeyEventType } from './modules/KeyEventType.js';
+import AudioPlayer from './components/AudioPlayer.vue';
+import utils from './modules/utils.js';
 
 function generateEmptyBarFrom(baseBar) {
   return new Bar(
@@ -101,47 +107,12 @@ function generateEmptyBarFrom(baseBar) {
   );
 }
 
-async function getFileInterface(accept = null) {
-  return new Promise(resolve => {
-    let inputElement = document.createElement('input');
-    inputElement.type = 'file';
-    inputElement.onchange = (event) => { resolve(event.target.files[0]) };
-    if (accept) inputElement.accept = accept;
-    let windowFocusEventHandler = () => {
-      let timeoutId = window.setTimeout(
-        () => {
-          window.removeEventListener('focus', windowFocusEventHandler);
-          window.clearTimeout(timeoutId);
-          resolve(null);
-        },
-        10000,
-      );
-    };
-    window.addEventListener('focus', windowFocusEventHandler);
-    inputElement.click();
-  })
-}
-
-async function loadFileAsUTF8Text(fileInterface) {
-  let textArrayBuffer = await new Promise((resolve, reject) => {
-    let fileReader = new FileReader();
-    fileReader.onload = (event) => { resolve(event.target.result) };
-    fileReader.onabort = () => { reject(null) };
-    fileReader.readAsArrayBuffer(fileInterface);
-  })
-  if (textArrayBuffer === null) return null;
-  let textUtf8Array = new Uint8Array(textArrayBuffer);
-  let textEncoding = Encoding.detect(textUtf8Array);
-  let textUint8Array = new Uint8Array(Encoding.convert(textUtf8Array, 'UTF8', textEncoding));
-  let textDecoder = new TextDecoder();
-  return textDecoder.decode(textUint8Array.buffer);
-}
-
 export default {
   name: 'App',
 
   components: {
     AppBar,
+    AudioPlayer,
     ScorePage,
     SnackBar,
     EditorComponent,
@@ -187,12 +158,19 @@ export default {
       this.$refs.main.$el.style.paddingBottom = String(borderBoxSize.blockSize) + 'px';
     });
     this.$data.$_footerResizeObserver.observe(this.$refs.footer.$el);
+    this.$data.$_appBarResizeObserver = new ResizeObserver(resizeObserverEntries => {
+      if (this.$data.$_isPrintLayoutEnabled) return;
+      let resizeObserverEntry = resizeObserverEntries[0];
+      let borderBoxSize = resizeObserverEntry.borderBoxSize[0];
+      this.$refs.main.$el.style.minWidth = String(borderBoxSize.inlineSize) + 'px';
+    });
+    this.$data.$_appBarResizeObserver.observe(this.$refs.appBar.$el);
     await this.$store.dispatch('loadConfigFromCookie');
   },
 
   beforeDestroy() {
-    this.$data.$_footerResizeObserver.unobserve(this.$refs.footer.$el);
     this.$data.$_footerResizeObserver.disconnect();
+    this.$data.$_appBarResizeObserver.disconnect();
   },
 
   errorCaptured(error) {
@@ -209,6 +187,7 @@ export default {
       $_renderComponent: true,
       $_footerResizeObserver: null,
       $_footerComponentInstance: null,
+      $_appBarResizeObserver: null,
       $_score: null,
       $_dialog: {
         shows: false,
@@ -310,17 +289,17 @@ export default {
       generateNewScore: this.$_generateNewScore,
 
       loadScoreFile: async () => {
-        let fileInterface = await getFileInterface('application/json');
+        let fileInterface = await utils.getFileInterface('application/json');
         if (fileInterface === null) return;
-        let scoreJsonString = await loadFileAsUTF8Text(fileInterface);
+        let scoreJsonString = await utils.loadFileAsUTF8Text(fileInterface);
         if (scoreJsonString === null) return;
         let score = Score.loadJson(scoreJsonString);
         await this.$_setNewScore(score);
       },
 
       loadScoreFromTextFile: async () => {
-        let fileInterface = await getFileInterface();
-        let scoreText = await loadFileAsUTF8Text(fileInterface);
+        let fileInterface = await utils.getFileInterface();
+        let scoreText = await utils.loadFileAsUTF8Text(fileInterface);
         if (scoreText === null) return;
         let score = ScoreTextParser.parse(
           scoreText,
@@ -645,6 +624,8 @@ export default {
       this.$data.$_isPrintLayoutEnabled = enabled;
       if (enabled) {
         this.$_showSnackBar('Press any key to exit print layout.');
+      } else {
+        this.$refs.main.$el.style.minWidth = undefined;
       }
     },
 
@@ -907,5 +888,12 @@ export default {
   font-family: 'M PLUS 1p', sans-serif;
   text-align: center;
   color: #2c3e50;
+  min-width: fit-content;
+}
+
+@media print {
+  .no-print{
+    display:none;
+  }
 }
 </style>
