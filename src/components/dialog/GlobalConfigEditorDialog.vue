@@ -15,7 +15,7 @@
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   autofocus number
                   type="number"
                   v-model="$data.$_staffLineStepPx"
@@ -27,7 +27,7 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   number
                   type="number"
                   v-model="$data.$_systemMarginTopPx"
@@ -38,7 +38,7 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   number
                   type="number"
                   v-model="$data.$_systemMarginBottomPx"
@@ -56,7 +56,7 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   number
                   type="number"
                   v-model="$data.$_chordFontSizePx"
@@ -75,6 +75,7 @@
 
 <script>
 import DialogBase from './DialogBase.vue';
+import DialogTextField from '../parts/DialogTextField.vue';
 import GridNoteSelector from '../parts/GridNoteSelector.vue';
 import input_utils from '../../modules/input_utils.js';
 
@@ -92,6 +93,7 @@ export default {
 
   components: {
     DialogBase,
+    DialogTextField,
     GridNoteSelector,
   },
 
