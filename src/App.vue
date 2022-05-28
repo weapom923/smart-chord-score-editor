@@ -148,7 +148,11 @@ export default {
   },
 
   created() {
-    window.addEventListener('keydown', this.$_onKeydown);
+    window.addEventListener('keydown', async (event) => {
+      if (await this.$_onKeydown(event)) {
+        event.preventDefault();
+      }
+    });
   },
 
   async mounted() {
@@ -632,112 +636,96 @@ export default {
     async $_onKeydown(event) {
       let keyEventType = getKeyEventType(event);
       if (this.$data.$_footerComponentInstance !== null) {
-        if (this.$data.$_footerComponentInstance.onKeydown(keyEventType, event)) return;
+        if (this.$data.$_footerComponentInstance.onKeydown(keyEventType, event)) return false;
       }
       if (this.$data.$_isPrintLayoutEnabled) {
         this.$_setPrintLayoutEnabled(false);
-        return;
+        return false;
       }
       switch (keyEventType) {
         case keyEventTypeEnum.key:
           switch (event.code) {
             case 'Escape':
               await this.$_unselectBar();
-              break;
+              return true;
             case 'ArrowRight':
               await this.$_selectNextBar();
-              break;
+              return true;
             case 'ArrowLeft':
               await this.$_selectPreviousBar();
-              break;
+              return true;
             case 'Enter':
-              setBarBreak(this, BarBreak.system);
-              break;
+              return setBarBreak(this, BarBreak.system);
             case 'Backspace':
-              setBarBreak(this, BarBreak.empty);
-              break;
+              return setBarBreak(this, BarBreak.empty);
             case 'Delete':
-              removeSelectedBars(this);
-              break;
+              return await removeSelectedBars(this);
             case 'KeyH':
               this.$_showHelpDialog();
-              break;
+              return true;
             case 'KeyE':
               this.$_toggleFooterEditorMaximizedAndMinimized();
-              break;
+              return true;
             case 'KeyP':
               this.$_setPrintLayoutEnabled(true);
-              break;
+              return true;
           }
           break;
         case keyEventTypeEnum.keyWithCtrl:
           switch (event.code) {
             case 'KeyA':
-              await selectAllBars(this);
-              break;
+              return await selectAllBars(this);
             case 'KeyC':
-              await copySelectedBars(this);
-              break;
+              return await copySelectedBars(this);
             case 'KeyV':
-              await pasteSelectedBarPartOnly(this);
-              break;
+              return await pasteSelectedBarPartOnly(this);
             case 'KeyZ':
               await this.$_undo();
-              break;
+              return true;
             case 'KeyS':
               await this.$_saveScoreFile();
-              break;
+              return true;
             case 'KeyN':
-              await insertBarAfter(this);
-              break;
+              return await insertBarAfter(this);
             case 'KeyM':
-              insertSectionAfter(this);
-              break;
+              return insertSectionAfter(this);
           }
           break;
         case keyEventTypeEnum.keyWithShift:
           switch (event.code) {
             case 'ArrowRight':
-              await incrementSelectedBarsLastIdx(this);
-              break;
+              return await incrementSelectedBarsLastIdx(this);
             case 'ArrowLeft':
-              await decrementSelectedBarsLastIdx(this);
-              break;
+              return await decrementSelectedBarsLastIdx(this);
             case 'Enter':
-              setBarBreak(this, BarBreak.page);
-              break;
+              return setBarBreak(this, BarBreak.page);
           }
           break;
         case keyEventTypeEnum.keyWithCtrlAndShift:
           switch (event.code) {
             case 'KeyV':
-              await pasteSelectedBar(this);
-              break;
+              return await pasteSelectedBar(this);
             case 'KeyZ':
               await this.$_redo();
-              break;
+              return true;
             case 'KeyN':
-              await insertBarBefore(this);
-              break;
+              return await insertBarBefore(this);
             case 'KeyM':
-              insertSectionBefore(this);
-              break;
+              return insertSectionBefore(this);
             case 'ArrowRight':
-              await incrementSelectedBarsFirstIdx(this);
-              break;
+              return await incrementSelectedBarsFirstIdx(this);
             case 'ArrowLeft':
-              await decrementSelectedBarsFirstIdx(this);
-              break;
+              return await decrementSelectedBarsFirstIdx(this);
           }
           break;
         case keyEventTypeEnum.repeatedKey:
           switch (event.code) {
             case 'ArrowRight':
               await this.$_selectNextBar();
-              break;
+              return true;
             case 'ArrowLeft':
               await this.$_selectPreviousBar();
-              break;
+              return true;
           }
           break;
         case keyEventTypeEnum.repeatedKeyWithCtrl:
@@ -745,105 +733,113 @@ export default {
         case keyEventTypeEnum.repeatedKeyWithShift:
           switch (event.code) {
             case 'ArrowRight':
-              await incrementSelectedBarsLastIdx(this);
-              break;
+              return await incrementSelectedBarsLastIdx(this);
             case 'ArrowLeft':
-              await decrementSelectedBarsLastIdx(this);
-              break;
+              return await decrementSelectedBarsLastIdx(this);
           }
           break;
         case keyEventTypeEnum.repeatedKeyWithCtrlAndShift:
           switch (event.code) {
             case 'ArrowRight':
-              await incrementSelectedBarsFirstIdx(this);
-              break;
+              return await incrementSelectedBarsFirstIdx(this);
             case 'ArrowLeft':
-              await decrementSelectedBarsFirstIdx(this);
-              break;
+              return await decrementSelectedBarsFirstIdx(this);
           }
           break;
       }
+      return false;
 
       async function selectAllBars(self) {
-        if (self.$data.$_score.numSections === 0) return;
+        if (self.$data.$_score.numSections === 0) return false;
         let firstSectionIdx = self.$data.$_score.firstSectionIdx;
         let firstBarIdx = self.$data.$_score.getFirstBarIdx(firstSectionIdx);
         await self.$_selectBar(firstSectionIdx, firstBarIdx);
         let lastSectionIdx = self.$data.$_score.lastSectionIdx;
         let lastBarIdx = self.$data.$_score.getLastBarIdx(lastSectionIdx);
         await self.$_expandSelectedBars(lastSectionIdx, lastBarIdx);
+        return true;
       }
 
       async function incrementSelectedBarsLastIdx(self) {
         await self.$store.dispatch('incrementSelectedBarsLastIdx', self.$data.$_score);
+        return true;
       }
 
       async function decrementSelectedBarsLastIdx(self) {
         await self.$store.dispatch('decrementSelectedBarsLastIdx', self.$data.$_score);
+        return true;
       }
 
       async function incrementSelectedBarsFirstIdx(self) {
         await self.$store.dispatch('incrementSelectedBarsFirstIdx', self.$data.$_score);
+        return true;
       }
 
       async function decrementSelectedBarsFirstIdx(self) {
         await self.$store.dispatch('decrementSelectedBarsFirstIdx', self.$data.$_score);
+        return true;
       }
 
       function setBarBreak(self, barBreakType) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         let { sectionIdx: previousSectionIdx, barIdx: previousBarIdx } = self.$data.$_score.getPreviousSectionAndBarIdx({
           sectionIdx: self.$_selectedBarsFirst.sectionIdx,
           barIdx: self.$_selectedBarsFirst.barIdx,
         });
-        if ((previousSectionIdx === null) || (previousBarIdx === null)) return;
+        if ((previousSectionIdx === null) || (previousBarIdx === null)) return false;
         let bar = self.$data.$_score.getBar(previousSectionIdx, previousBarIdx);
         bar.break = barBreakType;
         self.$_replaceBars(previousSectionIdx, previousBarIdx, [ bar ]);
+        return true;
       }
 
       async function copySelectedBars(self) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         await self.$_copyBars(
           self.$_selectedBarsFirst.sectionIdx,
           self.$_selectedBarsFirst.barIdx,
           self.$_selectedBarsLast.sectionIdx,
           self.$_selectedBarsLast.barIdx,
         );
+        return true;
       }
 
       async function pasteSelectedBar(self) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         await self.$_pasteBars(
           self.$_selectedBarsFirst.sectionIdx,
           self.$_selectedBarsFirst.barIdx,
         );
+        return true;
       }
 
       async function pasteSelectedBarPartOnly(self) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         await self.$_pasteBarsPartOnly(
           self.$_selectedBarsFirst.sectionIdx,
           self.$_selectedBarsFirst.barIdx,
         );
+        return true;
       }
 
       async function insertBarBefore(self) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         await self.$_insertBar(
           self.$_selectedBarsFirst.sectionIdx,
           self.$_selectedBarsFirst.barIdx,
           self.$_selectedBarsFirst.barIdx,
         );
+        return true;
       }
 
       async function insertBarAfter(self) {
-        if (!self.$_isBarSelected) return;
+        if (!self.$_isBarSelected) return false;
         await self.$_insertBar(
           self.$_selectedBarsLast.sectionIdx,
           self.$_selectedBarsLast.barIdx,
           self.$_selectedBarsLast.barIdx + 1,
         );
+        return true;
       }
 
       function insertSectionBefore(self) {
@@ -854,6 +850,7 @@ export default {
         } else {
           self.$_generateNewSection(sectionIdx);
         }
+        return true;
       }
 
       function insertSectionAfter(self) {
@@ -864,17 +861,19 @@ export default {
         } else {
           self.$_generateNewSection(sectionIdx + 1);
         }
+        return true;
       }
 
       async function removeSelectedBars(self) {
         let selectedBarsFirst = self.$_selectedBarsFirst;
         let selectedBarsLast = self.$_selectedBarsLast;
-        self.$_removeBars(
+        await self.$_removeBars(
           selectedBarsFirst.sectionIdx,
           selectedBarsFirst.barIdx,
           selectedBarsLast.sectionIdx,
           selectedBarsLast.barIdx,
         );
+        return true;
       }
     },
   }
