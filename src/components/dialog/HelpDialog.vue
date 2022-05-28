@@ -59,6 +59,8 @@
             <tr><td>D</td><td>Delete a selected note.</td></tr>
             <tr><td>T</td><td>Tie/untie a selected note to a previous note.</td></tr>
             <tr><td>R</td><td>Convert a selected note to a rest/normal note.</td></tr>
+            <tr><td>Y</td><td>Copy a selected note.</td></tr>
+            <tr><td>P</td><td>Paste a copied note content.</td></tr>
           </tbody>
         </v-simple-table>
       </v-card-text>
