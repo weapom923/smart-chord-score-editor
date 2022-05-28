@@ -190,14 +190,10 @@ export default {
       switch (keyEventType) {
         case keyEventTypeEnum.key:
           switch (event.code) {
-            case 'KeyN':
+            case 'KeyL':
               return incrementNoteIdx(this);
-            case 'KeyB':
+            case 'KeyH':
               return decrementNoteIdx(this);
-          }
-          break;
-        case keyEventTypeEnum.keyWithShift:
-          switch (event.code) {
             case 'KeyN':
               this.selectNextBar();
               return true;
@@ -208,10 +204,12 @@ export default {
           break;
         case keyEventTypeEnum.repeatedKey:
           switch (event.code) {
-            case 'KeyN':
-              return incrementNoteIdx(this);
-            case 'KeyB':
-              return decrementNoteIdx(this);
+            case 'KeyL':
+              incrementNoteIdx(this);
+              return true;
+            case 'KeyH':
+              decrementNoteIdx(this);
+              return true;
           }
           break;
       }

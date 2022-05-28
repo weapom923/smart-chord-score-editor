@@ -49,10 +49,10 @@
             <tr><th>Keys</th><th>Description</th></tr>
           </thead>
           <tbody>
-            <tr><td>N</td><td>Select a next note.</td></tr>
-            <tr><td>B</td><td>Select a previous note.</td></tr>
-            <tr><td>Shift+N</td><td>Select a next bar.</td></tr>
-            <tr><td>Shift+B</td><td>Select a previous bar.</td></tr>
+            <tr><td>L</td><td>Select a next note.</td></tr>
+            <tr><td>H</td><td>Select a previous note.</td></tr>
+            <tr><td>N</td><td>Select a next bar.</td></tr>
+            <tr><td>B</td><td>Select a previous bar.</td></tr>
             <tr><td>C</td><td>Open a chord text dialog.</td></tr>
             <tr><td>F</td><td>Fill a selected bar with a new note.</td></tr>
             <tr><td>Shift+F</td><td>Fill a selected bar with a new rest note.</td></tr>
@@ -61,6 +61,8 @@
             <tr><td>R</td><td>Convert a selected note to a rest/normal note.</td></tr>
             <tr><td>Y</td><td>Copy a selected note.</td></tr>
             <tr><td>P</td><td>Paste a copied note content.</td></tr>
+            <tr><td>U</td><td>Undo a change.</td></tr>
+            <tr><td>Ctrl+R</td><td>Redo a change.</td></tr>
           </tbody>
         </v-simple-table>
       </v-card-text>

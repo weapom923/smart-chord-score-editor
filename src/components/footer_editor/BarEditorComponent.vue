@@ -408,6 +408,16 @@ export default {
               if (!this.$_isNoteSelected || !this.$_isNoteCopied) break;
               this.$_pasteCopiedNoteContent();
               return true;
+            case 'KeyU':
+              this.undo();
+              return true;
+          }
+          break;
+        case keyEventTypeEnum.keyWithCtrl:
+          switch (event.code) {
+            case 'KeyR':
+              this.redo();
+              return true;
           }
           break;
         case keyEventTypeEnum.keyWithShift:
