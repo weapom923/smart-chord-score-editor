@@ -55,7 +55,7 @@
           </v-btn>
         </v-toolbar>
   
-        <audio-player />
+        <audio-player ref="audioPlayer" />
   
         <editor-component
           v-if="$_isBarSelected && !$data.$_isFooterEditorMinimized"
@@ -638,6 +638,7 @@ export default {
       if (this.$data.$_footerComponentInstance !== null) {
         if (this.$data.$_footerComponentInstance.onKeydown(keyEventType, event)) return false;
       }
+      if (this.$refs.audioPlayer.onKeydown(keyEventType, event)) return false;
       if (this.$data.$_isPrintLayoutEnabled) {
         this.$_setPrintLayoutEnabled(false);
         return false;

@@ -33,6 +33,16 @@
           </tbody>
         </v-simple-table>
 
+        <v-card-subtitle>Audio Player</v-card-subtitle>
+        <v-simple-table dense class="text-left">
+          <thead>
+            <tr><th>Keys</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Space</td><td>Play/pause.</td></tr>
+          </tbody>
+        </v-simple-table>
+
         <v-card-subtitle>Bar editor</v-card-subtitle>
         <v-simple-table dense class="text-left">
           <thead>

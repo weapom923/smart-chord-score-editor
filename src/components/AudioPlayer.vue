@@ -26,6 +26,7 @@
 
 <script>
 import AudioPlayerController from './AudioPlayerController.vue';
+import { keyEventTypeEnum } from '../modules/KeyEventType.js';
 import utils from '../modules/utils.js';
 
 export default {
@@ -107,6 +108,25 @@ export default {
   },
 
   methods: {
+    onKeydown(keyEventType, event) {
+      if (this.$_isAudioSourceLoaded) {
+        switch (keyEventType) {
+          case keyEventTypeEnum.key:
+            switch (event.code) {
+              case 'Space':
+                togglePlayAndPause(this);
+                return true;
+            }
+            break;
+        }
+      }
+      return false;
+
+      function togglePlayAndPause(self) {
+        (self.$data.$_isPlaying)? self.$_pause() : self.$_play();
+      }
+    },
+
     /* private */
     $_seekInMsec(timeMsec) {
       this.$data.$_audioPlayer.currentTime = timeMsec / 1000;
