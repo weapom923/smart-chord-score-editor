@@ -26,6 +26,15 @@
 
               <v-col sm="4" cols="12">
                 <dialog-text-field
+                  autofocus
+                  v-model="$data.$_metadata.artistName"
+                  v-bind:rules="$_rules.artistName"
+                  label="Artist Name"
+                />
+              </v-col>
+
+              <v-col sm="4" cols="12">
+                <dialog-text-field
                   v-model="$data.$_metadata.composerName"
                   v-bind:rules="$_rules.composerName"
                   label="Composer Name"
@@ -97,6 +106,10 @@ export default {
           input_utils.anythingIsOk,
         ],
 
+        artistName: [
+          input_utils.anythingIsOk,
+        ],
+
         composerName: [
           input_utils.anythingIsOk,
         ],
@@ -125,6 +138,7 @@ export default {
             this.$data.$_metadata.composerName,
             this.$data.$_metadata.arrangerName,
             this.$data.$_metadata.lyricistName,
+            this.$data.$_metadata.artistName,
           ),
         );
       }

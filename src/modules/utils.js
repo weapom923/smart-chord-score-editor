@@ -109,4 +109,21 @@ export default {
     let textDecoder = new TextDecoder();
     return textDecoder.decode(textUint8Array.buffer);
   },
+
+  isEqual(objA, objB) {
+    let objAKeys = Object.keys(objA);
+    let objBKeys = Object.keys(objB);
+    if (objAKeys.length !== objBKeys.length) return false;
+    for (let objAKey of objAKeys) {
+      if (!objBKeys.includes(objAKey)) return false;
+    }
+    for (let objBKey of objBKeys) {
+      if (!objAKeys.includes(objBKey)) return false;
+    }
+    return true;
+  },
+
+  clone(obj) {
+    return Object.assign({}, obj);
+  },
 }

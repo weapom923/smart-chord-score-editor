@@ -1,15 +1,18 @@
 import Section from './Section.js'
+import utils from './utils.js';
 
 class Score {
-  constructor(metadata, sections) {
+  constructor(metadata, sections, version) {
     this.metadata = metadata;
     this.sections = sections;
+    this.version = version;
   }
 
   static generateNew(title, composerName, arrangerName) {
     return new Score(
       new Score.Metadata(title, composerName, arrangerName),
       [],
+      Score.CurrentDataVersion,
     );
   }
 
@@ -17,6 +20,7 @@ class Score {
     let rawObj = new Object();
     rawObj.metadata = this.metadata.getRawObj();
     rawObj.sections = this.sections.map(section => section.getRawObj());
+    rawObj.version = this.version.getRawObj();
     return rawObj;
   }
 
@@ -26,6 +30,7 @@ class Score {
     for (let sectionIdx = 0; sectionIdx < this.sections.length; ++sectionIdx) {
       if (!this.sections[sectionIdx].isEqualTo(that.sections[sectionIdx])) return false;
     }
+    if (!this.version.isEqualTo(that.version)) return false;
     return true;
   }
 
@@ -33,6 +38,7 @@ class Score {
     return new Score(
       this.metadata.clone(),
       this.sections.map(section => section.clone()),
+      this.version.clone(),
     );
   }
 
@@ -40,11 +46,40 @@ class Score {
     return JSON.stringify(this.getRawObj());
   }
 
+  static convertRawObjFromVersion(rawObj, version) { 
+    let convertedRawObj = utils.clone(rawObj);
+    switch (version.toString()) {
+      case '0.1.0':
+        convertedRawObj.version = { major: 0, minor: 2, patch: 0 };
+        convertedRawObj.metadata.artist_name = '';
+        return convertedRawObj;
+      default:
+        return null;
+    }
+  }
+
   static loadFromRawObj(rawObj) {
+    let scoreDataVersion = getScoreDataVersion(rawObj);
+    while (!scoreDataVersion.isEqualTo(Score.CurrentDataVersion)) {
+      rawObj = Score.convertRawObjFromVersion(rawObj, scoreDataVersion);
+      if (rawObj === null) return null;
+      scoreDataVersion = getScoreDataVersion(rawObj);
+    }
+
     return new Score(
       Score.Metadata.loadFromRawObj(rawObj.metadata),
       rawObj.sections.map(sectionRawObj => Section.loadFromRawObj(sectionRawObj)),
+      scoreDataVersion,
     );
+
+    function getScoreDataVersion(rawObj) {
+      let rawObjKeys = Object.keys(rawObj);
+      if (!rawObjKeys.includes('version')) {
+        return new ScoreDataVersion(0, 1, 0);
+      } else {
+        return ScoreDataVersion.loadFromRawObj(rawObj.version);
+      }
+    }
   }
 
   static loadJson(jsonString) {
@@ -241,16 +276,68 @@ class Score {
   }
 }
 
+class ScoreDataVersion {
+  constructor(major, minor, patch) {
+    this.major = major;
+    this.minor = minor;
+    this.patch = patch;
+  }
+
+  getRawObj() {
+    let rawObj = new Object();
+    rawObj.major = this.major;
+    rawObj.minor = this.minor;
+    rawObj.patch = this.patch;
+    return rawObj;
+  }
+
+  isEqualTo(that) {
+    if (this.major !== that.major) return false;
+    if (this.minor !== that.minor) return false;
+    if (this.patch !== that.patch) return false;
+    return true;
+  }
+
+  static loadFromRawObj(rawObj) {
+    return new ScoreDataVersion(
+      rawObj.major,
+      rawObj.minor,
+      rawObj.patch,
+    );
+  }
+
+  clone() {
+    return new ScoreDataVersion(
+      this.major,
+      this.minor,
+      this.patch,
+    );
+  }
+
+  toString() {
+    return [ String(this.major), String(this.minor), String(this.patch) ].join('.');
+  }
+}
+
+Object.defineProperty(
+  Score,
+  'CurrentDataVersion',
+  {
+    value: new ScoreDataVersion(0, 2, 0),
+  },
+);
+
 Object.defineProperty(
   Score,
   'Metadata',
   {
     value: class {
-      constructor(title = '', composerName = '', arrangerName = '', lyricistName = '') {
+      constructor(title = '', composerName = '', arrangerName = '', lyricistName = '', artistName = '') {
         this.title = title;
         this.composerName = composerName;
         this.arrangerName = arrangerName;
         this.lyricistName = lyricistName;
+        this.artistName = artistName;
       }
 
       getRawObj() {
@@ -259,6 +346,7 @@ Object.defineProperty(
         rawObj.composer_name = this.composerName;
         rawObj.arranger_name = this.arrangerName;
         rawObj.lyricist_name = this.lyricistName;
+        rawObj.artist_name = this.artistName;
         return rawObj;
       }
 
@@ -267,6 +355,7 @@ Object.defineProperty(
         if (this.composerName !== that.composerName) return false;
         if (this.arrangerName !== that.arrangerName) return false;
         if (this.lyricistName !== that.lyricistName) return false;
+        if (this.artistName !== that.artistName) return false;
         return true;
       }
 
@@ -276,6 +365,7 @@ Object.defineProperty(
           this.composerName,
           this.arrangerName,
           this.lyricistName,
+          this.artistName,
         );
       }
 
@@ -285,6 +375,7 @@ Object.defineProperty(
           rawObj.composer_name,
           rawObj.arranger_name,
           rawObj.lyricist_name,
+          rawObj.artist_name,
         );
       }
     },

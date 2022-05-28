@@ -1,7 +1,8 @@
 <template>
   <v-card flat tile>
-    <v-card-title class="justify-center">
+    <v-card-title class="justify-center flex-column">
       <h1>{{ scoreMetadata.title }}</h1>
+      <h3 class="mt-2">{{ scoreMetadata.artistName }}</h3>
     </v-card-title>
     <v-card-text class="d-flex px-0">
       <v-spacer />
