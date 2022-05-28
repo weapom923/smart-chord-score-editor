@@ -18,7 +18,7 @@
           v-model="$data.$_valid"
           v-on:submit.prevent
         >
-          <v-text-field
+          <dialog-text-field
             autofocus
             v-model="$data.$_chordText"
             v-bind:error="$_hasError"
@@ -34,6 +34,7 @@
 
 <script>
 import DialogBase from './DialogBase.vue';
+import DialogTextField from '../parts/DialogTextField.vue';
 import Chord from '../../modules/Chord.js';
 import ChordComponent from '../ChordComponent.vue';
 import ChordTextParser from '../../modules/ChordTextParser.js';
@@ -46,6 +47,7 @@ export default {
 
   components: {
     DialogBase,
+    DialogTextField,
     ChordComponent,
   },
 

@@ -17,7 +17,7 @@
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   autofocus
                   v-model="$data.$_name"
                   v-bind:rules="$_rules.name"
@@ -59,6 +59,7 @@
 
 <script>
 import DialogBase from './DialogBase.vue';
+import DialogTextField from '../parts/DialogTextField.vue';
 import ScaleSelector from '../parts/ScaleSelector.vue';
 import ClefSelector from '../parts/ClefSelector.vue';
 import BarValueTextAreaAndSelector from '../parts/BarValueTextAreaAndSelector.vue';
@@ -84,6 +85,7 @@ export default {
 
   components: {
     DialogBase,
+    DialogTextField,
     ScaleSelector,
     ClefSelector,
     BarValueTextAreaAndSelector,

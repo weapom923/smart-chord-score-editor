@@ -16,7 +16,7 @@
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   autofocus
                   v-model="$data.$_metadata.title"
                   v-bind:rules="$_rules.title"
@@ -25,7 +25,16 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
+                  autofocus
+                  v-model="$data.$_metadata.artistName"
+                  v-bind:rules="$_rules.artistName"
+                  label="Artist Name"
+                />
+              </v-col>
+
+              <v-col sm="4" cols="12">
+                <dialog-text-field
                   v-model="$data.$_metadata.composerName"
                   v-bind:rules="$_rules.composerName"
                   label="Composer Name"
@@ -33,7 +42,7 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   v-model="$data.$_metadata.arrangerName"
                   v-bind:rules="$_rules.arrangerName"
                   label="Arranger Name"
@@ -41,7 +50,7 @@
               </v-col>
 
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   v-model="$data.$_metadata.lyricistName"
                   v-bind:rules="$_rules.lyricistName"
                   label="Lyricist Name"
@@ -57,6 +66,7 @@
 
 <script>
 import DialogBase from './DialogBase.vue';
+import DialogTextField from '../parts/DialogTextField.vue';
 import Score from '../../modules/Score.js';
 import input_utils from '../../modules/input_utils.js';
 
@@ -68,6 +78,7 @@ export default {
 
   components: {
     DialogBase,
+    DialogTextField,
   },
 
   props: {
@@ -92,6 +103,10 @@ export default {
     $_rules() {
       return {
         title: [
+          input_utils.anythingIsOk,
+        ],
+
+        artistName: [
           input_utils.anythingIsOk,
         ],
 
@@ -123,6 +138,7 @@ export default {
             this.$data.$_metadata.composerName,
             this.$data.$_metadata.arrangerName,
             this.$data.$_metadata.lyricistName,
+            this.$data.$_metadata.artistName,
           ),
         );
       }

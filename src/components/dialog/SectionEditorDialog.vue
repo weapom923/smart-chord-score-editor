@@ -16,7 +16,7 @@
           <v-container>
             <v-row>
               <v-col sm="4" cols="12">
-                <v-text-field
+                <dialog-text-field
                   autofocus
                   v-model="$data.$_sectionName"
                   v-bind:rules="$_rules.sectionName"
@@ -33,6 +33,7 @@
 
 <script>
 import DialogBase from './DialogBase.vue';
+import DialogTextField from '../parts/DialogTextField.vue';
 import Score from '../../modules/Score.js';
 import input_utils from '../../modules/input_utils.js';
 
@@ -44,6 +45,7 @@ export default {
 
   components: {
     DialogBase,
+    DialogTextField,
   },
 
   props: {

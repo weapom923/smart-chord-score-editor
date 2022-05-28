@@ -42,6 +42,20 @@
       </v-btn>
       <v-btn
         small icon
+        v-if="$_isNoteSelected"
+        v-on:click="$_copySelectedNote"
+      >
+        <v-icon>mdi-content-copy</v-icon>
+      </v-btn>
+      <v-btn
+        small icon
+        v-if="$_isNoteSelected && $_isNoteCopied"
+        v-on:click="$_pasteCopiedNoteContent"
+      >
+        <v-icon>mdi-content-paste</v-icon>
+      </v-btn>
+      <v-btn
+        small icon
         v-on:click="$_removeSelectedBar"
       >
         <v-icon>mdi-delete</v-icon>
@@ -144,6 +158,7 @@ export default {
     return {
       $_tempScore: null,
       $_tempBarIdx: null,
+      $_copiedNote: null,
     };
   },
 
@@ -258,6 +273,10 @@ export default {
       return (this.$_selectedNote !== null);
     },
 
+    $_isNoteCopied() {
+      return (this.$data.$_copiedNote !== null);
+    },
+
     $_isSelectedNoteTypeChord() {
       if (this.$_selectedPart === null) return false;
       if (this.$_selectedPart.type !== PartInBar.Type.chord) return false;
@@ -337,6 +356,8 @@ export default {
   },
 
   inject: [
+    'redo',
+    'undo',
     'insertBar',
     'replaceNote',
     'updatePart',
@@ -378,6 +399,24 @@ export default {
             case 'KeyC':
               if (!this.$_isSelectedNoteTypeChord) break;
               this.$_openChordTextEditorDialog();
+              return true;
+            case 'KeyY':
+              if (!this.$_isNoteSelected) break;
+              this.$_copySelectedNote();
+              return true;
+            case 'KeyP':
+              if (!this.$_isNoteSelected || !this.$_isNoteCopied) break;
+              this.$_pasteCopiedNoteContent();
+              return true;
+            case 'KeyU':
+              this.undo();
+              return true;
+          }
+          break;
+        case keyEventTypeEnum.keyWithCtrl:
+          switch (event.code) {
+            case 'KeyR':
+              this.redo();
               return true;
           }
           break;
@@ -432,6 +471,18 @@ export default {
       let newNote = this.$_selectedNote.clone();
       newNote.tied = !newNote.tied;
       this.replaceNote(this.selectedSectionIdx, this.selectedBarIdx, this.selectedPartIdx, this.selectedNoteIdx, newNote);
+    },
+
+    $_copySelectedNote() {
+      this.$data.$_copiedNote = this.$_selectedNote.clone();
+    },
+
+    $_pasteCopiedNoteContent() {
+      let pastedNote = this.$_selectedNote.clone();
+      pastedNote.pitchOrChord = this.$data.$_copiedNote.pitchOrChord;
+      pastedNote.type = this.$data.$_copiedNote.type;
+      pastedNote.tied = this.$data.$_copiedNote.tied;
+      this.replaceNote(this.selectedSectionIdx, this.selectedBarIdx, this.selectedPartIdx, this.selectedNoteIdx, pastedNote);
     },
 
     $_removeSelectedNote() {
