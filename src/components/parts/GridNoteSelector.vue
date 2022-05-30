@@ -35,7 +35,7 @@ export default {
     $_gridNoteValueName: {
       get() {
         return Object.keys(gridNoteValueNameToInstances).find(gritNoteValueName => {
-          return (this.$store.state.config.gridNoteValue === gridNoteValueNameToInstances[gritNoteValueName]);
+          return (this.value.isEqualTo(gridNoteValueNameToInstances[gritNoteValueName]));
         });
       },
 
