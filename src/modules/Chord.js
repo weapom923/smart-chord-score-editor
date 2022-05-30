@@ -206,7 +206,6 @@ class Chord {
         break;
       case Chord.Triad.minor:
         selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
-        selectableTensionNotes.delete(Chord.TensionNote.sharpEleventh);
         break;
       case Chord.Triad.suspendedFourth:
         selectableTensionNotes.delete(Chord.TensionNote.eleventh);
