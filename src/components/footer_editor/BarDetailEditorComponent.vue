@@ -22,6 +22,10 @@
         v-on:update="$_onUpdateBarValue"
         v-on:update:error="$_onUpdateBarValueError"
       />
+      <grid-note-selector
+        v-bind:value="$_selectedBar.gridNoteValue"
+        v-on:update="$_onUpdateGridNoteValue"
+      />
       <clef-selector
         v-bind:value="$_selectedBar.clef"
         v-on:update="$_onUpdateClef"
@@ -43,6 +47,7 @@ import BarRepeatEndingNumberSelector from '../parts/BarRepeatEndingNumberSelecto
 import BarLineStartSelector from '../parts/BarLineStartSelector.vue';
 import BarLineEndSelector from '../parts/BarLineEndSelector.vue';
 import BarValueTextAreaAndSelector from '../parts/BarValueTextAreaAndSelector.vue';
+import GridNoteSelector from '../parts/GridNoteSelector.vue';
 import Score from '../../modules/Score.js';
 import Bar from '../../modules/Bar.js';
 
@@ -55,6 +60,7 @@ export default {
     BarLineStartSelector,
     BarLineEndSelector,
     BarValueTextAreaAndSelector,
+    GridNoteSelector,
   },
 
   watch: {
@@ -120,6 +126,7 @@ export default {
             newBarLineStart,
             selectedBar.lineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );
@@ -140,6 +147,7 @@ export default {
             selectedBar.lineStart,
             newBarLineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );
@@ -160,6 +168,7 @@ export default {
             selectedBar.lineStart,
             selectedBar.lineEnd,
             barRepeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );
@@ -180,6 +189,7 @@ export default {
             selectedBar.lineStart,
             selectedBar.lineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );
@@ -200,6 +210,28 @@ export default {
             selectedBar.lineStart,
             selectedBar.lineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
+          ),
+        ),
+      );
+    },
+
+    async $_onUpdateGridNoteValue(gridNoteValue) {
+      let selectedBars = await this.$_getSelectedBars();
+      this.replaceBars(
+        this.$_selectedBarsFirst.sectionIdx,
+        this.$_selectedBarsFirst.barIdx,
+        selectedBars.map(
+          selectedBar => new Bar(
+            selectedBar.value,
+            selectedBar.parts,
+            selectedBar.clef,
+            selectedBar.scale,
+            selectedBar.break,
+            selectedBar.lineStart,
+            selectedBar.lineEnd,
+            selectedBar.repeatEnding,
+            gridNoteValue,
           ),
         ),
       );
@@ -220,6 +252,7 @@ export default {
             selectedBar.lineStart,
             selectedBar.lineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );
@@ -240,6 +273,7 @@ export default {
             selectedBar.lineStart,
             selectedBar.lineEnd,
             selectedBar.repeatEnding,
+            selectedBar.gridNoteValue,
           ),
         ),
       );

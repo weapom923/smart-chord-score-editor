@@ -8,6 +8,7 @@
         v-bind:part-type="$_part.type"
         v-bind:rest-note-pitch="$_part.restNotePitch"
         v-bind:is-selected="$_isNoteSelected(noteIdx)"
+        v-bind:grid-note-value="gridNoteValue"
         v-on:split-note-elements-update="$_onSplitNoteElementsUpdate(noteIdx, $event)"
         v-on:note-chord-element-update="$_onNoteChordElementUpdate(noteIdx, $event)"
         v-on:tie-point-update="$_onNoteTiePointUpdate(noteIdx, $event)"
@@ -72,6 +73,7 @@ export default {
     barIdx: { type: Number },
     partIdx: { type: Number },
     selectedNoteIdx: { type: Number, default: null },
+    gridNoteValue: { type: NoteValue },
   },
 
   data() {

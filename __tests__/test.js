@@ -128,6 +128,7 @@ test('parse score text', () => {
               BarLine.Start.repeatStart,
               BarLine.End.single,
               BarRepeatEnding.empty,
+              NoteValue.divisible.half,
             ),
             new Bar(
               new NoteValue(4, 4),
@@ -156,6 +157,7 @@ test('parse score text', () => {
               BarLine.Start.empty,
               BarLine.End.double,
               BarRepeatEnding.empty,
+              NoteValue.divisible.half,
             ),
             new Bar(
               new NoteValue(4, 4),
@@ -184,6 +186,7 @@ test('parse score text', () => {
               BarLine.Start.empty,
               BarLine.End.repeatEnd,
               BarRepeatEnding.empty,
+              NoteValue.divisible.half,
             ),
           ],
         ),

@@ -50,8 +50,8 @@
 
               <v-col sm="4" cols="12">
                 <grid-note-selector
-                  v-model="$data.$_gridNoteValue"
-                  v-bind:rules="$_rules.gridNoteValue"
+                  v-model="$data.$_defaultGridNoteValue"
+                  v-bind:rules="$_rules.defaultGridNoteValue"
                 />
               </v-col>
 
@@ -107,7 +107,7 @@ export default {
       $_staffLineStepPx: this.$store.state.config.staffLineStepPx,
       $_systemMarginTopPx: this.$store.state.config.systemMarginTopPx,
       $_systemMarginBottomPx: this.$store.state.config.systemMarginBottomPx,
-      $_gridNoteValue: this.$store.state.config.gridNoteValue,
+      $_defaultGridNoteValue: this.$store.state.config.defaultGridNoteValue,
       $_chordFontSizePx: this.$store.state.config.chordFontSizePx,
       // $_defaultChord: this.$store.state.config.defaultChord,
       // $_selectedNoteColor: this.$store.state.config.selectedNoteColor,
@@ -164,7 +164,7 @@ export default {
           },
         ],
 
-        gridNoteValue: [
+        defaultGridNoteValue: [
           input_utils.isTextFieldNotEmpty,
           () => { return true },
         ],
@@ -198,7 +198,7 @@ export default {
           staffLineStepPx: Number(this.$data.$_staffLineStepPx),
           systemMarginTopPx: Number(this.$data.$_systemMarginTopPx),
           systemMarginBottomPx: Number(this.$data.$_systemMarginBottomPx),
-          gridNoteValue: this.$data.$_gridNoteValue,
+          defaultGridNoteValue: this.$data.$_defaultGridNoteValue,
           chordFontSizePx: Number(this.$data.$_chordFontSizePx),
         },
       )

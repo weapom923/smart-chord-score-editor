@@ -48,6 +48,7 @@ test('equality 1', () => {
             BarLine.Start.repeatStart,
             BarLine.End.single,
             BarRepeatEnding.empty,
+            NoteValue.divisible.half,
           ),
         ],
       ),

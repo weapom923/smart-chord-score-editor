@@ -132,6 +132,7 @@ export default {
     note: { type: Note },
     partType: { type: String },
     restNotePitch: { type: NotePitch, default: null },
+    gridNoteValue: { type: NoteValue },
     isSelected: { type: Boolean, default: false },
   },
 
@@ -181,7 +182,7 @@ export default {
     },
 
     $_splitNoteValues() {
-      return this.note.value.splitIntoDivisibleNoteValues(this.offsetNoteValue, this.$store.state.config.gridNoteValue);
+      return this.note.value.splitIntoDivisibleNoteValues(this.offsetNoteValue, this.gridNoteValue);
     },
 
     $_splitNotes() {

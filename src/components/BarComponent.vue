@@ -45,6 +45,7 @@
           v-bind:bar-idx="barIdx"
           v-bind:part-idx="partIdx"
           v-bind:selected-note-idx="$_getSelectedNoteIdxInPart(partIdx)"
+          v-bind:grid-note-value="$_bar.gridNoteValue"
           v-on:note-elements-update="$_onNoteElementsUpdate(partIdx, $event)"
           v-on:note-chord-elements-update="$_onNoteChordElementsUpdate(partIdx, $event)"
           v-on:tie-point-update="$_onPartTiePointUpdate(partIdx, $event)"

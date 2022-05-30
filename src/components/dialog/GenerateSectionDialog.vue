@@ -100,6 +100,7 @@ export default {
     clef: { type: Clef, default: null },
     scale: { type: Scale, default: null },
     partInBarTypes: { type: Array, default: null },
+    gridNoteValue: { type: NoteValue, default: null },
   },
 
   data() {
@@ -136,11 +137,13 @@ export default {
       let scale = (this.scale === null)? this.$store.state.config.defaultScale : this.scale;
       let barValue = (this.barValue === null)? this.$store.state.config.defaultBarValue : this.barValue;
       let partInBarTypes = (this.partInBarTypes === null)? this.$store.state.config.defaultPartInBarTypes : this.partInBarTypes;
+      let gridNoteValue = (this.gridNoteValue === null)? this.$store.state.config.defaultGridNoteValue : this.gridNoteValue;
       this.$data.$_name = '';
       this.$data.$_barValue = barValue;
       this.$data.$_clef = clef;
       this.$data.$_scale = scale;
       this.$data.$_partInBarTypes = partInBarTypes;
+      this.$data.$_gridNoteValue = gridNoteValue;
     },
 
     $_ok() {
@@ -152,6 +155,7 @@ export default {
             this.$data.$_clef,
             this.$data.$_scale,
             this.$data.$_partInBarTypes,
+            this.$data.$_gridNoteValue,
           ),
         );
       }
