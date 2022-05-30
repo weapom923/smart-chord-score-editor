@@ -6,11 +6,11 @@ class Section {
     this.bars = bars;
   }
 
-  static generateNew(name, value, clef, scale, partInBarTypes) {
+  static generateNew(name, value, clef, scale, partInBarTypes, gridNoteValue) {
     return new Section(
       name,
       partInBarTypes.map(
-        partInBarType => Bar.generateNew(value, clef, scale, partInBarType),
+        partInBarType => Bar.generateNew(value, clef, scale, partInBarType, gridNoteValue),
       ),
     );
   }

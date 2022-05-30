@@ -1,4 +1,5 @@
 import Section from './Section.js'
+import NoteValue from './NoteValue.js'
 import utils from './utils.js';
 
 class Score {
@@ -52,6 +53,14 @@ class Score {
       case '0.1.0':
         convertedRawObj.version = { major: 0, minor: 2, patch: 0 };
         convertedRawObj.metadata.artist_name = '';
+        return convertedRawObj;
+      case '0.2.0':
+        convertedRawObj.version = { major: 0, minor: 3, patch: 0 };
+        for (let sectionRawObj of convertedRawObj.sections) {
+          for (let barRawObj of sectionRawObj.bars) {
+            barRawObj.grid_note_value = NoteValue.divisible.half;
+          }
+        }
         return convertedRawObj;
       default:
         return null;
@@ -323,7 +332,7 @@ Object.defineProperty(
   Score,
   'CurrentDataVersion',
   {
-    value: new ScoreDataVersion(0, 2, 0),
+    value: new ScoreDataVersion(0, 3, 0),
   },
 );
 

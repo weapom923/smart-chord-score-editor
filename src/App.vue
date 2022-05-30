@@ -104,6 +104,7 @@ function generateEmptyBarFrom(baseBar) {
     BarLine.Start.empty,
     BarLine.End.single,
     BarRepeatEnding.empty,
+    baseBar.gridNoteValue,
   );
 }
 
@@ -616,6 +617,7 @@ export default {
           callback: (section) => {
             this.$data.$_score.sections.splice(sectionIdx, 0, section);
           },
+          gridNoteValue: this.$store.state.config.defaultGridNoteValue,
         }
       );
     },

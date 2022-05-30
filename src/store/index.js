@@ -19,7 +19,7 @@ const store = new Vuex.Store({
       staffLineStepPx: 10,
       systemMarginTopPx: 30,
       systemMarginBottomPx: 10,
-      gridNoteValue: NoteValue.divisible.half,
+      defaultGridNoteValue: NoteValue.divisible.half,
       chordFontSizePx: 18,
       defaultChord: new Chord(Chord.Root.a, Chord.Triad.major),
       defaultBarValue: new NoteValue(4, 4),
@@ -34,11 +34,24 @@ const store = new Vuex.Store({
     loadConfigFromCookie(state) {
       let configJsonFromCookie = window.localStorage.getItem('config');
       if (configJsonFromCookie !== null) {
+        let configKeys = Object.keys(state.config);
         let rawConfigFromCookie = JSON.parse(configJsonFromCookie);
+        let configKeysFromCookie = Object.keys(rawConfigFromCookie);
+        let missingKeys = new Array();
+        for (let configKey of configKeys) {
+          if (!configKeysFromCookie.includes(configKey)) {
+            missingKeys.push(configKey);
+            break;
+          }
+        }
+        if (missingKeys.length > 0) {
+          console.warn('missing required config key: ' + missingKeys.join(', '));
+          return;
+        }
         state.config.staffLineStepPx = rawConfigFromCookie.staffLineStepPx;
         state.config.systemMarginTopPx = rawConfigFromCookie.systemMarginTopPx;
         state.config.systemMarginBottomPx = rawConfigFromCookie.systemMarginBottomPx;
-        state.config.gridNoteValue = NoteValue.loadFromRawObj(rawConfigFromCookie.gridNoteValue);
+        state.config.defaultGridNoteValue = NoteValue.loadFromRawObj(rawConfigFromCookie.defaultGridNoteValue);
         state.config.chordFontSizePx = rawConfigFromCookie.chordFontSizePx;
         state.config.defaultChord = Chord.loadFromRawObj(rawConfigFromCookie.defaultChord);
         state.config.defaultBarValue = NoteValue.loadFromRawObj(rawConfigFromCookie.defaultBarValue);
@@ -178,14 +191,14 @@ const store = new Vuex.Store({
       state.config.staffLineStepPx = config.staffLineStepPx;
       state.config.systemMarginTopPx = config.systemMarginTopPx;
       state.config.systemMarginBottomPx = config.systemMarginBottomPx;
-      state.config.gridNoteValue = config.gridNoteValue;
+      state.config.defaultGridNoteValue = config.defaultGridNoteValue;
       state.config.chordFontSizePx = config.chordFontSizePx;
 
       let configRawObj = new Object();
       configRawObj.staffLineStepPx = state.config.staffLineStepPx;
       configRawObj.systemMarginTopPx = state.config.systemMarginTopPx;
       configRawObj.systemMarginBottomPx = state.config.systemMarginBottomPx;
-      configRawObj.gridNoteValue = state.config.gridNoteValue.getRawObj();
+      configRawObj.defaultGridNoteValue = state.config.defaultGridNoteValue.getRawObj();
       configRawObj.chordFontSizePx = state.config.chordFontSizePx;
       configRawObj.defaultChord = state.config.defaultChord.getRawObj();
       configRawObj.defaultBarValue = state.config.defaultBarValue.getRawObj();

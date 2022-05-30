@@ -7,7 +7,7 @@ import PartInBar from './PartInBar.js'
 import BarRepeatEnding from './BarRepeatEnding.js'
 
 class Bar {
-  constructor(value, partsInBar, clef, scale, barBreak, barLineStart, barLineEnd, barRepeatEnding) {
+  constructor(value, partsInBar, clef, scale, barBreak, barLineStart, barLineEnd, barRepeatEnding, gridNoteValue) {
     this.value = value;
     this.parts = partsInBar;
     this.clef = clef;
@@ -16,9 +16,10 @@ class Bar {
     this.lineStart = barLineStart;
     this.lineEnd = barLineEnd;
     this.repeatEnding = barRepeatEnding;
+    this.gridNoteValue = gridNoteValue;
   }
 
-  static generateNew(value, clef, scale, partInBarType) {
+  static generateNew(value, clef, scale, partInBarType, gridNoteValue) {
     return new Bar(
       value,
       [ new PartInBar([], partInBarType, null) ],
@@ -28,6 +29,7 @@ class Bar {
       BarLine.Start.empty,
       BarLine.End.single,
       BarRepeatEnding.empty,
+      gridNoteValue,
     );
   }
 
@@ -55,6 +57,7 @@ class Bar {
       this.lineStart.clone(),
       this.lineEnd.clone(),
       this.repeatEnding.clone(),
+      this.gridNoteValue.clone(),
     );
   }
 
@@ -68,6 +71,7 @@ class Bar {
     rawObj.line_start = this.lineStart.getRawObj();
     rawObj.line_end = this.lineEnd.getRawObj();
     rawObj.repeat_ending = this.repeatEnding.getRawObj();
+    rawObj.grid_note_value = this.gridNoteValue.getRawObj();
     return rawObj;
   }
 
@@ -81,6 +85,7 @@ class Bar {
       BarLine.loadFromRawObj(rawObj.line_start),
       BarLine.loadFromRawObj(rawObj.line_end),
       BarRepeatEnding.loadFromRawObj(rawObj.repeat_ending),
+      NoteValue.loadFromRawObj(rawObj.grid_note_value),
     );
   }
 
