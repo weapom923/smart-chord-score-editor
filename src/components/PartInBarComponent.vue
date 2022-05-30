@@ -94,18 +94,6 @@ export default {
       return this.score.getPart(this.sectionIdx, this.barIdx, this.partIdx);
     },
 
-    $_previousBar() {
-      if (this.score === null) return null;
-      let {
-        sectionIdx: previousSectionIdx,
-        barIdx: previousBarIdx,
-      } = this.score.getPreviousSectionAndBarIdx({
-        sectionIdx: this.sectionIdx,
-        barIdx: this.barIdx
-      });
-      return this.getBar(previousSectionIdx, previousBarIdx);
-    },
-
     $_previousPart() {
       if (this.score === null) return null;
       let {
