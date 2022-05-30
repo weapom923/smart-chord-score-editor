@@ -68,6 +68,7 @@ class Note {
       pitchOrChord,
       NoteValue.loadFromRawObj(rawObj.value),
       rawObj.type,
+      rawObj.tied,
     );
   }
 }
