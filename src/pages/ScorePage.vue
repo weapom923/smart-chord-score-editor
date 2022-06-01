@@ -1,10 +1,12 @@
 <template>
-  <v-container id="score-page">
+  <v-container
+    id="score-page"
+    v-bind:class="$_pageClasses"
+  >
     <v-sheet
       tile 
-      class="pa-5"
-      v-bind:elevation="$_pageElevation"
-      v-bind:width="$_pageWidth"
+      elevation="3"
+      class="pa-5 no-elevation-on-print"
       v-on:mousedown="unselectBar"
     >
       <score-title-component
@@ -41,6 +43,20 @@
   flex-direction: column;
   user-select: none;
   break-after: page;
+}
+
+.fixed-size {
+  width: 1080px;
+}
+
+@media print {
+  .fixed-size-on-print {
+    width: 1080px !important;
+  }
+
+  .no-elevation-on-print {
+    box-shadow: none !important;
+  }
 }
 </style>
 
@@ -94,7 +110,12 @@ export default {
 
     $_pageElevation() { return ((this.isPrintLayoutEnabled)? 0 : 3) },
 
-    $_pageWidth() { return ((this.isPrintLayoutEnabled)? 1080 : undefined) },
+    $_pageClasses() {
+      let pageClasses = new Array();
+      pageClasses.push('fixed-size-on-print');
+      if (this.isPrintLayoutEnabled) pageClasses.push('fixed-size');
+      return pageClasses;
+    },
 
     $_sectionDefinitions() {
       let sectionDefinitions = new Array();
