@@ -146,6 +146,13 @@ export default {
       },
       deep: true,
     },
+
+    '$data.$_score.metadata': {
+      handler(metadata) {
+        document.title = metadata.title;
+      },
+      deep: true,
+    },
   },
 
   created() {
