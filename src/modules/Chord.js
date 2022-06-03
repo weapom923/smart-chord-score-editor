@@ -246,7 +246,6 @@ class Chord {
       case Chord.SixthOrSeventh.majorSeventh:
         selectableTensionNotes.delete(Chord.TensionNote.flatNinth);
         selectableTensionNotes.delete(Chord.TensionNote.sharpNinth);
-        selectableTensionNotes.delete(Chord.TensionNote.eleventh);
         selectableTensionNotes.delete(Chord.TensionNote.flatThirteenth);
         break;
     }
