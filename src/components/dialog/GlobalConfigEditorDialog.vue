@@ -65,6 +65,18 @@
                   label="Chord Font Size(px)"
                 />
               </v-col>
+
+              <v-col sm="4" cols="12">
+                <dialog-text-field
+                  number
+                  type="number"
+                  v-model="$data.$_pageWidthOnPrintPx"
+                  v-bind:rules="$_rules.pageWidthOnPrintPx"
+                  v-bind:min="$_pageWidthOnPrintPxMin"
+                  label="Page Width On Print(px)"
+                />
+              </v-col>
+
             </v-row>
           </v-container>
         </v-form>
@@ -84,6 +96,7 @@ const staffLineStaffPxMax = 15;
 const systemMarginTopPxMin = 0;
 const systemMerginBottomPxMin = 0;
 const chordFontSizePxMin = 6;
+const pageWidthOnPrintPxMin = 640;
 
 export default {
   model: {
@@ -109,6 +122,7 @@ export default {
       $_systemMarginBottomPx: this.$store.state.config.systemMarginBottomPx,
       $_defaultGridNoteValue: this.$store.state.config.defaultGridNoteValue,
       $_chordFontSizePx: this.$store.state.config.chordFontSizePx,
+      $_pageWidthOnPrintPx: this.$store.state.config.pageWidthOnPrintPx,
       // $_defaultChord: this.$store.state.config.defaultChord,
       // $_selectedNoteColor: this.$store.state.config.selectedNoteColor,
     };
@@ -129,6 +143,8 @@ export default {
     $_systemMerginBottomPxMin() { return systemMerginBottomPxMin },
 
     $_chordFontSizePxMin() { return chordFontSizePxMin },
+
+    $_pageWidthOnPrintPxMin() { return pageWidthOnPrintPxMin },
 
     $_rules() {
       return {
@@ -179,6 +195,16 @@ export default {
           },
         ],
 
+        pageWidthOnPrintPx: [
+          input_utils.isTextFieldNotEmpty,
+          pageWidthOnPrintPx => {
+            if (pageWidthOnPrintPx < pageWidthOnPrintPxMin) {
+              return 'Page width must be more than or equal to ' + String(pageWidthOnPrintPxMin) + '.';
+            }
+            return true;
+          },
+        ],
+
         // defaultChord: [
         //   () => { return true }
         // ],
@@ -200,6 +226,7 @@ export default {
           systemMarginBottomPx: Number(this.$data.$_systemMarginBottomPx),
           defaultGridNoteValue: this.$data.$_defaultGridNoteValue,
           chordFontSizePx: Number(this.$data.$_chordFontSizePx),
+          pageWidthOnPrintPx: Number(this.$data.$_pageWidthOnPrintPx),
         },
       )
     },

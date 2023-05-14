@@ -21,6 +21,7 @@ const store = new Vuex.Store({
       systemMarginBottomPx: 10,
       defaultGridNoteValue: NoteValue.divisible.half,
       chordFontSizePx: 18,
+      pageWidthOnPrintPx: 1080,
       defaultChord: new Chord(Chord.Root.a, Chord.Triad.major),
       defaultBarValue: new NoteValue(4, 4),
       defaultClef: Clef.treble,
@@ -53,6 +54,7 @@ const store = new Vuex.Store({
         state.config.systemMarginBottomPx = rawConfigFromCookie.systemMarginBottomPx;
         state.config.defaultGridNoteValue = NoteValue.loadFromRawObj(rawConfigFromCookie.defaultGridNoteValue);
         state.config.chordFontSizePx = rawConfigFromCookie.chordFontSizePx;
+        state.config.pageWidthOnPrintPx = rawConfigFromCookie.pageWidthOnPrintPx;
         state.config.defaultChord = Chord.loadFromRawObj(rawConfigFromCookie.defaultChord);
         state.config.defaultBarValue = NoteValue.loadFromRawObj(rawConfigFromCookie.defaultBarValue);
         state.config.defaultClef = Clef.loadFromRawObj(rawConfigFromCookie.defaultClef);
@@ -193,6 +195,7 @@ const store = new Vuex.Store({
       state.config.systemMarginBottomPx = config.systemMarginBottomPx;
       state.config.defaultGridNoteValue = config.defaultGridNoteValue;
       state.config.chordFontSizePx = config.chordFontSizePx;
+      state.config.pageWidthOnPrintPx = config.pageWidthOnPrintPx;
 
       let configRawObj = new Object();
       configRawObj.staffLineStepPx = state.config.staffLineStepPx;
@@ -206,6 +209,7 @@ const store = new Vuex.Store({
       configRawObj.defaultScale = state.config.defaultScale.getRawObj();
       configRawObj.defaultPartInBarTypes = state.config.defaultPartInBarTypes;
       configRawObj.selectedNoteColor = state.config.selectedNoteColor.getRawObj();
+      configRawObj.pageWidthOnPrintPx = state.config.pageWidthOnPrintPx;
       window.localStorage.setItem('config', JSON.stringify(configRawObj));
     },
   },
