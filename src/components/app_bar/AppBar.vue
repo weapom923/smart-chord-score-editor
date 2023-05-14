@@ -1,7 +1,8 @@
 <template>
   <v-app-bar
-    app fixed dark dense
+    fixed dark dense
     id="app-bar"
+    v-bind:app="!isPrintLayoutEnabled"
   >
     <v-tooltip
       bottom

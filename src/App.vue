@@ -3,24 +3,30 @@
     <app-bar
       ref="appBar"
       class="no-print"
+      v-show="!$data.$_isPrintLayoutEnabled"
       v-bind:is-undo-disabled="$data.$_isUndoDisabled"
       v-bind:is-redo-disabled="$data.$_isRedoDisabled"
       v-bind:is-print-layout-enabled="$data.$_isPrintLayoutEnabled"
     />
 
     <v-main app ref="main">
-      <template v-if="$_isScoreLoaded && $data.$_renderComponent">
+      <div
+        id="score-page-container"
+        class="d-flex flex-column align-center"
+        v-if="$_isScoreLoaded && $data.$_renderComponent"
+        v-on:click.left="$_disablePrintLayout"
+      >
         <score-page
           v-for="(scorePageDefinition, scorePageDefinitionIdx) of $_scorePageDefinitions"
           v-bind:key="scorePageDefinitionIdx"
           v-bind:score="$data.$_score"
+          v-bind:score-page-common-definition="$_scorePageCommonDefinition"
           v-bind:score-page-definition="scorePageDefinition"
           v-bind:score-page-index="scorePageDefinitionIdx"
           v-bind:num-score-pages="$_numScorePages"
           v-bind:is-print-layout-enabled="$data.$_isPrintLayoutEnabled"
         />
-
-      </template>
+      </div>
       
       <component
         v-model="$data.$_dialog.shows"
@@ -30,14 +36,16 @@
     </v-main>
 
     <snack-bar
+      class="no-print"
       v-model="$data.$_snackBar.shows"
       v-bind:message="$data.$_snackBar.message"
     />
 
     <v-footer
-      app outlined class="pa-0 no-print"
+      outlined class="pa-0 no-print"
       ref="footer"
-      v-show="$_isScoreLoaded"
+      v-show="$_isScoreLoaded && !$data.$_isPrintLayoutEnabled"
+      v-bind:app="!$data.$_isPrintLayoutEnabled"
     >
       <v-card width="100%" tile>
         <v-toolbar dark dense height="20">
@@ -78,7 +86,7 @@ import HelpDialog from './components/dialog/HelpDialog.vue';
 import ScoreTextParser from './modules/ScoreTextParser.js';
 import AppBar from './components/app_bar/AppBar.vue';
 import ScorePage from './pages/ScorePage.vue';
-import { ScorePageDefinition } from './pages/ScorePage.vue';
+import { ScorePageDefinition, ScorePageCommonDefinition } from './pages/ScorePage.vue';
 import SnackBar from './components/snack_bar/SnackBar.vue';
 import EditorComponent from './components/footer_editor/EditorComponent.vue';
 import Score from './modules/Score.js';
@@ -228,6 +236,10 @@ export default {
 
     $_selectedBarsLast() {
       return this.$store.state.selectedBarsLast;
+    },
+
+    $_scorePageCommonDefinition() {
+      return new ScorePageCommonDefinition(ScorePageCommonDefinition.whRatio.silver);
     },
 
     $_scorePageDefinitions() {
@@ -433,6 +445,12 @@ export default {
   },
 
   methods: {
+    $_disablePrintLayout() {
+      if (this.$data.$_isPrintLayoutEnabled) {
+        this.$data.$_isPrintLayoutEnabled = false;
+      }
+    },
+
     async $_generateNewScore() {
       let score = Score.generateNew('Untitled', '', '');
       await this.$_setNewScore(score);
@@ -903,6 +921,10 @@ export default {
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  #score-page-container {
+    align-items: baseline !important;
   }
 }
 </style>
