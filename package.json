@@ -1,6 +1,6 @@
 {
   "name": "smart-chord-score-editor",
-  "version": "0.1.0",
+  "version": "0.1.18",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
