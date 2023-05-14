@@ -171,7 +171,6 @@ export default {
 
     $_updatePositionAndSize() {
       this.$_updateTiePropsAndStyles();
-      this.$_emitTiePointUpdate();
     },
 
     $_emitTiePointUpdate() {
@@ -255,6 +254,7 @@ export default {
       this.$data.$_tieProps = tieProps;
       this.$data.$_tieStyles = tieStyles;
       this.$data.$_isTiedToNextNote = isTiedToNextNote;
+      this.$_emitTiePointUpdate();
     },
   },
 }

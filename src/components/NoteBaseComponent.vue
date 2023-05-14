@@ -216,10 +216,12 @@ export default {
     },
 
     $_noteTieStartOffset() {
+      if (this.$data.$_splitNoteTieStartOffsets.length < 1) return null;
       return this.$data.$_splitNoteTieStartOffsets[0];
     },
 
     $_noteTieEndOffset() {
+      if (this.$data.$_splitNoteTieStartOffsets.length < 1) return null;
       let lastNoteTieEndOffsetsIdx = this.$data.$_splitNoteTieEndOffsets.length - 1;
       return this.$data.$_splitNoteTieEndOffsets[lastNoteTieEndOffsetsIdx];
     },
@@ -271,13 +273,6 @@ export default {
     $_onNoteTiePointUpdate(splitNoteIdx, { tieStartPointOffset, tieEndPointOffset }) {
       this.$set(this.$data.$_splitNoteTieStartOffsets, splitNoteIdx, tieStartPointOffset);
       this.$set(this.$data.$_splitNoteTieEndOffsets, splitNoteIdx, tieEndPointOffset);
-      this.$emit(
-        'tie-point-update',
-        {
-          tieStartPointOffset: this.$_noteTieStartOffset,
-          tieEndPointOffset: this.$_noteTieEndOffset,
-        },
-      );
       this.$_updateTiePropsAndStyles();
     },
 
@@ -287,6 +282,16 @@ export default {
 
     $_updatePositionAndSize() {
       this.$_updateTiePropsAndStyles();
+    },
+
+    $_emitTiePointUpdate() {
+      this.$emit(
+        'tie-point-update',
+        {
+          tieStartPointOffset: this.$_noteTieStartOffset,
+          tieEndPointOffset: this.$_noteTieEndOffset,
+        },
+      );
     },
 
     $_updateTiePropsAndStyles() {
@@ -324,6 +329,7 @@ export default {
       }
       this.$data.$_tieProps = tieProps;
       this.$data.$_tieStyles = tieStyles;
+      this.$_emitTiePointUpdate();
     },
   }
 }
