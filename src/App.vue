@@ -711,7 +711,7 @@ export default {
               await this.$_undo();
               return true;
             case 'KeyS':
-              await this.$_saveScoreFile();
+              this.$_saveScoreFile();
               return true;
             case 'KeyN':
               return await insertBarAfter(this);
