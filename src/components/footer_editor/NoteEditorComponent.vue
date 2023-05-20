@@ -1,14 +1,21 @@
 <template>
   <v-card v-bind="$attrs" v-if="$_selectedNote">
     <v-card-text class="pa-0">
-      <v-range-slider
-        ticks dense hide-details
-        v-model="$data.$_noteValueSliderValues"
-        v-bind:min="0"
-        v-bind:max="$_numSliderTicks"
-        v-on:change="$_onChangeValues"
-        v-on:input="$_onInputValues"
-      />
+      <div
+        v-on:keydown.left.stop
+        v-on:keydown.right.stop
+        v-on:keydown.up.stop
+        v-on:keydown.down.stop
+      >
+        <v-range-slider
+          ticks dense hide-details
+          v-model="$data.$_noteValueSliderValues"
+          v-bind:min="0"
+          v-bind:max="$_numSliderTicks"
+          v-on:change="$_onChangeValues"
+          v-on:input="$_onInputValues"
+        />
+      </div>
       <note-value-selector-buttons
         v-model="$data.$_noteValueSliderUnitValue"
         v-bind:safe-unit-value="$_safeNoteValueSliderUnitValue"
@@ -240,25 +247,28 @@ export default {
       this.$emit('update-part', newPart, this.selectedNoteIdx);
     },
 
-    $_onChangeValues() {
-      let newNotes = new Array();
-      let newSelectedNoteIdx = this.selectedNoteIdx;
-      for (let currentNoteIdx = 0; currentNoteIdx < this.$_numNotes; ++currentNoteIdx) {
-        let note = this.$_selectedPart.notes[currentNoteIdx];
-        if (note.value.isGreaterThan(0)) {
-          newNotes.push(note);
-        } else {
-          if (currentNoteIdx < this.selectedNoteIdx) {
-            --newSelectedNoteIdx;
-          }
-          if (newSelectedNoteIdx < 0) {
-            newSelectedNoteIdx = 0;
+    $_onChangeValues([ noteValueSliderValueLow, noteValueSliderValueHigh ]) {
+      this.$_onInputValues(([ noteValueSliderValueLow, noteValueSliderValueHigh ]));
+      this.$nextTick(() => {
+        let newNotes = new Array();
+        let newSelectedNoteIdx = this.selectedNoteIdx;
+        for (let currentNoteIdx = 0; currentNoteIdx < this.$_numNotes; ++currentNoteIdx) {
+          let note = this.$_selectedPart.notes[currentNoteIdx];
+          if (note.value.isGreaterThan(0)) {
+            newNotes.push(note);
+          } else {
+            if (currentNoteIdx < this.selectedNoteIdx) {
+              --newSelectedNoteIdx;
+            }
+            if (newSelectedNoteIdx < 0) {
+              newSelectedNoteIdx = 0;
+            }
           }
         }
-      }
-      let newPart = new PartInBar(newNotes, this.$_selectedPart.type);
-      this.$emit('update-part', newPart, newSelectedNoteIdx);
-      this.$data.$_isChangingNoteValue = false;
+        let newPart = new PartInBar(newNotes, this.$_selectedPart.type);
+        this.$emit('update-part', newPart, newSelectedNoteIdx);
+        this.$data.$_isChangingNoteValue = false;
+      })
     },
 
     $_onChangeSelectedNotePitchOrChord(pitchOrChord) {
