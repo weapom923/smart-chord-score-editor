@@ -19,10 +19,10 @@
             <tr><td>Ctrl+S</td><td>Save a score to local storage.</td></tr>
             <tr><td>Ctrl+C</td><td>Copy selected bars.</td></tr>
             <tr><td>Ctrl+V</td><td>Paste copied bars on a selected bar.</td></tr>
-            <tr><td>Ctrl+N</td><td>Insert a new bar after selected bars.</td></tr>
-            <tr><td>Ctrl+Shift+N</td><td>Insert a new bar before selected bars.</td></tr>
-            <tr><td>Ctrl+M</td><td>Insert a new section after selected sections.</td></tr>
-            <tr><td>Ctrl+Shift+M</td><td>Insert a new section before selected sections.</td></tr>
+            <tr><td>Alt+N</td><td>Insert a new bar after selected bars.</td></tr>
+            <tr><td>Alt+Shift+N</td><td>Insert a new bar before selected bars.</td></tr>
+            <tr><td>Alt+M</td><td>Insert a new section after selected sections.</td></tr>
+            <tr><td>Alt+Shift+M</td><td>Insert a new section before selected sections.</td></tr>
             <tr><td>Delete</td><td>Delete selected bars.</td></tr>
             <tr><td>Enter</td><td>Break a system before a selected bar.</td></tr>
             <tr><td>Shift+Enter</td><td>Break a page before a selected bar.</td></tr>

@@ -699,6 +699,14 @@ export default {
               return true;
           }
           break;
+        case keyEventTypeEnum.keyWithAlt:
+          switch (event.code) {
+            case 'KeyN':
+              return await insertBarAfter(this);
+            case 'KeyM':
+              return insertSectionAfter(this);
+          }
+          break;
         case keyEventTypeEnum.keyWithCtrl:
           switch (event.code) {
             case 'KeyA':
@@ -713,10 +721,6 @@ export default {
             case 'KeyS':
               this.$_saveScoreFile();
               return true;
-            case 'KeyN':
-              return await insertBarAfter(this);
-            case 'KeyM':
-              return insertSectionAfter(this);
           }
           break;
         case keyEventTypeEnum.keyWithShift:
@@ -729,6 +733,14 @@ export default {
               return setBarBreak(this, BarBreak.page);
           }
           break;
+        case keyEventTypeEnum.keyWithAltAndShift:
+          switch (event.code) {
+            case 'KeyN':
+              return await insertBarBefore(this);
+            case 'KeyM':
+              return insertSectionBefore(this);
+          }
+          break;
         case keyEventTypeEnum.keyWithCtrlAndShift:
           switch (event.code) {
             case 'KeyV':
@@ -736,10 +748,6 @@ export default {
             case 'KeyZ':
               await this.$_redo();
               return true;
-            case 'KeyN':
-              return await insertBarBefore(this);
-            case 'KeyM':
-              return insertSectionBefore(this);
             case 'ArrowRight':
               return await incrementSelectedBarsFirstIdx(this);
             case 'ArrowLeft':
