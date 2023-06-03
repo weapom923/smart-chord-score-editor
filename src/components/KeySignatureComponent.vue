@@ -4,11 +4,14 @@
     v-bind:style="$_keySignatureComponentStyle"
   >
     <div
+      class="key-signature"
       v-for="(notePitch, keySignatureIdx) in $_keySignatureNotePitches"
       v-bind:key="keySignatureIdx"
       v-bind:style="$_keySignatureStyle(notePitch, keySignatureIdx)"
-      v-bind:class="$_keySignatureClass(notePitch)"
-    />
+    >
+      <key-signature v-bind:key-shift-amount="$_keyShiftAmount(notePitch)">
+      </key-signature>
+    </div>
   </div>
 </template>
 
@@ -25,18 +28,6 @@
   position: absolute;
   width: 5px;
 }
-
-.sharp:after {
-  content: "♯";
-}
-
-.flat:after {
-  content: "♭";
-}
-
-.natural:after {
-  content: "♮";
-}
 </style>
 
 <script>
@@ -44,11 +35,15 @@ import NotePitch from '../modules/NotePitch.js'
 import NotePitchSymbol from '../modules/NotePitchSymbol.js'
 import Scale from '../modules/Scale.js'
 import Clef from '../modules/Clef.js'
+import KeySignature from '../components/canvases/KeySignature.vue'
 
-const keySignatureWidthPx = 5;
-const fontSizeRate = 1.8;
+const keySignatureWidthPx = 6;
 
 export default {
+  components: {
+    KeySignature,
+  },
+
   props: {
     clef: { type: Clef, defualt: Clef.treble },
     scale: { type: Scale, default: null },
@@ -65,10 +60,6 @@ export default {
   computed: {
     $_staffLineStepPx() {
       return this.$store.state.config.staffLineStepPx;
-    },
-
-    $_keySignatureFontSize() {
-      return this.$_staffLineStepPx * fontSizeRate;
     },
 
     $_keySignatureComponentStyle() {
@@ -116,10 +107,7 @@ export default {
     $_keySignatureStyle(notePitch, keySignatureIdx) {
       return {
         left: String(keySignatureIdx * keySignatureWidthPx) + 'px',
-        top: String(getTopOffsetPx(this.$_staffLineStepPx, notePitch) - (this.$_keySignatureFontSize / 2)) + 'px',
-        fontSize: String(this.$_keySignatureFontSize) + 'px',
-        lineHeight: String(this.$_keySignatureFontSize) + 'px',
-        height: String(this.$_keySignatureFontSize) + 'px',
+        top: String(getTopOffsetPx(this.$_staffLineStepPx, notePitch)) + 'px',
       }
 
       function getTopOffsetPx(staffLineStepPx, notePitch) {
@@ -164,12 +152,10 @@ export default {
       }
     },
 
-    $_keySignatureClass(notePitch) {
-      let keySignatureClass = new Array();
-      keySignatureClass.push('key-signature');
-      if (notePitch.isSharp) keySignatureClass.push('sharp');
-      if (notePitch.isFlat) keySignatureClass.push('flat');
-      return keySignatureClass;
+    $_keyShiftAmount(notePitch) {
+      if (notePitch.isSharp) return 1;
+      if (notePitch.isFlat) return -1;
+      return 0;
     },
   },
 }
