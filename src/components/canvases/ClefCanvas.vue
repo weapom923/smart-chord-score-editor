@@ -24,7 +24,7 @@ export default {
   ],
 
   watch: {
-    Clef: {
+    clef: {
       handler() { this.$_setDirty(true) },
       deep: true,
       immediate: true,
@@ -104,7 +104,7 @@ export default {
     $_style() {
       return {
         marginTop: String(this.$_marginTopPx) + 'px',
-        marginBottom: String(this.$_marginTopPx) + 'px',
+        marginBottom: String(this.$_marginBottomPx) + 'px',
         height: String(this.$_clefHeightPx) + 'px',
         width: String(this.$_clefWidthPx) + 'px',
       };
