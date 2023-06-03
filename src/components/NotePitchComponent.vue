@@ -31,7 +31,8 @@
 #note-sharp-or-flat-text {
   position: relative;
   display: inline-block;
-  margin-right: -5px;
+  margin-left: -2px;
+  margin-right: -7px;
 }
 </style>
 

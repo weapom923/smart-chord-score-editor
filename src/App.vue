@@ -917,10 +917,11 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400&display=swap');
 
 #app {
-  font-family: 'M PLUS 1p', sans-serif;
+  font-family: 'Klee One';
   text-align: center;
   color: #2c3e50;
   min-width: fit-content;

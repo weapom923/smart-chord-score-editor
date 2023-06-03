@@ -48,7 +48,12 @@
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Yusei+Magic:wght@400&display=swap');
+
 #chord-container {
+  font-family: 'Yusei Magic';
+  color: #2c3e50;
+  border-color: #2c3e50;
   overflow-y: visible;
   display: flex;
   width: fit-content;
