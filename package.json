@@ -11,7 +11,7 @@
     "core-js": "^3.6.5",
     "encoding-japanese": "^1.0.30",
     "vue": "^2.6.11",
-    "vue-router": "^3.5.3",
+    "vue-router": "^3.6.5",
     "vuetify": "^2.6.3",
     "vuex": "^3.6.2"
   },
